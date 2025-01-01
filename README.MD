@@ -4,11 +4,16 @@ Canvas Flask Video Downloader App
 # Tạo môi trường ảo
 ```bash
 python -m venv myenv
-
+```
 # Kích hoạt môi trường ảo
 # Trên Windows
+```bash
 myenv\Scripts\activate
+```
+
 
 # Trên macOS/Linux
+```bash
 source myenv/bin/activate
 ```
+

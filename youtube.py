@@ -67,3 +67,19 @@ def download_video_facebook(video_url):
     # Tạo URL YouTube từ video_id
     video_url = f"https://www.facebook.com/watch/?v={video_id}"
     return download_video_from_url(video_url, DOWNLOAD_PATH)
+
+
+def download_video_by_url(video_url):
+    """
+    Tải video từ YouTube bằng video_id.
+    :param video_id: ID của video trên YouTube
+    :return: Đường dẫn file video đã tải
+    """
+    # Thư mục lưu video mặc định
+    DOWNLOAD_PATH = r"C:\Users\chung\Videos\Film\Other"
+
+    # Tạo thư mục nếu chưa tồn tại
+    if not os.path.exists(DOWNLOAD_PATH):
+        os.makedirs(DOWNLOAD_PATH)
+
+    return download_video_from_url(video_url, DOWNLOAD_PATH)

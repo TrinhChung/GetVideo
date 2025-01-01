@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="vi">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Trang Lỗi</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				background-color: #f2f2f2;
+				margin: 0;
+				padding: 0;
+				text-align: center;
+			}
+
+			.container {
+				margin-top: 100px;
+				padding: 30px;
+				background-color: white;
+				border-radius: 10px;
+				box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+				margin-left: auto;
+				margin-right: auto;
+				word-wrap: break-word;
+				padding: 20px 20px;
+				max-width: 600px;
+			}
+
+			h1 {
+				color: #d9534f;
+			}
+
+			p {
+				color: #5a5a5a;
+				font-size: 16px;
+			}
+
+			.error-message {
+				font-weight: bold;
+				color: #d9534f;
+			}
+
+			.btn {
+				display: inline-block;
+				padding: 10px 20px;
+				margin-top: 20px;
+				background-color: #007bff;
+				color: white;
+				text-decoration: none;
+				border-radius: 5px;
+				font-size: 16px;
+			}
+
+			.btn:hover {
+				background-color: #0056b3;
+			}
+		</style>
+	</head>
+	<body>
+
+		<div class="container">
+			<h1>Đã xảy ra lỗi!</h1>
+			<p>Xin lỗi, đã có lỗi xảy ra khi xử lý yêu cầu của bạn.</p>
+			<p class="error-message">{{error_message}}</p>
+			<a href="/" class="btn">Quay lại Trang Chủ</a>
+			<a href="/download-url" class="btn">Quay lại Download URL</a>
+		</div>
+
+	</body>
+</html>

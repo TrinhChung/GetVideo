@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_mysqldb import MySQL
 from yt_list import get_playlist_info_and_video_details
-from youtube import download_video, download_video_facebook
+from youtube import download_video, download_video_facebook, download_video_by_url
 
 # Tạo ứng dụng Flask
 app = Flask(__name__)
@@ -62,7 +62,9 @@ def download_video_route(video_id):
             return redirect(url_for("index"))
         except Exception as e:
             cur.close()
-            return f"Đã xảy ra lỗi khi tải video: {e}"
+            return render_template(
+                "error.html", error_message=f"Đã xảy ra lỗi khi tải video: {e}"
+            )
 
     cur.close()
     return redirect(url_for("index"))
@@ -85,8 +87,7 @@ def download_all_videos():
                 "UPDATE videos SET crawled = %s WHERE id = %s", ("Yes", video[0])
             )
         except Exception as e:
-            # Nếu xảy ra lỗi, vẫn tiếp tục tải các video khác
-            print(f"Đã xảy ra lỗi khi tải video {video[1]}: {e}")
+           return  render_template("error.html", error_message=e)
 
     mysql.connection.commit()
     cur.close()
@@ -100,12 +101,29 @@ def download_from_url():
         if video_url:
             try:
                 # Cấu hình yt_dlp
+                download_video_by_url(video_url)
+
+                # Trả file về cho người dùng
+                return render_template("downloadFromUrl.html")
+            except Exception as e:
+                return render_template("error.html", error_message=e)
+
+    return render_template("downloadFromUrl.html")
+
+
+@app.route("/download-facebook-url", methods=["POST"])
+def download_from_facebook_url():
+    if request.method == "POST":
+        video_url = request.form.get("video_url")
+        if video_url:
+            try:
+                # Cấu hình yt_dlp
                 download_video_facebook(video_url)
 
                 # Trả file về cho người dùng
                 return render_template("downloadFromUrl.html")
             except Exception as e:
-                return f"Error: {e}", 500
+                return render_template("error.html", error_message=e)
 
     return render_template("downloadFromUrl.html")
 
