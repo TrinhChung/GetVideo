@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Video Downloader</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				background-color: #f4f4f9;
+				margin: 0;
+				padding: 0;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				height: 100vh;
+			}
+
+			h1 {
+				color: #333;
+			}
+
+			.button-container {
+				margin-top: 20px;
+			}
+
+			button {
+				background-color: #007bff;
+				color: white;
+				padding: 10px 20px;
+				border: none;
+				border-radius: 5px;
+				cursor: pointer;
+				font-size: 16px;
+				margin: 10px;
+				transition: background-color 0.3s ease;
+			}
+
+			button:hover {
+				background-color: #0056b3;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Video Downloader</h1>
+		<p>Choose an option below to start downloading videos:</p>
+		<div class="button-container">
+			<button onclick="redirectToBatch()">Batch Download YouTube Videos</button>
+			<button onclick="redirectToURL()">Download Video from URL</button>
+		</div>
+
+		<script>
+			function redirectToBatch() {
+				window.location.href = '/batch'; // Thay bằng URL thực tế của bạn
+			}
+
+			function redirectToURL() {
+				window.location.href = '/download-url'; // Thay bằng URL thực tế của bạn
+			}
+		</script>
+	</body>
+</html>
