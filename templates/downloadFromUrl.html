@@ -4,59 +4,39 @@
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
 		<title>Download Video from URL</title>
-		<style>
-			.box {
-				padding: 20px 20px;
-			}
-
-			h1 {
-				color: #333;
-			}
-
-			form {
-				margin-top: 20px;
-			}
-
-			input {
-				padding: 10px;
-				font-size: 16px;
-				width: 300px;
-				margin-right: 10px;
-				border: 1px solid #ccc;
-				border-radius: 5px;
-			}
-
-			button {
-				background-color: #007bff;
-				color: white;
-				padding: 10px 20px;
-				border: none;
-				border-radius: 5px;
-				cursor: pointer;
-				font-size: 16px;
-				transition: background-color 0.3s ease;
-			}
-
-			button:hover {
-				background-color: #0056b3;
-			}
-		</style>
 	</head>
 	<body>
 		{% include 'header.html' %}
-		<div class="container">
-			<h1>Download Video from URL</h1>
-			<form action="/download-url" method="post">
-				<input type="text" name="video_url" placeholder="Enter video URL" required>
-				<button type="submit">Download</button>
-			</form>
-			<h1>Download Video from Facebook</h1>
-			<form action="/download-facebook-url" method="post">
-				<input type="text" name="video_url" placeholder="Enter video URL" required>
-				<button type="submit">Download</button>
-			</form>
+		<div class="container mt-5">
+			<h1 class="text-center mb-4">Download Video from URL</h1>
+
+			<!-- Form to download from generic video URL -->
+			<div class="d-flex flex-column align-items-center">
+				<form action="/download-url" method="post" class="w-75">
+					<div class="mb-3">
+						<label for="video_url" class="form-label">Video URL:</label>
+						<input type="text" name="video_url" id="video_url" class="form-control" placeholder="Enter video URL"
+							required>
+					</div>
+					<button type="submit" class="btn btn-primary w-100">Download</button>
+				</form>
+			</div>
+
+			<!-- Section to download from Facebook URL -->
+			<div class="text-center mt-5">
+				<h2 class="text-primary">Download Video from Facebook</h2>
+				<form action="/download-facebook-url" method="post" class="w-75 mx-auto">
+					<div class="mb-3">
+						<label for="facebook_video_url" class="form-label">Facebook Video URL:</label>
+						<input type="text" name="video_url" id="facebook_video_url" class="form-control"
+							placeholder="Enter Facebook video URL" required>
+					</div>
+					<button type="submit" class="btn btn-primary w-100">Download</button>
+				</form>
+			</div>
 		</div>
 	</body>
 </html>

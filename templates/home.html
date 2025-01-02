@@ -4,57 +4,33 @@
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
 		<title>Video Downloader</title>
-		<style>
-
-			h1 {
-				color: #333;
-			}
-
-			.button-container {
-				margin-top: 20px;
-			}
-
-			button {
-				background-color: #007bff;
-				color: white;
-				padding: 10px 20px;
-				border: none;
-				border-radius: 5px;
-				cursor: pointer;
-				font-size: 16px;
-				margin: 10px;
-				transition: background-color 0.3s ease;
-			}
-
-			button:hover {
-				background-color: #0056b3;
-			}
-		</style>
 	</head>
 	<body>
 		{% include 'header.html' %}
-		<div class="container">
-			<h1>Video Downloader</h1>
-			<p>Choose an option below to start downloading videos:</p>
-			<div class="button-container">
-				<button onclick="redirectToBatch()">Batch Download YouTube Videos</button>
-				<button onclick="redirectToURL()">Download Video from URL</button>
-				<button onclick="redirectToAccount()">Account</button>
+		<div class="container mt-5">
+			<h1 class="text-center mb-4">Video Downloader</h1>
+			<p class="text-center mb-5">Choose an option below to start downloading videos:</p>
+			<div class="d-flex justify-content-center flex-column align-items-center">
+				<button class="btn btn-primary mb-3 w-50" onclick="redirectToBatch()">Batch Download YouTube Videos</button>
+				<button class="btn btn-primary mb-3 w-50" onclick="redirectToURL()">Download Video from URL</button>
+				<button class="btn btn-primary w-50" onclick="redirectToAccount()">Account</button>
 			</div>
 		</div>
 
 		<script>
 			function redirectToBatch() {
-				window.location.href = '/batch'; // Thay bằng URL thực tế của bạn
+				window.location.href = '/batch'; // Replace with your actual URL
 			}
 
 			function redirectToURL() {
-				window.location.href = '/download-url'; // Thay bằng URL thực tế của bạn
+				window.location.href = '/download-url'; // Replace with your actual URL
 			}
+
 			function redirectToAccount() {
-				window.location.href = '/account_fb'; // Thay bằng URL thực tế của bạn
+				window.location.href = '/account_fb'; // Replace with your actual URL
 			}
 		</script>
 	</body>
