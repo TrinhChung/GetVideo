@@ -1,13 +1,19 @@
 import mysql.connector
 from mysql.connector import Error
 import time
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+PASSWORD_DB = os.getenv("PASSWORD_DB")  # Token truy cập của bạn
 
 # Kết nối đến MySQL
 try:
     connection = mysql.connector.connect(
         host="localhost",  # Máy chủ MySQL
         user="root",  # Tên người dùng MySQL
-        password="chungtrinh1904",  # Mật khẩu người dùng MySQL
+        password=PASSWORD_DB,  # Mật khẩu người dùng MySQL
         database="video",  # Tên cơ sở dữ liệu
     )
 
@@ -18,7 +24,7 @@ except Error as e:
     print(f"Lỗi kết nối MySQL: {e}")
     time.sleep(5)  # Đợi 5 giây và thử lại
     connection = mysql.connector.connect(
-        host="localhost", user="root", password="chungtrinh1904"
+        host="localhost", user="root", password=PASSWORD_DB
     )
     cursor = connection.cursor()
     cursor.execute(
@@ -33,22 +39,38 @@ cursor = connection.cursor()
 # Tạo bảng playlist
 create_playlist_table = """
 CREATE TABLE IF NOT EXISTS playlist (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+    id VARCHAR(255) PRIMARY KEY,
+    title VARCHAR(255)
+)
 """
 
 # Tạo bảng videos
 create_videos_table = """
 CREATE TABLE IF NOT EXISTS videos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    playlist_id INT,
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    url VARCHAR(255),
-    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (playlist_id) REFERENCES playlist(id) ON DELETE CASCADE
+    video_id VARCHAR(255) PRIMARY KEY,
+    title VARCHAR(255),
+    crawled BOOLEAN DEFAULT FALSE,
+    playlist_id VARCHAR(255),
+    FOREIGN KEY (playlist_id) REFERENCES playlists(id)
+);
+"""
+
+create_facebook_accounts_table = """
+CREATE TABLE IF NOT EXISTS facebook_accounts (
+    id INT AUTO_INCREMENT PRIMARY KEY, -- ID tự tăng làm khóa chính
+    email VARCHAR(255) UNIQUE NOT NULL, -- Email của tài khoản Facebook, phải là duy nhất
+    access_token TEXT NOT NULL -- Access token của tài khoản
+);
+"""
+
+create_pages_table = """
+CREATE TABLE IF NOT EXISTS pages (
+    page_id VARCHAR(255) PRIMARY KEY, -- ID của page
+    name VARCHAR(255) NOT NULL, -- Tên page
+    access_token TEXT NOT NULL, -- Access token của page
+    expires_at DATETIME NOT NULL, -- Thời gian hết hạn của token
+    facebook_account_id INT NOT NULL, -- Khóa ngoại tới bảng facebook_accounts
+    FOREIGN KEY (facebook_account_id) REFERENCES facebook_accounts(id) ON DELETE CASCADE
 );
 """
 
@@ -56,6 +78,8 @@ CREATE TABLE IF NOT EXISTS videos (
 try:
     cursor.execute(create_playlist_table)  # Tạo bảng playlist
     cursor.execute(create_videos_table)  # Tạo bảng videos
+    cursor.execute(create_facebook_accounts_table)  # Tạo bảng token account
+    cursor.execute(create_pages_table)  # Tạo bảng videos
     print("Đã tạo thành công bảng playlist và videos.")
 except mysql.connector.Error as err:
     print(f"Lỗi khi tạo bảng: {err}")

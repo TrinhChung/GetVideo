@@ -2,14 +2,19 @@ from flask import Flask, render_template, request, redirect, url_for
 from flask_mysqldb import MySQL
 from yt_list import get_playlist_info_and_video_details
 from youtube import download_video, download_video_facebook, download_video_by_url
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
+
+PASSWORD_DB = os.getenv("PASSWORD_DB")  # Token truy cập của bạn
 # Tạo ứng dụng Flask
 app = Flask(__name__)
 
 # Cấu hình kết nối MySQL
 app.config["MYSQL_HOST"] = "localhost"  # Máy chủ MySQL (localhost cho máy tính cá nhân)
 app.config["MYSQL_USER"] = "root"  # Tên người dùng MySQL
-app.config["MYSQL_PASSWORD"] = "chungtrinh1904"  # Mật khẩu người dùng MySQL
+app.config["MYSQL_PASSWORD"] = PASSWORD_DB  # Mật khẩu người dùng MySQL
 app.config["MYSQL_DB"] = "video"  # Tên cơ sở dữ liệu MySQL
 
 # Khởi tạo đối tượng MySQL
@@ -125,6 +130,52 @@ def download_from_facebook_url():
                 return render_template("error.html", error_message=e)
 
     return render_template("downloadFromUrl.html")
+
+
+# Route hiển thị danh sách tài khoản Facebook tại đường dẫn /account_fb/
+@app.route("/account_fb/")
+def account_fb():
+    cursor = mysql.connection.cursor()
+    cursor.execute("SELECT id, email, access_token FROM facebook_accounts")
+    accounts = cursor.fetchall()
+    cursor.close()
+    return render_template("account_fb.html", accounts=accounts)
+
+
+# Route để xử lý form thêm tài khoản tại /account_fb/add_account
+@app.route("/account_fb/add_account", methods=["POST"])
+def add_fb_account():
+    if request.method == "POST":
+        email = request.form["email"]
+        access_token = request.form["access_token"]
+        cursor = mysql.connection.cursor()
+        try:
+            cursor.execute(
+                "INSERT INTO facebook_accounts (email, access_token) VALUES (%s, %s)",
+                (email, access_token),
+            )
+            mysql.connection.commit()
+            print("Facebook account added successfully!", "success")
+        except Exception as e:
+            print(f"Error: {e}", "danger")
+        finally:
+            cursor.close()
+        return redirect(url_for("account_fb"))
+
+
+# Route để xóa tài khoản Facebook tại /account_fb/delete_account/<id>
+@app.route("/account_fb/delete_account/<int:id>", methods=["GET", "POST"])
+def delete_fb_account(id):
+    cursor = mysql.connection.cursor()
+    try:
+        cursor.execute("DELETE FROM facebook_accounts WHERE id = %s", (id,))
+        mysql.connection.commit()
+        print("Facebook account deleted successfully!", "success")
+    except Exception as e:
+        print(f"Error: {e}", "danger")
+    finally:
+        cursor.close()
+    return redirect(url_for("account_fb"))
 
 
 if __name__ == "__main__":
