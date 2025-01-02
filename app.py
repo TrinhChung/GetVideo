@@ -15,7 +15,6 @@ app.config["MYSQL_DB"] = "video"  # Tên cơ sở dữ liệu MySQL
 # Khởi tạo đối tượng MySQL
 mysql = MySQL(app)
 
-
 @app.route("/", methods=["GET", "POST"])
 def home():
     return render_template("home.html")  # Truyền dữ liệu cho template
@@ -87,7 +86,7 @@ def download_all_videos():
                 "UPDATE videos SET crawled = %s WHERE id = %s", ("Yes", video[0])
             )
         except Exception as e:
-           return  render_template("error.html", error_message=e)
+           print(f"Đã xảy ra lỗi: {e}")
 
     mysql.connection.commit()
     cur.close()
