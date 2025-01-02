@@ -3,19 +3,10 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
 		<title>Download Video from URL</title>
 		<style>
-			body {
-				font-family: Arial, sans-serif;
-				background-color: #f4f4f9;
-				margin: 0;
-				padding: 0;
-				display: flex;
-				flex-direction: column;
-				align-items: left;
-				height: 100vh;
-			}
-
 			.box {
 				padding: 20px 20px;
 			}
@@ -54,7 +45,8 @@
 		</style>
 	</head>
 	<body>
-		<div class="box">
+		{% include 'header.html' %}
+		<div class="container">
 			<h1>Download Video from URL</h1>
 			<form action="/download-url" method="post">
 				<input type="text" name="video_url" placeholder="Enter video URL" required>

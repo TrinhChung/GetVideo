@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+		<title>Pages</title>
+	</head>
+	<body>
+		{% include 'header.html' %}
+		<div class="container">
+			<h1>List of Pages</h1>
+			<table border="1">
+				<thead>
+					<tr>
+						<th>Page ID</th>
+						<th>Page Name</th>
+						<th>Access Token</th>
+						<th>Expires At</th>
+						<th>Facebook Account ID</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for page in pages %}
+					<tr>
+						<td>{{ page[0] }}</td> <!-- page_id -->
+						<td>{{ page[1] }}</td> <!-- name -->
+						<td>{{ page[2] }}</td> <!-- access_token -->
+						<td>{{ page[3] }}</td> <!-- expires_at -->
+						<td>{{ page[4] }}</td> <!-- facebook_account_id -->
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</body>
+</html>

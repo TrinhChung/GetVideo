@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for
-from app import mysql
+from database_init import mysql
 
 facebook_bp = Blueprint("facebook", __name__)
+
 
 @facebook_bp.route("/account_fb/")
 def account_fb():
@@ -29,7 +30,7 @@ def add_fb_account():
             print(f"Error: {e}", "danger")
         finally:
             cursor.close()
-        return redirect(url_for("account_fb"))
+        return redirect(url_for("facebook.account_fb"))
 
 
 @facebook_bp.route("/account_fb/delete_account/<int:id>", methods=["GET", "POST"])
@@ -43,4 +44,4 @@ def delete_fb_account(id):
         print(f"Error: {e}", "danger")
     finally:
         cursor.close()
-    return redirect(url_for("account_fb"))
+    return redirect(url_for("facebook.account_fb"))
