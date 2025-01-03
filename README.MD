@@ -33,3 +33,7 @@ pip freeze > requirements.txt
 ```bash
 pip install -r requirements.txt
 ```
+# Run Telegram bot
+```bash
+python telegram_bot/runbot.py
+```
