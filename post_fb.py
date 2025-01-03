@@ -2,7 +2,9 @@ from facebook import GraphAPI
 from dotenv import load_dotenv
 import os
 import requests
-from database_init import mysql
+from models.page import Page  # Assuming Page is defined in page.py
+from database_init import db  # Assuming db is initialized in database_init.py
+from sqlalchemy.exc import IntegrityError
 
 # Tải các biến môi trường từ file .env
 load_dotenv()
@@ -12,18 +14,16 @@ ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")  # Token truy cập của bạn
 PAGE_ID = os.getenv("PAGE_ID")  # ID của Trang
 
 # Khởi tạo GraphAPI
-
+graph = GraphAPI(access_token=ACCESS_TOKEN)
 
 # Nội dung bài viết
 post_message = "Đây là bài đăng thử nghiệm từ Python. 🚀"
 
+
 # Đăng bài viết
 def create_post_page(page_id, access_token, message):
     try:
-        graph = GraphAPI(access_token=access_token)
-        graph.put_object(
-            parent_object=page_id, connection_name="feed", message=message
-        )
+        graph.put_object(parent_object=page_id, connection_name="feed", message=message)
         print("Bài đăng đã được đăng thành công!")
     except Exception as e:
         print(f"Lỗi khi đăng bài viết: {str(e)}")
@@ -60,59 +60,55 @@ def get_account(access_token, facebook_account_id):
         response = graph.get_object("me/accounts")
         pages = response.get("data", [])
 
-        print(access_token)
-        print(facebook_account_id)
-
         if not pages:
             print("Không có trang nào được liên kết với tài khoản này.")
             return False
 
         print(f"Đã tìm thấy {len(pages)} trang. Đang lưu vào cơ sở dữ liệu...")
 
-        # Kết nối MySQL
-        cursor = mysql.connection.cursor()
-
-        # Lưu thông tin từng trang vào cơ sở dữ liệu
+        # Kết nối cơ sở dữ liệu sử dụng SQLAlchemy
         for page in pages:
             page_id = page.get("id")
             name = page.get("name")
-            category = page.get(
-                "category", None
-            )  # Một số trang có thể không có danh mục
+            category = page.get("category", None)
             page_access_token = page.get("access_token")
             expires_at = None
 
-            # Thêm hoặc cập nhật thông tin trang vào bảng `pages`
-            cursor.execute(
-                """
-            INSERT INTO pages (page_id, name, category, access_token, expires_at,facebook_account_id)
-            VALUES (%s, %s, %s, %s, %s, %s)
-            ON DUPLICATE KEY UPDATE
-                name = VALUES(name),
-                category = VALUES(category),
-                access_token = VALUES(access_token);
-            """,
-                (
-                    page_id,
-                    name,
-                    category,
-                    page_access_token,
-                    expires_at,
-                    facebook_account_id,
-                ),
-            )
+            # Kiểm tra xem page_id có tồn tại trong cơ sở dữ liệu chưa
+            existing_page = Page.query.filter_by(page_id=page_id).first()
 
-        # Xác nhận thay đổi
-        mysql.connection.commit()
+            if existing_page:
+                # Nếu đã tồn tại, cập nhật thông tin của trang
+                existing_page.name = name
+                existing_page.category = category
+                existing_page.access_token = page_access_token
+                existing_page.expires_at = expires_at
+                existing_page.facebook_account_id = facebook_account_id
+            else:
+                # Nếu chưa có, tạo mới một bản ghi
+                new_page = Page(
+                    page_id=page_id,
+                    name=name,
+                    category=category,
+                    access_token=page_access_token,
+                    expires_at=expires_at,
+                    facebook_account_id=facebook_account_id,
+                )
+                db.session.add(new_page)
+
+        # Xác nhận thay đổi vào cơ sở dữ liệu
+        db.session.commit()
+        print("Dữ liệu đã được lưu thành công!")
+
         return True
 
+    except IntegrityError as e:
+        db.session.rollback()  # Rollback nếu có lỗi IntegrityError
+        print(f"Lỗi cơ sở dữ liệu: {e}")
+        return False
     except Exception as e:
         print(f"Đã xảy ra lỗi: {e}")
         return False
-
-    finally:
-        # Đóng kết nối
-        cursor.close()
 
 
 # access_token_page = get_access_token_page_by_id(PAGE_ID)

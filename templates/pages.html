@@ -82,20 +82,20 @@
 					<tbody>
 						{% for page in pages %}
 						<tr>
-							<td class="col-page-id">{{ page[0] }}</td>
-							<td class="col-name">{{ page[1] }}</td>
-							<td class="col-category">{{ page[2] }}</td>
+							<td class="col-page-id">{{ page.page_id }}</td> <!-- Sử dụng page.page_id -->
+							<td class="col-name">{{ page.name }}</td> <!-- Sử dụng page.name -->
+							<td class="col-category">{{ page.category }}</td> <!-- Sử dụng page.category -->
 							<td class="col-token">
 								<div class="token-wrapper">
-									<div class="token-content">{{ page[3] }}</div>
-									<button class="btn btn-sm btn-outline-primary copy-btn" onclick="copyToken(this, '{{ page[3] }}')"
-										title="Copy token">
+									<div class="token-content">{{ page.access_token }}</div> <!-- Sử dụng page.access_token -->
+									<button class="btn btn-sm btn-outline-primary copy-btn"
+										onclick="copyToken(this, '{{ page.access_token }}')" title="Copy token">
 										Copy
 									</button>
 								</div>
 							</td>
-							<td class="col-expires">{{ page[4] }}</td>
-							<td class="col-account-id">{{ page[5] }}</td>
+							<td class="col-expires">{{ page.expires_at }}</td> <!-- Sử dụng page.expires_at -->
+							<td class="col-account-id">{{ page.facebook_account_id }}</td> <!-- Sử dụng page.facebook_account_id -->
 						</tr>
 						{% endfor %}
 					</tbody>

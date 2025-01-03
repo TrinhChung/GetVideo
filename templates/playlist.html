@@ -37,11 +37,11 @@
 				<tbody>
 					{% for playlist in playlists %}
 					<tr>
-						<td>{{ playlist[0] }}</td>
-						<td>{{ playlist[1] }}</td>
+						<td>{{ playlist.id }}</td>
+						<td>{{ playlist.title }}</td>
 						<td>
 							<form method="POST" action="{{ url_for('batch.get_video_from_playlist') }}">
-								<input type="hidden" name="playlist_id" value="{{ playlist[0] }}">
+								<input type="hidden" name="playlist_id" value="{{ playlist.id }}">
 								<button type="submit" class="btn btn-primary">Lấy Video từ Playlist</button>
 							</form>
 						</td>

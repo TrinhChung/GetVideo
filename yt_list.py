@@ -1,47 +1,38 @@
 import yt_dlp
 from until import generate_playlist_url
+from models.video import Video
+from models.playlist import Playlist
+from database_init import db
 
-def get_existing_playlist(connection, playlist_id):
+
+def get_existing_playlist(playlist_id):
     """
     Lấy thông tin playlist đã tồn tại từ database.
     Args:
-        connection: Kết nối MySQL
         playlist_id: ID của playlist
     Returns:
         Tuple chứa (playlist_title, danh sách video_ids) hoặc None nếu không tồn tại
     """
-    cursor = connection.cursor()
-    try:
-        # Kiểm tra playlist
-        cursor.execute("SELECT id, title FROM playlist WHERE id = %s", (playlist_id,))
-        playlist = cursor.fetchone()
+    playlist = Playlist.query.filter_by(id=playlist_id).first()
 
-        if not playlist:
-            return None
+    if not playlist:
+        return None
 
-        # Lấy danh sách video hiện có
-        cursor.execute("SELECT id FROM videos WHERE playlist_id = %s", (playlist_id,))
-        existing_video_ids = [row[0] for row in cursor.fetchall()]
+    existing_video_ids = [video.video_id for video in playlist.videos]
 
-        return playlist[1], existing_video_ids
-    finally:
-        cursor.close()
+    return playlist.title, existing_video_ids
 
 
-def get_playlist_info_and_video_details(playlist_id, connection):
+def get_playlist_info_and_video_details(playlist_id):
     """
     Hàm chính để xử lý playlist và cập nhật database.
     """
-    if connection is None:
-        print("Không thể kết nối đến MySQL.")
-        return
-
     try:
         # Bước 1: Lấy URL playlist từ ID
         playlist_url = generate_playlist_url(playlist_id)
 
         # Bước 2: Kiểm tra playlist trong database
-        existing_data = get_existing_playlist(connection, playlist_id)
+        existing_data = get_existing_playlist(playlist_id)
 
         # Bước 3: Lấy thông tin mới từ YouTube
         yt_playlist_id, yt_playlist_title, yt_videos = get_playlist_from_youtube(
@@ -64,16 +55,14 @@ def get_playlist_info_and_video_details(playlist_id, connection):
 
             if new_videos:
                 save_playlist_and_videos_to_mysql(
-                    connection, playlist_id, yt_playlist_title, new_videos
+                    playlist_id, yt_playlist_title, new_videos
                 )
                 print(f"Đã thêm {len(new_videos)} video mới vào playlist")
             else:
                 print("Không có video mới để thêm")
         else:
             print("Thêm playlist mới...")
-            save_playlist_and_videos_to_mysql(
-                connection, playlist_id, yt_playlist_title, yt_videos
-            )
+            save_playlist_and_videos_to_mysql(playlist_id, yt_playlist_title, yt_videos)
             print(f"Đã thêm playlist mới với {len(yt_videos)} video")
 
     except Exception as e:
@@ -81,34 +70,31 @@ def get_playlist_info_and_video_details(playlist_id, connection):
 
 
 # Lưu thông tin vào bảng playlist và videos
-def save_playlist_and_videos_to_mysql(
-    connection, playlist_id, playlist_title, video_data
-):
-    cursor = connection.cursor()
-
+def save_playlist_and_videos_to_mysql(playlist_id, playlist_title, video_data):
     print("Đang lưu thông tin playlist và video...")
 
     # Lưu thông tin playlist vào bảng playlist
-    cursor.execute(
-        "INSERT INTO playlist (id, title) VALUES (%s, %s) ON DUPLICATE KEY UPDATE title=%s",
-        (playlist_id, playlist_title, playlist_title),
-    )
+    playlist = Playlist.query.filter_by(id=playlist_id).first()
+    if not playlist:
+        playlist = Playlist(id=playlist_id, title=playlist_title)
+        db.session.add(playlist)
 
     # Lưu thông tin video vào bảng videos
     for video in video_data:
-        cursor.execute(
-            "INSERT INTO videos (video_id, title, playlist_id, crawled) VALUES (%s, %s, %s, %s)",
-            (
-                video["id"],
-                video["title"],
-                playlist_id,
-                False,  # False: video chưa được crawl
-            ),
-        )
+        # Kiểm tra nếu video đã tồn tại
+        if not Video.query.filter_by(
+            video_id=video["id"], playlist_id=playlist_id
+        ).first():
+            video_entry = Video(
+                video_id=video["id"],
+                title=video["title"],
+                playlist_id=playlist_id,
+                crawled=False,  # False: video chưa được crawl
+            )
+            db.session.add(video_entry)
 
     # Commit và đóng kết nối
-    connection.commit()
-    cursor.close()
+    db.session.commit()
 
     print(f"Thông tin playlist và video đã được lưu vào MySQL.")
 

@@ -11,15 +11,22 @@ python -m venv myenv
 myenv\Scripts\activate
 ```
 
+# Run App
+```bash
+python app.py
+```
+
+# Run Telegram bot
+```bash
+python telegram_bot/runbot.py
+```
+
 # Seed DBDB
 ```bash
 python dump.py
 ```
 
-# Run App
-```bash
-python app.py
-```
+
 
 # Trên macOS/Linux
 ```bash
@@ -32,8 +39,4 @@ pip freeze > requirements.txt
 
 ```bash
 pip install -r requirements.txt
-```
-# Run Telegram bot
-```bash
-python telegram_bot/runbot.py
 ```

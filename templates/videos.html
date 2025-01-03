@@ -53,27 +53,22 @@
 				<thead class="table-light">
 					<tr>
 						<th>ID</th>
-						<th>Video ID</th>
-						<th>Tiêu đề</th>
 						<th>Playlist ID</th>
 						<th>Thời gian</th>
-						<th>Trạng thái</th>
+						<th>Đường dẫn</th>
 						<th>Tải Video</th>
 					</tr>
 				</thead>
 				<tbody>
 					{% for video in videos %}
 					<tr>
-						<td>{{ video[0] }}</td> <!-- video.id -->
-						<td>{{ video[1] }}</td> <!-- video.video_id -->
-						<td>{{ video[2] }}</td> <!-- video.title -->
-						<td>{{ video[4] }}</td> <!-- video.playlist_id -->
-						<td>{{ video[5] if video[5] else 'Chưa có thông tin' }}</td>
-						<!-- video.duration (hoặc thông báo nếu không có) -->
-						<td>{{ 'Đã tải' if video[3] == 1 else 'Chưa tải' }}</td> <!-- video.crawled -->
-						{% if video[3] == 0 %}
+						<td>{{ video.id }}</td> <!-- video.id -->
+						<td>{{ video.playlist_id }}</td> <!-- video.playlist_id -->
+						<td>{{ video.duration if video.duration else 'Chưa có thông tin' }}</td> <!-- video.duration -->
+						<td>{{ video.path if video.path else 'Chưa có đường dẫn' }}</td> <!-- video.path -->
+						{% if not video.crawled %}
 						<td>
-							<form method="POST" action="{{ url_for('batch.download_video_route', video_id=video[1]) }}">
+							<form method="POST" action="{{ url_for('batch.download_video_route', video_id=video.video_id) }}">
 								<button type="submit" class="btn btn-success">Tải Video</button>
 							</form>
 						</td>
@@ -83,7 +78,7 @@
 					</tr>
 					{% else %}
 					<tr>
-						<td colspan="7" class="text-center">Không có video nào để hiển thị.</td>
+						<td colspan="8" class="text-center">Không có video nào để hiển thị.</td>
 					</tr>
 					{% endfor %}
 				</tbody>
