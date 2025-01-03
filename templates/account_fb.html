@@ -7,6 +7,36 @@
 		<title>Facebook Account Manager</title>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+		<style>
+			.token-wrapper {
+				display: flex;
+				align-items: center;
+				/* Căn chỉnh dọc cho các phần tử */
+				gap: 8px;
+				width: 100%;
+				/* Đảm bảo không gian rộng đủ cho nội dung */
+			}
+
+			.token-content {
+				max-height: 2.4em;
+				/* Khoảng 2 dòng */
+				overflow: hidden;
+				text-overflow: ellipsis;
+				display: -webkit-box;
+				-webkit-line-clamp: 2;
+				-webkit-box-orient: vertical;
+				flex-grow: 1;
+				/* Cho phép phần tử này chiếm phần còn lại của không gian */
+			}
+
+			.copy-btn {
+				padding: 2px 8px;
+				font-size: 0.8em;
+				margin-left: 5px;
+				white-space: nowrap;
+				/* Đảm bảo nút không bị gãy dòng */
+			}
+		</style>
 	</head>
 	<body>
 		{% include 'header.html' %}
@@ -52,8 +82,21 @@
 					<tr>
 						<td>{{ account[0] }}</td>
 						<td>{{ account[1] }}</td>
-						<td class="text-truncate" style="max-width: 300px;">{{ account[2] }}</td>
+						<td class="text-truncate" style="max-width: 300px;">
+							<div class="token-wrapper">
+								<div class="token-content">{{ account[2] }}</div>
+								<button class="btn btn-sm btn-outline-primary copy-btn" onclick="copyToken(this, '{{ account[2] }}')"
+									title="Copy token">
+									Copy
+								</button>
+							</div>
+						</td>
 						<td>
+							<form action="{{ url_for('facebook.get_pages') }}" method="POST" style="display: inline;">
+								<input type="hidden" name="id" value="{{ account[0] }}">
+								<input type="hidden" name="access_token" value="{{ account[2] }}">
+								<button type="submit" class="btn btn-info btn-sm">Get Pages</button>
+							</form>
 							<a href="{{ url_for('facebook.delete_fb_account', id=account[0]) }}"
 								class="btn btn-danger btn-sm">Delete</a>
 						</td>
@@ -62,5 +105,27 @@
 				</tbody>
 			</table>
 		</div>
+
+		<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+		<script>
+			function copyToken(button, token) {
+				navigator.clipboard.writeText(token).then(() => {
+					button.textContent = 'Copied!';
+					button.classList.remove('btn-outline-primary');
+					button.classList.add('btn-success');
+
+					setTimeout(() => {
+						button.textContent = 'Copy';
+						button.classList.remove('btn-success');
+						button.classList.add('btn-outline-primary');
+					}, 2000);
+				}).catch(err => {
+					console.error('Failed to copy:', err);
+					button.textContent = 'Error';
+					button.classList.add('btn-danger');
+				});
+			}
+		</script>
 	</body>
 </html>

@@ -11,12 +11,20 @@ python -m venv myenv
 myenv\Scripts\activate
 ```
 
+# Run App
+```bash
+python app.py
+```
 
 # Trên macOS/Linux
 ```bash
 source myenv/bin/activate
 ```
 
+```bash
 pip freeze > requirements.txt
+```
 
+```bash
 pip install -r requirements.txt
+```

@@ -58,18 +58,19 @@ CREATE TABLE IF NOT EXISTS videos (
 create_facebook_accounts_table = """
 CREATE TABLE IF NOT EXISTS facebook_accounts (
     id INT AUTO_INCREMENT PRIMARY KEY, -- ID tự tăng làm khóa chính
-    email VARCHAR(255) UNIQUE NOT NULL, -- Email của tài khoản Facebook, phải là duy nhất
-    access_token TEXT NOT NULL -- Access token của tài khoản
+    email VARCHAR(255) UNIQUE,         -- Email của tài khoản Facebook, có thể null
+    access_token TEXT NOT NULL         -- Access token của tài khoản, bắt buộc
 );
 """
 
 create_pages_table = """
 CREATE TABLE IF NOT EXISTS pages (
-    page_id VARCHAR(255) PRIMARY KEY, -- ID của page
-    name VARCHAR(255) NOT NULL, -- Tên page
-    access_token TEXT NOT NULL, -- Access token của page
-    expires_at DATETIME NOT NULL, -- Thời gian hết hạn của token
-    facebook_account_id INT NOT NULL, -- Khóa ngoại tới bảng facebook_accounts
+    page_id VARCHAR(255) PRIMARY KEY,  -- ID của page
+    name VARCHAR(255),                 -- Tên page, có thể null
+    category VARCHAR(255),             -- Loại danh mục của page, có thể null
+    access_token TEXT NOT NULL,        -- Access token của page, bắt buộc
+    expires_at DATETIME,               -- Thời gian hết hạn của token, có thể null
+    facebook_account_id INT,           -- Khóa ngoại tới bảng facebook_accounts, có thể null
     FOREIGN KEY (facebook_account_id) REFERENCES facebook_accounts(id) ON DELETE CASCADE
 );
 """

@@ -12,6 +12,8 @@ def show_pages():
     cursor = mysql.connection.cursor()
     cursor.execute("SELECT * FROM pages")
     pages = cursor.fetchall()  # Lấy tất cả các trang
+    
+    print(pages)
 
     # Đóng kết nối
     cursor.close()
