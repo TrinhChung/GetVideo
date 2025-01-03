@@ -26,8 +26,11 @@ def download_video_from_url(video_url, download_path):
                 video_url, download=True
             )  # Tải video và lấy thông tin
             video_path = os.path.join(download_path, f"{info['title']}.{info['ext']}")
+            video_duration = info.get(
+                "duration", 0
+            ) 
             print(f"Video đã được tải về: {video_path}")
-            return video_path
+            return video_path, video_duration
     except Exception as e:
         raise Exception(f"Đã xảy ra lỗi khi tải video: {e}")
 

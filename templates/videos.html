@@ -73,7 +73,7 @@
 						<td>{{ 'Đã tải' if video[3] == 1 else 'Chưa tải' }}</td> <!-- video.crawled -->
 						{% if video[3] == 0 %}
 						<td>
-							<form method="POST" action="/batch/download/{{ video[0] }}">
+							<form method="POST" action="{{ url_for('batch.download_video_route', video_id=video[1]) }}">
 								<button type="submit" class="btn btn-success">Tải Video</button>
 							</form>
 						</td>

@@ -87,14 +87,17 @@ def index():
 @batch_bp.route("/download/<video_id>", methods=["POST"])
 def download_video_route(video_id):
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM videos WHERE id = %s", (video_id,))
+    cur.execute("SELECT * FROM videos WHERE video_id = %s", (video_id,))
     video = cur.fetchone()
 
-    if video and video[3] == "No":
+    if video and video[3] == False:
         try:
-            download_video(video_id)
+            video_path, video_duration = download_video(video_id)
+
+            # Lưu video path và video duration vào cơ sở dữ liệu
             cur.execute(
-                "UPDATE videos SET crawled = %s WHERE id = %s", ("Yes", video_id)
+                "UPDATE videos SET crawled = %s, path = %s, duration = %s WHERE video_id = %s",
+                (True, video_path, video_duration, video_id),
             )
             mysql.connection.commit()
             cur.close()
@@ -103,30 +106,31 @@ def download_video_route(video_id):
         except Exception as e:
             cur.close()
             flash(f"Đã xảy ra lỗi khi tải video: {e}", "danger")
-            return render_template(
-                "error.html", error_message=f"Đã xảy ra lỗi khi tải video: {e}"
-            )
 
     cur.close()
     flash("Video đã được tải hoặc không có trong hệ thống", "info")
     return redirect(url_for("batch.index"))
 
 
-@batch_bp.route("/download_all", methods=["POST"])
+@batch_bp.route("/batch/download_all", methods=["POST"])
 def download_all_videos():
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM videos WHERE crawled = 'No'")
     videos_to_download = cur.fetchall()
+    print(videos_to_download)
 
     for video in videos_to_download:
         try:
-            download_video(video[0])
+            video_path, video_duration = download_video(video[1])
+
+            # Lưu video path và video duration vào cơ sở dữ liệu
             cur.execute(
-                "UPDATE videos SET crawled = %s WHERE id = %s", (True, video[0])
+                "UPDATE videos SET crawled = %s, path = %s, duration = %s WHERE id = %s",
+                (True, video_path, video_duration, video[0]),
             )
-            flash(f"Video {video[0]} đã được tải xuống", "success")
+            flash(f"Video {video[2]} đã được tải xuống", "success")
         except Exception as e:
-            flash(f"Đã xảy ra lỗi khi tải video {video[0]}: {e}", "danger")
+            flash(f"Đã xảy ra lỗi khi tải video {video[2]}: {e}", "danger")
             print(f"Đã xảy ra lỗi: {e}")
 
     mysql.connection.commit()
