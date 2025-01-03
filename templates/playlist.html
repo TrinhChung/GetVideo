@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="vi">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Danh Sách Playlist</title>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+	</head>
+	<body>
+		{% include 'header.html' %}
+		{% include 'message.html' %}
+
+		<div class="container mt-5">
+			<h2>Danh Sách Playlist</h2>
+
+			<!-- Thêm Playlist Form -->
+			<h3>Thêm Playlist Mới</h3>
+			<form method="POST" action="{{ url_for('batch.batch_youtube_playlist') }}">
+				<div class="mb-3">
+					<label for="playlist_url" class="form-label">URL Playlist</label>
+					<input type="text" class="form-control" id="playlist_url" name="playlist_url" required>
+				</div>
+				<button type="submit" class="btn btn-success">Thêm Playlist</button>
+			</form>
+
+			<!-- Danh Sách Playlist -->
+			{% if playlists %}
+			<table class="table table-striped mt-4">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Title</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for playlist in playlists %}
+					<tr>
+						<td>{{ playlist[0] }}</td>
+						<td>{{ playlist[1] }}</td>
+						<td>
+							<form method="POST" action="{{ url_for('batch.get_video_from_playlist') }}">
+								<input type="hidden" name="playlist_id" value="{{ playlist[0] }}">
+								<button type="submit" class="btn btn-primary">Lấy Video từ Playlist</button>
+							</form>
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+			{% else %}
+			<p>Không tìm thấy playlist nào.</p>
+			{% endif %}
+
+			<!-- Nút lấy tất cả video -->
+			<form method="POST" action="{{ url_for('batch.get_all_videos') }}">
+				<button type="submit" class="btn btn-warning mt-3">Lấy Tất Cả Video</button>
+			</form>
+
+		</div>
+
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+	</body>
+</html>

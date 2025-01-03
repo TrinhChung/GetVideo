@@ -1,5 +1,5 @@
 import yt_dlp
-from until import extract_playlist_id
+from until import generate_playlist_url
 
 def get_existing_playlist(connection, playlist_id):
     """
@@ -28,7 +28,7 @@ def get_existing_playlist(connection, playlist_id):
         cursor.close()
 
 
-def get_playlist_info_and_video_details(playlist_url, connection):
+def get_playlist_info_and_video_details(playlist_id, connection):
     """
     Hàm chính để xử lý playlist và cập nhật database.
     """
@@ -37,10 +37,8 @@ def get_playlist_info_and_video_details(playlist_url, connection):
         return
 
     try:
-        # Bước 1: Lấy ID playlist từ URL
-        playlist_id = extract_playlist_id(playlist_url)
-        if not playlist_id:
-            raise ValueError("Không thể trích xuất playlist ID từ URL")
+        # Bước 1: Lấy URL playlist từ ID
+        playlist_url = generate_playlist_url(playlist_id)
 
         # Bước 2: Kiểm tra playlist trong database
         existing_data = get_existing_playlist(connection, playlist_id)
@@ -99,13 +97,13 @@ def save_playlist_and_videos_to_mysql(
     # Lưu thông tin video vào bảng videos
     for video in video_data:
         cursor.execute(
-            "INSERT INTO videos (id, title, playlist_id, crawled) VALUES (%s, %s, %s, %s)",
+            "INSERT INTO videos (video_id, title, playlist_id, crawled) VALUES (%s, %s, %s, %s)",
             (
                 video["id"],
                 video["title"],
                 playlist_id,
-                "No",
-            ),  # 'Yes' đánh dấu đã crawl
+                False,  # False: video chưa được crawl
+            ),
         )
 
     # Commit và đóng kết nối

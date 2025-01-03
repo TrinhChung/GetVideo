@@ -5,10 +5,10 @@ import os
 
 load_dotenv()
 
-
 def create_app():
     app = Flask(__name__, static_url_path="/static")
-    
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+
     app.config["MYSQL_HOST"] = "localhost"
     app.config["MYSQL_USER"] = "root"
     app.config["MYSQL_PASSWORD"] = os.getenv("PASSWORD_DB")

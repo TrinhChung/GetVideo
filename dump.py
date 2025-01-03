@@ -47,11 +47,14 @@ CREATE TABLE IF NOT EXISTS playlist (
 # Tạo bảng videos
 create_videos_table = """
 CREATE TABLE IF NOT EXISTS videos (
-    video_id VARCHAR(255) PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    video_id VARCHAR(255) NOT NULL,
     title VARCHAR(255),
     crawled BOOLEAN DEFAULT FALSE,
     playlist_id VARCHAR(255),
-    FOREIGN KEY (playlist_id) REFERENCES playlists(id)
+    path VARCHAR(255),
+    duration INT,  -- Duration in seconds (or minutes depending on your preference)
+    FOREIGN KEY (playlist_id) REFERENCES playlist(id)
 );
 """
 

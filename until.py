@@ -1,5 +1,5 @@
 from urllib.parse import urlparse, parse_qs
-
+import os
 def extract_facebook_video_id(url):
     """
     Trích xuất ID video từ URL Facebook.
@@ -38,3 +38,21 @@ def extract_playlist_id(url):
     except Exception as e:
         print(f"Đã xảy ra lỗi khi trích xuất playlist ID: {e}")
         return None
+
+
+def generate_playlist_url(playlist_id):
+    """
+    Tạo URL playlist từ playlist ID.
+    Args:
+        playlist_id: ID của playlist YouTube (ví dụ: PLE4UtJLkLkg9lAIX3PqBmpVT-NiuXfgx9)
+    Returns:
+        URL của playlist.
+    """
+    try:
+        # Tạo URL từ playlist_id
+        url = f"https://www.youtube.com/playlist?list={playlist_id}"
+        return url
+    except Exception as e:
+        print(f"Đã xảy ra lỗi khi tạo URL từ playlist ID: {e}")
+        return None
+

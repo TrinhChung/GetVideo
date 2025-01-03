@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="vi">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+		<title>Video Playlist</title>
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+		<style>
+			/* Ensure word wrap in the title column */
+			.table td,
+			.table th {
+				white-space: normal !important;
+			}
+
+			/* Increase width of the "Tải Video" column */
+			.table td:last-child {
+				width: 130px;
+				/* Adjust as needed */
+			}
+
+			.table th:nth-child(1) {
+				width: 120px;
+				/* Adjust to make the title column smaller */
+			}
+
+			.table th:nth-child(3) {
+				width: 300px;
+				/* Adjust to make the title column smaller */
+			}
+
+			.table th:nth-child(4) {
+				width: 120px;
+				/* Adjust to make the title column smaller */
+			}
+		</style>
+	</head>
+	<body>
+		{% include 'header.html' %}
+		{% include 'message.html' %}
+		<div class="container mt-5">
+			<h1 class="text-center mb-4">Danh sách Video Playlist</h1>
+
+			<!-- Button Tải tất cả -->
+			<form method="POST" action="/batch/download_all" class="mt-4">
+				<button type="submit" class="btn btn-danger">Tải Tất Cả Video</button>
+			</form>
+
+			<!-- Hiển thị danh sách video -->
+			<h3 class="mt-5">Danh sách Video</h3>
+			<table class="table table-bordered mt-3">
+				<thead class="table-light">
+					<tr>
+						<th>ID</th>
+						<th>Video ID</th>
+						<th>Tiêu đề</th>
+						<th>Playlist ID</th>
+						<th>Thời gian</th>
+						<th>Trạng thái</th>
+						<th>Tải Video</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for video in videos %}
+					<tr>
+						<td>{{ video[0] }}</td> <!-- video.id -->
+						<td>{{ video[1] }}</td> <!-- video.video_id -->
+						<td>{{ video[2] }}</td> <!-- video.title -->
+						<td>{{ video[4] }}</td> <!-- video.playlist_id -->
+						<td>{{ video[5] if video[5] else 'Chưa có thông tin' }}</td>
+						<!-- video.duration (hoặc thông báo nếu không có) -->
+						<td>{{ 'Đã tải' if video[3] == 1 else 'Chưa tải' }}</td> <!-- video.crawled -->
+						{% if video[3] == 0 %}
+						<td>
+							<form method="POST" action="/batch/download/{{ video[0] }}">
+								<button type="submit" class="btn btn-success">Tải Video</button>
+							</form>
+						</td>
+						{% else %}
+						<td></td>
+						{% endif %}
+					</tr>
+					{% else %}
+					<tr>
+						<td colspan="7" class="text-center">Không có video nào để hiển thị.</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+			integrity="sha384-OgVRvuATP1z7JjHLkuOU63t63E9UK9R1DlmAy1UoZlZpkjr/ZpZqgs3bzAv29ZjX"
+			crossorigin="anonymous"></script>
+	</body>
+</html>

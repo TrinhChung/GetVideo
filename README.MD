@@ -11,6 +11,11 @@ python -m venv myenv
 myenv\Scripts\activate
 ```
 
+# Seed DBDB
+```bash
+python dump.py
+```
+
 # Run App
 ```bash
 python app.py

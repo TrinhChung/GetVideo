@@ -10,3 +10,28 @@ body {
 	margin-top: 20px;
 	background-color: #ffffff;
 }
+.flashes {
+    list-style-type: none;
+    padding: 0;
+}
+
+.flashes li {
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ddd;
+}
+
+.flashes .success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.flashes .danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.flashes .info {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+}

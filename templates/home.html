@@ -10,6 +10,7 @@
 	</head>
 	<body>
 		{% include 'header.html' %}
+		{% include 'message.html' %}
 		<div class="container mt-5">
 			<h1 class="text-center mb-4">Video Downloader</h1>
 			<p class="text-center mb-5">Choose an option below to start downloading videos:</p>
@@ -22,7 +23,7 @@
 
 		<script>
 			function redirectToBatch() {
-				window.location.href = '/batch'; // Replace with your actual URL
+				window.location.href = '/batch/videos'; // Replace with your actual URL
 			}
 
 			function redirectToURL() {

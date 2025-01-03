@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, flash
 from youtube import download_video_by_url, download_video_facebook
 
 download_bp = Blueprint("download", __name__)
@@ -11,9 +11,10 @@ def download_from_url():
         if video_url:
             try:
                 download_video_by_url(video_url)
+                flash("Video đã được tải xuống thành công!", "success")
                 return render_template("downloadFromUrl.html")
             except Exception as e:
-                return render_template("error.html", error_message=e)
+                flash(f"Đã xảy ra lỗi: {e}", "danger")
 
     return render_template("downloadFromUrl.html")
 
@@ -25,8 +26,9 @@ def download_from_facebook_url():
         if video_url:
             try:
                 download_video_facebook(video_url)
+                flash("Video từ Facebook đã được tải xuống thành công!", "success")
                 return render_template("downloadFromUrl.html")
             except Exception as e:
-                return render_template("error.html", error_message=e)
+                flash(f"Đã xảy ra lỗi: {e}", "danger")
 
     return render_template("downloadFromUrl.html")
