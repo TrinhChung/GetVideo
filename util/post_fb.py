@@ -102,7 +102,7 @@ def get_account(access_token, facebook_account_id):
             page_access_token = page.get("access_token")
 
             # Lấy expires_at từ get_token_data_from_facebook
-            expires_at = get_token_data_from_facebook(page_access_token)
+            token_data, expires_at = get_token_data_from_facebook(page_access_token)
 
             if expires_at is None:
                 expires_at = None  # Nếu không có expires_at, gán là None

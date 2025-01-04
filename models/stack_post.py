@@ -1,0 +1,22 @@
+from database_init import db
+from datetime import datetime
+
+
+class StackPost(db.Model):
+    __tablename__ = "stack_post"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    page_id = db.Column(db.String(255), nullable=False)  # ID của trang
+    time = db.Column(db.DateTime, default=datetime.utcnow)  # Thời gian đăng bài
+    video_split_id = db.Column(
+        db.Integer, db.ForeignKey("video_split.id"), nullable=False
+    )  # Liên kết với video_splits
+    title = db.Column(db.String(255), nullable=False)  # Tiêu đề bài đăng
+    status = db.Column(
+        db.String(50), nullable=False
+    )  # Trạng thái của bài đăng, ví dụ: "pending", "completed"
+
+    # Mối quan hệ giữa StackPost và VideoSplit
+    video_split = db.relationship(
+        "VideoSplit", backref=db.backref("stack_post", lazy=True)
+    )

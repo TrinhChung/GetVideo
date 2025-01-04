@@ -42,3 +42,17 @@ pip freeze > requirements.txt
 ```bash
 pip install -r requirements.txt
 ```
+# Tạo history migration mới:
+```bash
+flask db init 
+```
+
+# Tạo migration mới:
+```bash
+flask db migrate -m "Add splited field to Video model"
+```
+
+# Áp dụng migration:
+```bash
+flask db upgrade
+```

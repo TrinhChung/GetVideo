@@ -2,7 +2,7 @@
 from database_init import db
 
 class Platform(db.Model):
-    __tablename__ = "platforms"
+    __tablename__ = "platform"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(
@@ -12,7 +12,7 @@ class Platform(db.Model):
     videos = db.relationship(
         "Video",
         secondary="video_platform",
-        backref=db.backref("platforms", lazy="dynamic"),
+        backref=db.backref("platform", lazy="dynamic"),
     )
 
     def __repr__(self):
