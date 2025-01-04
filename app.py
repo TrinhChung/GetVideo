@@ -1,6 +1,6 @@
 from flask import Flask
-from database_init import db
 from flask_migrate import Migrate
+from database_init import db
 from dotenv import load_dotenv
 import os
 

@@ -1,6 +1,3 @@
-from flask_sqlalchemy import SQLAlchemy
-from flask_mysqldb import MySQL
-
-db = SQLAlchemy()
-
-mysql = MySQL()
+import flask_sqlalchemy
+print(flask_sqlalchemy.__version__)
+db = flask_sqlalchemy.SQLAlchemy()

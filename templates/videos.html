@@ -20,20 +20,12 @@
 				/* Adjust as needed */
 			}
 
-			.table th:nth-child(1) {
-				width: 120px;
-				/* Adjust to make the title column smaller */
-			}
-
 			.table th:nth-child(3) {
-				width: 300px;
+				width: 150px;
 				/* Adjust to make the title column smaller */
 			}
 
-			.table th:nth-child(4) {
-				width: 120px;
-				/* Adjust to make the title column smaller */
-			}
+
 		</style>
 	</head>
 	<body>
@@ -64,7 +56,9 @@
 					<tr>
 						<td>{{ video.id }}</td> <!-- video.id -->
 						<td>{{ video.playlist_id }}</td> <!-- video.playlist_id -->
-						<td>{{ video.duration if video.duration else 'Chưa có thông tin' }}</td> <!-- video.duration -->
+						<td data-duration="{{ video.duration if video.duration else '' }}">
+							{{ video.duration if video.duration else 'Chưa có thông tin' }}
+						</td>
 						<td>{{ video.path if video.path else 'Chưa có đường dẫn' }}</td> <!-- video.path -->
 						{% if not video.crawled %}
 						<td>
@@ -88,5 +82,29 @@
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
 			integrity="sha384-OgVRvuATP1z7JjHLkuOU63t63E9UK9R1DlmAy1UoZlZpkjr/ZpZqgs3bzAv29ZjX"
 			crossorigin="anonymous"></script>
+		<script>
+			document.addEventListener("DOMContentLoaded", () => {
+				// Hàm chuyển đổi giây thành phút và giây
+				function convertDurationToMinutes(duration) {
+					const totalSeconds = parseInt(duration, 10);
+					if (isNaN(totalSeconds)) return "Chưa có thông tin";
+
+					const minutes = Math.floor(totalSeconds / 60);
+					const seconds = totalSeconds % 60;
+
+					return seconds > 0 ? `${minutes} phút ${seconds} giây` : `${minutes} phút`;
+				}
+
+				// Lấy tất cả các ô chứa thời gian
+				const durationCells = document.querySelectorAll("td[data-duration]");
+
+				// Lặp qua và cập nhật nội dung
+				durationCells.forEach((cell) => {
+					const duration = cell.getAttribute("data-duration");
+					cell.textContent = convertDurationToMinutes(duration);
+				});
+			});
+		</script>
+
 	</body>
 </html>

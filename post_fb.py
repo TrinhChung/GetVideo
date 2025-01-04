@@ -5,6 +5,8 @@ import requests
 from models.page import Page  # Assuming Page is defined in page.py
 from database_init import db  # Assuming db is initialized in database_init.py
 from sqlalchemy.exc import IntegrityError
+from datetime import datetime
+from flask import  flash
 
 # Tải các biến môi trường từ file .env
 load_dotenv()
@@ -72,7 +74,12 @@ def get_account(access_token, facebook_account_id):
             name = page.get("name")
             category = page.get("category", None)
             page_access_token = page.get("access_token")
-            expires_at = None
+
+            # Lấy expires_at từ get_token_data_from_facebook
+            token_data, expires_at = get_token_data_from_facebook(page_access_token)
+
+            if expires_at is None:
+                expires_at = None  # Nếu không có expires_at, gán là None
 
             # Kiểm tra xem page_id có tồn tại trong cơ sở dữ liệu chưa
             existing_page = Page.query.filter_by(page_id=page_id).first()
@@ -111,6 +118,86 @@ def get_account(access_token, facebook_account_id):
         return False
 
 
-# access_token_page = get_access_token_page_by_id(PAGE_ID)
-# print(access_token_page)
-# create_post_page(PAGE_ID, post_message)
+def process_expires_at(token_data):
+    """
+    Xử lý expires_at từ dữ liệu token của Facebook.
+    Trả về thời gian hết hạn hoặc None nếu không có thời gian hết hạn.
+    """
+    expires_at = token_data.get("expires_at", None)
+    if expires_at == 0:
+        expires_at = datetime(
+            2100, 1, 1
+        )  # Nếu expires_at = 0, đặt ngày hết hạn là năm 2100
+    else:
+        expires_at = datetime.fromtimestamp(expires_at) if expires_at else None
+    return expires_at
+
+
+def get_token_data_from_facebook(access_token):
+    """
+    Gửi yêu cầu đến API của Facebook để kiểm tra thông tin và thời hạn của Access Token.
+    Trả về dữ liệu token hoặc None nếu có lỗi.
+    """
+    app_id = os.getenv("APP_ID")  # Thay bằng App ID của bạn
+    app_secret = os.getenv("APP_SECRET")  # Thay bằng App Secret của bạn
+    app_access_token = f"{app_id}|{app_secret}"
+
+    # Endpoint để debug token
+    url = f"https://graph.facebook.com/debug_token?input_token={access_token}&access_token={app_access_token}"
+
+    try:
+        # Gửi yêu cầu
+        response = requests.get(url, timeout=10)
+        data = response.json()
+
+        if "data" in data:
+            token_data = data["data"]
+            expires_at = process_expires_at(token_data)  # Sử dụng hàm xử lý expires_at
+            return token_data, expires_at
+        else:
+            print("Không thể lấy thông tin token.")
+            print(data)
+            return None, None
+    except requests.Timeout:
+        print("Request timed out.")
+    except requests.RequestException as e:
+        print(f"Lỗi khi kiểm tra token: {str(e)}")
+        return None, None
+
+
+def check_token_expiry(access_token, page_id):
+    """
+    Kiểm tra thông tin và thời hạn của Access Token và cập nhật expires_at vào cơ sở dữ liệu.
+    """
+    try:
+        # Lấy dữ liệu token từ Facebook
+        token_data, expires_at = get_token_data_from_facebook(access_token)
+
+        if token_data:
+            is_valid = token_data.get("is_valid", False)
+
+            print(f"Token hợp lệ: {is_valid}")
+            print(f"Expires_at: {expires_at}")
+
+            # Tìm page tương ứng với page_id
+            page = Page.query.filter_by(page_id=page_id).first()
+
+            if page:
+                # Cập nhật expires_at vào bảng Page
+                page.expires_at = expires_at
+                db.session.commit()  # Lưu thay đổi vào cơ sở dữ liệu
+
+                flash(
+                    f"Token Debug Success and expires_at updated for page: {page.name}",
+                    "success",
+                )
+            else:
+                flash("Page not found.", "error")
+
+            return token_data, expires_at
+        else:
+            print("Không thể lấy dữ liệu token.")
+            return None, None
+    except Exception as e:
+        print(f"Lỗi: {str(e)}")
+        return None, None

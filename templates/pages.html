@@ -76,7 +76,7 @@
 							<th class="col-category">Category</th>
 							<th class="col-token">Access Token</th>
 							<th class="col-expires">Expires At</th>
-							<th class="col-account-id">Facebook Account ID</th>
+							<th class="col-account-id">Debug Token</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -94,8 +94,20 @@
 									</button>
 								</div>
 							</td>
-							<td class="col-expires">{{ page.expires_at }}</td> <!-- Sử dụng page.expires_at -->
-							<td class="col-account-id">{{ page.facebook_account_id }}</td> <!-- Sử dụng page.facebook_account_id -->
+							<td class="col-expires">
+								{% if page.expires_at %}
+								{{ page.expires_at }}
+								{% else %}
+								Chưa rõ giá trị 
+								{% endif %}
+							</td>
+							<td class="col-account-id"><form action="/pages/debug-token" method="POST">
+								<input type="hidden" name="token" value="{{ page.access_token }}">
+								<input type="hidden" name="page_id" value="{{ page.page_id }}">
+								<button type="submit" class="btn btn-sm btn-outline-secondary" title="Debug token">
+									Debug Token
+								</button>
+							</form></td> <!-- Sử dụng page.facebook_account_id -->
 						</tr>
 						{% endfor %}
 					</tbody>
