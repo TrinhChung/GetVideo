@@ -15,20 +15,46 @@ load_dotenv()
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")  # Token truy cập của bạn
 PAGE_ID = os.getenv("PAGE_ID")  # ID của Trang
 
-# Khởi tạo GraphAPI
-graph = GraphAPI(access_token=ACCESS_TOKEN)
-
 # Nội dung bài viết
 post_message = "Đây là bài đăng thử nghiệm từ Python. 🚀"
 
 
 # Đăng bài viết
 def create_post_page(page_id, access_token, message):
+    # Khởi tạo GraphAPI
+    graph = GraphAPI(access_token=access_token)
     try:
         graph.put_object(parent_object=page_id, connection_name="feed", message=message)
         print("Bài đăng đã được đăng thành công!")
     except Exception as e:
         print(f"Lỗi khi đăng bài viết: {str(e)}")
+
+
+def create_video_post(page_id, access_token, video_path, message=""):
+    """
+    Đăng video lên Facebook page
+
+    Parameters:
+    - page_id: ID của trang Facebook
+    - access_token: token truy cập Facebook API
+    - video_path: Đường dẫn tới file video
+    - message: Tin nhắn kèm video (tùy chọn)
+    """
+    # Khởi tạo đối tượng GraphAPI
+    graph = GraphAPI(access_token=access_token)
+
+    try:
+        # Đăng video lên trang Facebook
+        with open(video_path, "rb") as video_file:
+            post = graph.put_object(
+                parent_object=page_id,
+                connection_name="videos",
+                source=video_file,
+                message=message,
+            )
+            print(f"Video đã được đăng thành công! ID bài viết: {post['id']}")
+    except Exception as e:
+        print(f"Lỗi khi đăng video: {str(e)}")
 
 
 def create_post_by_request(access_token):
@@ -76,7 +102,7 @@ def get_account(access_token, facebook_account_id):
             page_access_token = page.get("access_token")
 
             # Lấy expires_at từ get_token_data_from_facebook
-            token_data, expires_at = get_token_data_from_facebook(page_access_token)
+            expires_at = get_token_data_from_facebook(page_access_token)
 
             if expires_at is None:
                 expires_at = None  # Nếu không có expires_at, gán là None
