@@ -26,7 +26,9 @@ python telegram_bot/runbot.py
 python dump.py
 ```
 
-
+```bash
+deactivate
+```
 
 # Trên macOS/Linux
 ```bash

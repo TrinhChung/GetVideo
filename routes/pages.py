@@ -1,7 +1,7 @@
 # routes/pages.py
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from models.page import Page  # Import model Page đã tạo
-from post_fb import check_token_expiry  # Import hàm check_token_expiry
+from util.post_fb import check_token_expiry  # Import hàm check_token_expiry
 
 # Tạo blueprint cho pages
 pages_bp = Blueprint("pages", __name__)

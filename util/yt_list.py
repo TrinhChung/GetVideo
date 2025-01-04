@@ -1,5 +1,5 @@
 import yt_dlp
-from until import generate_playlist_url
+from util.until import generate_playlist_url
 from models.video import Video
 from models.playlist import Playlist
 from database_init import db

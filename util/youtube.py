@@ -1,6 +1,6 @@
 import os
 import yt_dlp
-from until import extract_facebook_video_id
+from util.until import extract_facebook_video_id
 
 def download_video_from_url(video_url, download_path):
     """

@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from yt_list import get_playlist_info_and_video_details
+from util.yt_list import get_playlist_info_and_video_details
 from database_init import db
 from models.playlist import Playlist
 from models.video import Video
-from until import extract_playlist_id
-from youtube import download_video
+from util.until import extract_playlist_id
+from util.youtube import download_video
 
 batch_bp = Blueprint("batch", __name__)
 

@@ -1,5 +1,5 @@
 from urllib.parse import urlparse, parse_qs
-import os
+
 def extract_facebook_video_id(url):
     """
     Trích xuất ID video từ URL Facebook.

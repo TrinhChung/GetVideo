@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from database_init import db
 from models.facebook_account import FacebookAccount
-from post_fb import get_account
+from util.post_fb import get_account
 
 facebook_bp = Blueprint("facebook", __name__)
 
