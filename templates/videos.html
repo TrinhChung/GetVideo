@@ -4,9 +4,11 @@
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-		<title>Video Playlist</title>
+		<title>Danh sách Video</title>
 		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+		<!-- Thêm Font Awesome -->
+		<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 		<style>
 			/* Ensure word wrap in the title column */
 			.table td,
@@ -16,16 +18,22 @@
 
 			/* Increase width of the "Tải Video" column */
 			.table td:last-child {
-				width: 130px;
-				/* Adjust as needed */
+				width: 150px;
 			}
 
 			.table th:nth-child(3) {
 				width: 150px;
-				/* Adjust to make the title column smaller */
 			}
 
-
+			/* Điều chỉnh độ rộng của cột đường dẫn */
+			.table td:nth-child(4) {
+				width: 400px;
+				/* Bạn có thể điều chỉnh giá trị này cho phù hợp */
+				word-wrap: break-word;
+				/* Đảm bảo rằng văn bản dài sẽ xuống dòng */
+				white-space: normal !important;
+				/* Cho phép xuống dòng trong cột */
+			}
 		</style>
 	</head>
 	<body>
@@ -34,9 +42,11 @@
 		<div class="container mt-5">
 			<h1 class="text-center mb-4">Danh sách Video Playlist</h1>
 
-			<!-- Button Tải tất cả -->
-			<form method="POST" action="/batch/download_all" class="mt-4">
-				<button type="submit" class="btn btn-danger">Tải Tất Cả Video</button>
+			<!-- Button Tải tất cả với icon -->
+			<form method="POST" action="{{ url_for('video.download_all_videos') }}" class="mt-4">
+				<button type="submit" class="btn btn-danger">
+					<i class="fas fa-download"></i> Tải Tất Cả Video
+				</button>
 			</form>
 
 			<!-- Hiển thị danh sách video -->
@@ -49,30 +59,47 @@
 						<th>Thời gian</th>
 						<th>Đường dẫn</th>
 						<th>Tải Video</th>
+						<th>Split Video</th> <!-- Cột Split mới -->
 					</tr>
 				</thead>
 				<tbody>
 					{% for video in videos %}
 					<tr>
-						<td>{{ video.id }}</td> <!-- video.id -->
-						<td>{{ video.playlist_id }}</td> <!-- video.playlist_id -->
+						<td>{{ video.id }}</td>
+						<td>{{ video.playlist_id }}</td>
 						<td data-duration="{{ video.duration if video.duration else '' }}">
 							{{ video.duration if video.duration else 'Chưa có thông tin' }}
 						</td>
-						<td>{{ video.path if video.path else 'Chưa có đường dẫn' }}</td> <!-- video.path -->
+						<td>{{ video.path if video.path else 'Chưa có đường dẫn' }}</td>
 						{% if not video.crawled %}
 						<td>
-							<form method="POST" action="{{ url_for('batch.download_video_route', video_id=video.video_id) }}">
-								<button type="submit" class="btn btn-success">Tải Video</button>
+							<form method="POST" action="{{ url_for('video.download_video_route', video_id=video.video_id) }}">
+								<button type="submit" class="btn btn-success">
+									<i class="fas fa-download"></i> Tải Video
+								</button>
 							</form>
 						</td>
 						{% else %}
-						<td></td>
+						<td class="text-center">
+							<span class="text-success">Đã tải xong</span>
+						</td>
+						{% endif %}
+						<!-- Nút Split video -->
+						{% if video.path %}
+						<td>
+							<form method="POST" action="{{ url_for('video.split_video_route', video_id=video.video_id) }}">
+								<button type="submit" class="btn btn-warning">Split Video</button>
+							</form>
+						</td>
+						{% else %}
+						<td class="text-center">
+							<span class="text-muted">--</span>
+						</td>
 						{% endif %}
 					</tr>
 					{% else %}
 					<tr>
-						<td colspan="8" class="text-center">Không có video nào để hiển thị.</td>
+						<td colspan="5" class="text-center">Không có video nào để hiển thị.</td>
 					</tr>
 					{% endfor %}
 				</tbody>

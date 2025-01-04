@@ -1,6 +1,21 @@
 from moviepy.editor import VideoFileClip  # Dùng để làm việc với video
 import os
 import re
+from models.video_split import VideoSplit
+from database_init import db
+
+def get_video_type(path):
+    """
+    Xác định loại video từ đường dẫn.
+    """
+    if "Youtube" in path.lower():
+        return "youtube"
+    elif "Facebook" in path.lower():
+        return "facebook"
+    elif "Tiktok" in path.lower():
+        return "tiktok"
+    else:
+        return "Other"
 
 
 def clean_title(title):
@@ -47,19 +62,29 @@ def split_video(
 
     # Làm sạch tên video
     clean_video_title = clean_title(video_title)
-    print(clean_video_title)
 
     # Xác định thời gian bắt đầu và kết thúc
     start_time = 0
     end_time = segment_duration_sec
     i = 1
 
+    video_type = get_video_type(video_path)
+
     # Lặp qua video và cắt thành các phần nhỏ
     while end_time <= video.duration:
         subclip = video.subclip(start_time, end_time)  # Cắt đoạn video
-        subclip.write_videofile(
-            os.path.join(output_dir, f"{clean_video_title}_Phần_{i}.mp4"), codec=codec
-        )  # Lưu phần nhỏ vào thư mục
+        output_path = os.path.join(output_dir, f"{clean_video_title}_Phần_{i}.mp4")
+        subclip.write_videofile(output_path, codec=codec)  # Lưu phần nhỏ vào thư mục
+
+        # Lưu vào database
+        video_split = VideoSplit(
+            path=output_path,
+            title=f"{clean_video_title}_Phần_{i}",
+            duration=segment_duration_sec,
+            type=video_type,
+        )
+        db.session.add(video_split)
+
         i += 1
         start_time = end_time
         end_time += segment_duration_sec
@@ -67,18 +92,17 @@ def split_video(
     # Nếu video còn lại một đoạn nhỏ cuối cùng
     if start_time < video.duration:
         subclip = video.subclip(start_time, video.duration)
-        subclip.write_videofile(
-            os.path.join(output_dir, f"{clean_video_title}_Phần_{i}.mp4"), codec=codec
+        subclip.write_videofile(output_path, codec=codec)
+
+        video_split = VideoSplit(
+            path=output_path,
+            title=f"{clean_video_title}_Phần_{i}",
+            duration=int(video.duration - start_time),
+            type=video_type,
         )
+        db.session.add(video_split)
 
+    # Commit tất cả các thay đổi vào database
+    db.session.commit()
+    
     print(f"Video đã được chia thành các phần nhỏ và lưu tại {output_dir}!")
-
-# Ví dụ sử dụng hàm
-video_paths = [
-    r"C:\Users\chung\Videos\Film\Youtube\[Review Phim] Cửu Long Thành Trại - Siêu Phẩm Hành Động Xã Hội Đen 2024.mp4",
-]
-
-# Chạy hàm cho từng video
-for video_path in video_paths:
-    segment_duration_sec = 10 * 60  # Cắt video thành các phần 10 phút
-    split_video(video_path, segment_duration_sec)

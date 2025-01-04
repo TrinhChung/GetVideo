@@ -34,13 +34,15 @@ def create_app():
     migrate.init_app(app, db)
 
     from routes.home import home_bp
-    from routes.batch import batch_bp
+    from routes.playlist import playlist_bp
+    from routes.video import video_bp
     from routes.download import download_bp
     from routes.facebook import facebook_bp
     from routes.pages import pages_bp
 
     app.register_blueprint(home_bp)
-    app.register_blueprint(batch_bp)
+    app.register_blueprint(playlist_bp)
+    app.register_blueprint(video_bp)
     app.register_blueprint(download_bp)
     app.register_blueprint(facebook_bp)
     app.register_blueprint(pages_bp)
