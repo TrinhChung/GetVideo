@@ -44,6 +44,7 @@
 
 			<!-- Button Tải tất cả với icon -->
 			<form method="POST" action="{{ url_for('video.download_all_videos') }}" class="mt-4">
+				{{ form.csrf_token }} <!-- CSRF token -->
 				<button type="submit" class="btn btn-danger">
 					<i class="fas fa-download"></i> Tải Tất Cả Video
 				</button>
@@ -73,7 +74,7 @@
 						<td>{{ video.path if video.path else 'Chưa có đường dẫn' }}</td>
 						{% if not video.crawled %}
 						<td>
-							<form method="POST" action="{{ url_for('video.download_video_route', video_id=video.video_id) }}">
+							<form method="GET" action="{{ url_for('video.download_video_route', video_id=video.video_id) }}">
 								<button type="submit" class="btn btn-success">
 									<i class="fas fa-download"></i> Tải Video
 								</button>
@@ -88,6 +89,7 @@
 						{% if video.path %}
 						<td>
 							<form method="POST" action="{{ url_for('video.split_video_route', video_id=video.video_id) }}">
+								{{ form.csrf_token }} <!-- CSRF token -->
 								<button type="submit" class="btn btn-warning">Split Video</button>
 							</form>
 						</td>
@@ -99,7 +101,7 @@
 					</tr>
 					{% else %}
 					<tr>
-						<td colspan="5" class="text-center">Không có video nào để hiển thị.</td>
+						<td colspan="6" class="text-center">Không có video nào để hiển thị.</td>
 					</tr>
 					{% endfor %}
 				</tbody>

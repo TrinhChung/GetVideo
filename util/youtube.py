@@ -42,7 +42,7 @@ def download_video(video_id):
     :return: Đường dẫn file video đã tải
     """
     # Thư mục lưu video mặc định
-    DOWNLOAD_PATH = r"C:\Users\chung\Videos\Film\Youtube"
+    DOWNLOAD_PATH = r"./Videos/Film/Youtube"
 
     # Tạo thư mục nếu chưa tồn tại
     if not os.path.exists(DOWNLOAD_PATH):
@@ -61,7 +61,7 @@ def download_video_facebook(video_url):
     """
     video_id = extract_facebook_video_id(video_url);
     # Thư mục lưu video mặc định
-    DOWNLOAD_PATH = r"C:\Users\chung\Videos\Film\Facebook"
+    DOWNLOAD_PATH = r"./Videos/Film/Facebook"
 
     # Tạo thư mục nếu chưa tồn tại
     if not os.path.exists(DOWNLOAD_PATH):
@@ -79,7 +79,7 @@ def download_video_by_url(video_url):
     :return: Đường dẫn file video đã tải
     """
     # Thư mục lưu video mặc định
-    DOWNLOAD_PATH = r"C:\Users\chung\Videos\Film\Other"
+    DOWNLOAD_PATH = r"./Videos/Film/Tiktok"
 
     # Tạo thư mục nếu chưa tồn tại
     if not os.path.exists(DOWNLOAD_PATH):

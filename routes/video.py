@@ -3,19 +3,22 @@ from database_init import db
 from models.video import Video
 from util.youtube import download_video
 from util.split_video import split_video  # Nhập hàm split_video
+from Form.video import VideoDownloadForm, VideoSplitForm
 
 video_bp = Blueprint("video", __name__)
 
 
 # Route để hiển thị và quản lý video
-@video_bp.route("/videos", methods=["GET", "POST"])
+@video_bp.route("/videos", methods=["GET"])
 def index():
+    form = VideoDownloadForm()
     videos = Video.query.all()
-    return render_template("videos.html", videos=videos)
+    form = VideoDownloadForm()
+    return render_template("videos.html", videos=videos, form=form)
 
 
 # Route để tải xuống video theo video_id
-@video_bp.route("/download/<video_id>", methods=["POST"])
+@video_bp.route("/download/<video_id>", methods=["GET"])
 def download_video_route(video_id):
     video = Video.query.filter_by(video_id=video_id).first()
 

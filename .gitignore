@@ -10,6 +10,8 @@ instance/
 
 /myenv/
 
+/Videos/*
+
 # Flask cache files
 *.log
 *.pid

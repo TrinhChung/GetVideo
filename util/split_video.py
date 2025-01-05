@@ -48,7 +48,7 @@ def split_video(
         output_prefix (str): Tiền tố của tên các file xuất ra.
         codec (str): Bộ mã hóa video để sử dụng khi xuất file (mặc định là "libx264").
     """
-    output_dir = r"C:\Users\chung\Videos\Splited"  # Đường dẫn thư mục cố định
+    output_dir = r"./Videos/Splited"  # Đường dẫn thư mục cố định
 
     # Kiểm tra và tạo thư mục nếu chưa tồn tại
     if not os.path.exists(output_dir):
