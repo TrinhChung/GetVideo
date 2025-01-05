@@ -3,6 +3,7 @@ from flask_migrate import Migrate
 from database_init import db
 from dotenv import load_dotenv
 import os
+import secrets
 
 # Import tất cả các mô hình
 from models.category_playlist import CategoryPlaylist
@@ -24,7 +25,7 @@ migrate = Migrate()
 
 def create_app():
     app = Flask(__name__, static_url_path="/static")
-    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+    app.config["SECRET_KEY"] = secrets.token_hex(16)
     app.config["SQLALCHEMY_DATABASE_URI"] = (
         f"mysql://root:{os.getenv('PASSWORD_DB')}@localhost/video"
     )
@@ -39,6 +40,7 @@ def create_app():
     from routes.download import download_bp
     from routes.facebook import facebook_bp
     from routes.pages import pages_bp
+    from routes.auth import auth_bp
 
     app.register_blueprint(home_bp)
     app.register_blueprint(playlist_bp)
@@ -46,6 +48,7 @@ def create_app():
     app.register_blueprint(download_bp)
     app.register_blueprint(facebook_bp)
     app.register_blueprint(pages_bp)
+    app.register_blueprint(auth_bp)
 
     return app
 
