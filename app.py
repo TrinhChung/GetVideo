@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import os
 import secrets
 from flask_wtf.csrf import CSRFProtect
+from datetime import timedelta
 
 # Import tất cả các mô hình
 from models.category_playlist import CategoryPlaylist
@@ -23,10 +24,23 @@ load_dotenv()
 
 migrate = Migrate()
 
-
 def create_app():
     app = Flask(__name__, static_url_path="/static")
-    app.config["SECRET_KEY"] = secrets.token_hex(16)
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+    # Cấu hình thời gian sống của session
+    app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
+
+    # Thiết lập cookie bảo mật
+    app.config["SESSION_COOKIE_HTTPONLY"] = (
+        True  # Chỉ có thể truy cập session từ phía server
+    )
+    app.config["SESSION_COOKIE_SECURE"] = (
+        True  # Chỉ gửi cookie qua HTTPS (nếu triển khai trên server có HTTPS)
+    )
+    app.config["SESSION_COOKIE_SAMESITE"] = (
+        "Lax"  # Xác định phạm vi của cookie, tránh chia sẻ với các trang web khác
+    )
+
     csrf = CSRFProtect(app)
     app.config["SQLALCHEMY_DATABASE_URI"] = (
         f"mysql://root:{os.getenv('PASSWORD_DB')}@localhost/video"
