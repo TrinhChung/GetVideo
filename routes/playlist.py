@@ -3,6 +3,7 @@ from util.yt_list import get_playlist_info_and_video_details
 from database_init import db
 from models.playlist import Playlist
 from util.until import extract_playlist_id
+from Form.playlist import PlaylistForm, GetVideoFromPlaylistForm, GetAllVideosForm
 
 playlist_bp = Blueprint("playlist", __name__)
 
@@ -10,8 +11,10 @@ playlist_bp = Blueprint("playlist", __name__)
 # Route để hiển thị và quản lý playlist
 @playlist_bp.route("/batch/playlist", methods=["GET", "POST"])
 def batch_youtube_playlist():
-    if request.method == "POST":
-        playlist_url = request.form["playlist_url"]
+    form = PlaylistForm()
+
+    if form.validate_on_submit():
+        playlist_url = form.playlist_url.data
         playlist_id = extract_playlist_id(playlist_url)
 
         if not playlist_id:
@@ -27,22 +30,28 @@ def batch_youtube_playlist():
         return redirect(url_for("playlist.batch_youtube_playlist"))
 
     playlists = Playlist.query.all()
-    return render_template("playlist.html", playlists=playlists)
+    return render_template("playlist.html", playlists=playlists, form=form)
 
 
 # Route để lấy video từ playlist
-@playlist_bp.route("/batch/get_video_from_playlist", methods=["POST"])
+@playlist_bp.route("/batch/get_video_from_playlist", methods=["GET", "POST"])
 def get_video_from_playlist():
-    playlist_id = request.form["playlist_id"]
+    form = GetVideoFromPlaylistForm()
 
-    try:
-        get_playlist_info_and_video_details(playlist_id)
-        flash("Video đã được thêm từ playlist", "success")
-    except Exception as e:
-        flash(f"Đã xảy ra lỗi khi lấy video từ playlist: {e}", "danger")
-        return render_template(
-            "error.html", error_message=f"Đã xảy ra lỗi khi lấy video từ playlist: {e}"
-        )
+    if form.validate_on_submit():
+        playlist_id = form.playlist_id.data
+
+        try:
+            get_playlist_info_and_video_details(playlist_id)
+            flash("Video đã được thêm từ playlist", "success")
+        except Exception as e:
+            flash(f"Đã xảy ra lỗi khi lấy video từ playlist: {e}", "danger")
+            return render_template(
+                "error.html",
+                error_message=f"Đã xảy ra lỗi khi lấy video từ playlist: {e}",
+            )
+
+        return redirect(url_for("playlist.batch_youtube_playlist"))
 
     return redirect(url_for("playlist.batch_youtube_playlist"))
 
@@ -50,17 +59,20 @@ def get_video_from_playlist():
 # Route để lấy video từ tất cả playlist
 @playlist_bp.route("/batch/get_all_videos", methods=["POST"])
 def get_all_videos():
-    playlists = Playlist.query.all()
+    form = GetAllVideosForm()
 
-    for playlist in playlists:
-        try:
-            get_playlist_info_and_video_details(playlist.id)
-            flash(f"Video đã được thêm từ playlist {playlist.title}", "success")
-        except Exception as e:
-            flash(
-                f"Đã xảy ra lỗi khi lấy video từ playlist {playlist.title}: {e}",
-                "danger",
-            )
-            print(f"Đã xảy ra lỗi khi lấy video từ playlist {playlist.title}: {e}")
+    if form.validate_on_submit():
+        playlists = Playlist.query.all()
+
+        for playlist in playlists:
+            try:
+                get_playlist_info_and_video_details(playlist.id)
+                flash(f"Video đã được thêm từ playlist {playlist.title}", "success")
+            except Exception as e:
+                flash(
+                    f"Đã xảy ra lỗi khi lấy video từ playlist {playlist.title}: {e}",
+                    "danger",
+                )
+                print(f"Đã xảy ra lỗi khi lấy video từ playlist {playlist.title}: {e}")
 
     return redirect(url_for("playlist.batch_youtube_playlist"))

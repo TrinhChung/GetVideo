@@ -16,7 +16,8 @@
 
 			<!-- Form to download from generic video URL -->
 			<div class="d-flex flex-column align-items-center">
-				<form action="/download-url" method="post" class="w-75">
+				<form action="/download-url" method="post" class="w-75 w-sm-100">
+					{{ form.csrf_token }} <!-- CSRF token -->
 					<div class="mb-3">
 						<label for="video_url" class="form-label">Video URL:</label>
 						<input type="text" name="video_url" id="video_url" class="form-control" placeholder="Enter video URL"
@@ -29,7 +30,8 @@
 			<!-- Section to download from Facebook URL -->
 			<div class="text-center mt-5">
 				<h2 class="text-primary">Download Video from Facebook</h2>
-				<form action="/download-facebook-url" method="post" class="w-75 mx-auto">
+				<form action="/download-facebook-url" method="post" class="w-75 w-sm-100 mx-auto">
+					{{ form.csrf_token }} <!-- CSRF token -->
 					<div class="mb-3">
 						<label for="facebook_video_url" class="form-label">Facebook Video URL:</label>
 						<input type="text" name="video_url" id="facebook_video_url" class="form-control"
@@ -39,5 +41,7 @@
 				</form>
 			</div>
 		</div>
+
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 	</body>
 </html>

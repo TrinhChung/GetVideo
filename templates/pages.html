@@ -56,8 +56,15 @@
 
 			.token-wrapper {
 				display: flex;
-				align-items: flex-start;
+				align-items: center;
 				gap: 8px;
+			}
+
+			/* Responsive: Đảm bảo bảng có thể cuộn ngang trên các màn hình nhỏ */
+			@media (max-width: 768px) {
+				.table-responsive {
+					overflow-x: auto;
+				}
 			}
 		</style>
 	</head>
@@ -98,16 +105,18 @@
 								{% if page.expires_at %}
 								{{ page.expires_at }}
 								{% else %}
-								Chưa rõ giá trị 
+								Chưa rõ giá trị
 								{% endif %}
 							</td>
-							<td class="col-account-id"><form action="/pages/debug-token" method="POST">
-								<input type="hidden" name="token" value="{{ page.access_token }}">
-								<input type="hidden" name="page_id" value="{{ page.page_id }}">
-								<button type="submit" class="btn btn-sm btn-outline-secondary" title="Debug token">
-									Debug Token
-								</button>
-							</form></td> <!-- Sử dụng page.facebook_account_id -->
+							<td class="col-account-id">
+								<form action="/pages/debug-token" method="POST">
+									<input type="hidden" name="token" value="{{ page.access_token }}">
+									<input type="hidden" name="page_id" value="{{ page.page_id }}">
+									<button type="submit" class="btn btn-sm btn-outline-secondary" title="Debug token">
+										Debug Token
+									</button>
+								</form>
+							</td> <!-- Sử dụng page.facebook_account_id -->
 						</tr>
 						{% endfor %}
 					</tbody>

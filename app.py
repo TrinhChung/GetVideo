@@ -1,9 +1,10 @@
-from flask import Flask
+from flask import Flask, session, redirect, url_for, flash, request
 from flask_migrate import Migrate
 from database_init import db
 from dotenv import load_dotenv
 import os
 import secrets
+from flask_wtf.csrf import CSRFProtect
 
 # Import tất cả các mô hình
 from models.category_playlist import CategoryPlaylist
@@ -26,6 +27,7 @@ migrate = Migrate()
 def create_app():
     app = Flask(__name__, static_url_path="/static")
     app.config["SECRET_KEY"] = secrets.token_hex(16)
+    csrf = CSRFProtect(app)
     app.config["SQLALCHEMY_DATABASE_URI"] = (
         f"mysql://root:{os.getenv('PASSWORD_DB')}@localhost/video"
     )
@@ -49,6 +51,13 @@ def create_app():
     app.register_blueprint(facebook_bp)
     app.register_blueprint(pages_bp)
     app.register_blueprint(auth_bp)
+
+    @app.before_request
+    def require_login():
+        allowed_routes = ["auth.login", "auth.register", "static"]
+        if "user_id" not in session and request.endpoint not in allowed_routes:
+            flash("Bạn cần đăng nhập để truy cập trang này.", "danger")
+            return redirect(url_for("auth.login"))
 
     return app
 

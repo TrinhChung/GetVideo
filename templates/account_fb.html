@@ -44,6 +44,7 @@
 		<div class="container mt-5">
 			<h1 class="text-dark mb-4">Facebook Account Manager</h1>
 			<form action="{{ url_for('facebook.add_fb_account') }}" method="POST" class="mb-4">
+				{{ form.csrf_token }} <!-- CSRF token -->
 				<div class="mb-3">
 					<label for="email" class="form-label">Email</label>
 					<input type="email" class="form-control" id="email" name="email" required>
@@ -81,6 +82,7 @@
 						</td>
 						<td>
 							<form action="{{ url_for('facebook.get_pages') }}" method="POST" style="display: inline;">
+								{{ form.csrf_token }} <!-- CSRF token -->
 								<input type="hidden" name="id" value="{{ account.id }}">
 								<input type="hidden" name="access_token" value="{{ account.access_token }}">
 								<button type="submit" class="btn btn-info btn-sm">Get Pages</button>

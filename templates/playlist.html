@@ -30,6 +30,7 @@
 				</div>
 				<div class="card-body">
 					<form method="POST" action="{{ url_for('playlist.batch_youtube_playlist') }}">
+						{{ form.csrf_token }} <!-- Token bảo mật CSRF -->
 						<div class="mb-3">
 							<label for="playlist_url" class="form-label">URL Playlist</label>
 							<input type="text" class="form-control" id="playlist_url" name="playlist_url" required>
@@ -48,7 +49,7 @@
 					<h5>Danh Sách Playlist</h5>
 				</div>
 				<div class="card-body">
-					<table class="table table-hover">
+					<table class="table table-hover table-responsive">
 						<thead class="table-dark">
 							<tr>
 								<th>ID</th>
@@ -63,6 +64,7 @@
 								<td>{{ playlist.title }}</td>
 								<td>
 									<form method="POST" action="{{ url_for('playlist.get_video_from_playlist') }}" class="d-inline">
+										{{ form.csrf_token }} <!-- CSRF token --> <!-- Token bảo mật CSRF -->
 										<input type="hidden" name="playlist_id" value="{{ playlist.id }}">
 										<button type="submit" class="btn btn-primary btn-sm">
 											<i class="fa fa-download"></i> Lấy Video
@@ -83,6 +85,7 @@
 
 			<!-- Nút lấy tất cả video -->
 			<form method="POST" action="{{ url_for('playlist.get_all_videos') }}" class="text-center mt-4">
+				{{ form.csrf_token }} <!-- Token bảo mật CSRF -->
 				<button type="submit" class="btn btn-warning">
 					<i class="fa fa-cloud-download-alt"></i> Lấy Tất Cả Video
 				</button>
