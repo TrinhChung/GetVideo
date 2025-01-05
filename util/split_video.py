@@ -3,6 +3,7 @@ import os
 import re
 from models.video_split import VideoSplit
 from database_init import db
+from models.video import Video
 
 def get_video_type(path):
     """
@@ -66,9 +67,24 @@ def split_video(
     # Xác định thời gian bắt đầu và kết thúc
     start_time = 0
     end_time = segment_duration_sec
-    i = 1
 
     video_type = get_video_type(video_path)
+
+    # Cập nhật video gốc là đã được chia nhỏ
+    video_obj = Video.query.filter_by(path=video_path).first()
+    video_id = None
+
+    if video_obj:
+        video_obj.splited = True  # Đánh dấu video là đã được chia nhỏ
+        video_id = video_obj.id
+
+    #Tính toán số lượng video đã được chia nhỏ trước đó với video_id và type_duration
+    existing_video_splits_count = VideoSplit.query.filter_by(
+        video_id=video_id, type_duration=segment_duration_sec
+    ).count()
+
+    # Khởi tạo i từ count đã tính
+    i = existing_video_splits_count + 1
 
     # Lặp qua video và cắt thành các phần nhỏ
     while end_time <= video.duration:
@@ -81,6 +97,8 @@ def split_video(
             path=output_path,
             title=f"{clean_video_title}_Phần_{i}",
             duration=segment_duration_sec,
+            type_duration=segment_duration_sec,
+            video_id=video_id,
             type=video_type,
         )
         db.session.add(video_split)
@@ -98,11 +116,13 @@ def split_video(
             path=output_path,
             title=f"{clean_video_title}_Phần_{i}",
             duration=int(video.duration - start_time),
+            type_duration=segment_duration_sec,
+            video_id=video_id,
             type=video_type,
         )
         db.session.add(video_split)
 
     # Commit tất cả các thay đổi vào database
     db.session.commit()
-    
+
     print(f"Video đã được chia thành các phần nhỏ và lưu tại {output_dir}!")

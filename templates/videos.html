@@ -3,8 +3,8 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 		<title>Danh sách Video</title>
+		<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
 		<!-- Thêm Font Awesome -->
@@ -16,11 +16,6 @@
 				white-space: normal !important;
 			}
 
-			/* Increase width of the "Tải Video" column */
-			.table td:last-child {
-				width: 150px;
-			}
-
 			.table th:nth-child(3) {
 				width: 150px;
 			}
@@ -28,11 +23,8 @@
 			/* Điều chỉnh độ rộng của cột đường dẫn */
 			.table td:nth-child(4) {
 				width: 400px;
-				/* Bạn có thể điều chỉnh giá trị này cho phù hợp */
 				word-wrap: break-word;
-				/* Đảm bảo rằng văn bản dài sẽ xuống dòng */
 				white-space: normal !important;
-				/* Cho phép xuống dòng trong cột */
 			}
 		</style>
 	</head>
@@ -50,90 +42,88 @@
 				</button>
 			</form>
 
-			<!-- Hiển thị danh sách video -->
-			<h3 class="mt-5">Danh sách Video</h3>
-			<table class="table table-bordered mt-3">
-				<thead class="table-light">
-					<tr>
-						<th>ID</th>
-						<th>Playlist ID</th>
-						<th>Thời gian</th>
-						<th>Đường dẫn</th>
-						<th>Tải Video</th>
-						<th>Split Video</th> <!-- Cột Split mới -->
-					</tr>
-				</thead>
-				<tbody>
-					{% for video in videos %}
-					<tr>
-						<td>{{ video.id }}</td>
-						<td>{{ video.playlist_id }}</td>
-						<td data-duration="{{ video.duration if video.duration else '' }}">
-							{{ video.duration if video.duration else 'Chưa có thông tin' }}
-						</td>
-						<td>{{ video.path if video.path else 'Chưa có đường dẫn' }}</td>
-						{% if not video.crawled %}
-						<td>
-							<form method="GET" action="{{ url_for('video.download_video_route', video_id=video.video_id) }}">
-								<button type="submit" class="btn btn-success">
-									<i class="fas fa-download"></i> Tải Video
-								</button>
-							</form>
-						</td>
-						{% else %}
-						<td class="text-center">
-							<span class="text-success">Đã tải xong</span>
-						</td>
-						{% endif %}
-						<!-- Nút Split video -->
-						{% if video.path %}
-						<td>
-							<form method="POST" action="{{ url_for('video.split_video_route', video_id=video.video_id) }}">
-								{{ form.csrf_token }} <!-- CSRF token -->
-								<button type="submit" class="btn btn-warning">Split Video</button>
-							</form>
-						</td>
-						{% else %}
-						<td class="text-center">
-							<span class="text-muted">--</span>
-						</td>
-						{% endif %}
-					</tr>
-					{% else %}
-					<tr>
-						<td colspan="6" class="text-center">Không có video nào để hiển thị.</td>
-					</tr>
-					{% endfor %}
-				</tbody>
-			</table>
+			<form method="POST" action="{{ url_for('video.split_selected_videos') }}" class="mt-4">
+				{{ form.csrf_token }} <!-- CSRF token -->
+				<select name="split_duration" class="form-select">
+					<option value="60" {% if selected_duration == 60 %}selected{% endif %}>1 phút</option>
+					<option value="180" {% if selected_duration == 180 %}selected{% endif %}>3 phút</option>
+					<option value="300" {% if selected_duration == 300 %}selected{% endif %}>5 phút</option>
+					<option value="600" {% if selected_duration == 600 %}selected{% endif %}>10 phút</option>
+				</select>
+				<button type="submit" class="btn btn-warning mt-2">Tách video đã chọn</button>
+				<!-- Danh sách các video cần tách sẽ được gửi ở đây -->
+				<div class="mt-2">
+					<h3 class="mt-5">Danh sách Video</h3>
+					<table class="table table-bordered mt-3">
+						<thead class="table-light">
+							<tr>
+								<th>ID</th>
+								<th>Playlist ID</th>
+								<th>Thời gian</th>
+								<th>Đường dẫn</th>
+								<th>Tải Video</th>
+								<th>Split TikTok</th> <!-- Cột Split mới -->
+								<th>Chọn</th> <!-- Cột chọn video -->
+							</tr>
+						</thead>
+						<tbody>
+							{% for video in videos %}
+							<tr>
+								<td>{{ video.id }}</td>
+								<td>{{ video.playlist_id }}</td>
+								<td data-duration="{{ video.duration if video.duration else '' }}">
+									{{ video.duration if video.duration else 'Chưa có thông tin' }}
+								</td>
+								<td>{{ video.path if video.path else 'Chưa có đường dẫn' }}</td>
+								{% if not video.crawled %}
+								<td>
+									<form method="GET" action="{{ url_for('video.download_video_route', video_id=video.video_id) }}">
+										<button type="submit" class="btn btn-success">
+											<i class="fas fa-download"></i> Tải Video
+										</button>
+									</form>
+								</td>
+								{% else %}
+								<td class="text-center">
+									<span class="text-success">Đã tải xong</span>
+								</td>
+								{% endif %}
+								<!-- Nút Split video -->
+								{% if video.path and not video.splited %}
+								<td>
+									<form method="POST" action="{{ url_for('video.split_video_route', video_id=video.video_id) }}">
+										{{ form.csrf_token }} <!-- CSRF token -->
+										<button type="submit" class="btn btn-warning">Split Video</button>
+									</form>
+								</td>
+								{% else %}
+								<td class="text-center">
+									<span class="text-muted">--</span>
+								</td>
+								{% endif %}
+								<!-- Checkbox chọn video -->
+								<td>
+									{% if not video.splited %}
+									<input type="checkbox" name="selected_videos" value="{{ video.id }}">
+									{% else %}
+									<span class="text-muted">--</span>
+									{% endif %}
+								</td>
+							</tr>
+							{% else %}
+							<tr>
+								<td colspan="7" class="text-center">Không có video nào để hiển thị.</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</form>
 		</div>
 
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
 			integrity="sha384-OgVRvuATP1z7JjHLkuOU63t63E9UK9R1DlmAy1UoZlZpkjr/ZpZqgs3bzAv29ZjX"
 			crossorigin="anonymous"></script>
-		<script>
-			document.addEventListener("DOMContentLoaded", () => {
-				// Hàm chuyển đổi giây thành phút và giây
-				function convertDurationToMinutes(duration) {
-					const totalSeconds = parseInt(duration, 10);
-					if (isNaN(totalSeconds)) return "Chưa có thông tin";
-
-					const minutes = Math.floor(totalSeconds / 60);
-					const seconds = totalSeconds % 60;
-
-					return seconds > 0 ? `${minutes} phút ${seconds} giây` : `${minutes} phút`;
-				}
-
-				// Lấy tất cả các ô chứa thời gian
-				const durationCells = document.querySelectorAll("td[data-duration]");
-
-				// Lặp qua và cập nhật nội dung
-				durationCells.forEach((cell) => {
-					const duration = cell.getAttribute("data-duration");
-					cell.textContent = convertDurationToMinutes(duration);
-				});
-			});
-		</script>
 
 	</body>
 </html>

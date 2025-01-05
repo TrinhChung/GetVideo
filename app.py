@@ -57,14 +57,18 @@ def create_app():
     from routes.facebook import facebook_bp
     from routes.pages import pages_bp
     from routes.auth import auth_bp
+    from routes.video_split import video_split_bp
+    from routes.stack_post import stack_post_bp
 
     app.register_blueprint(home_bp)
     app.register_blueprint(playlist_bp)
     app.register_blueprint(video_bp)
+    app.register_blueprint(video_split_bp)
     app.register_blueprint(download_bp)
     app.register_blueprint(facebook_bp)
     app.register_blueprint(pages_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(stack_post_bp)
 
     @app.before_request
     def require_login():

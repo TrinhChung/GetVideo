@@ -21,7 +21,7 @@ user_data = {}
 
 # Hàm xử lý khi nhận lệnh /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    keyboard = [["YouTube Link", "Facebook Link"]]
+    keyboard = [["YouTube Link", "Facebook Link", "Tiktok Link"]]
     reply_markup = ReplyKeyboardMarkup(
         keyboard, resize_keyboard=True, one_time_keyboard=False
     )
@@ -43,6 +43,9 @@ async def select_link_type(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     elif text == "Facebook Link":
         user_data[user_id] = "facebooklink"
         await update.message.reply_text("Bạn đã chọn đính kèm link Facebook.")
+    elif text == "Tiktok Link":
+        user_data[user_id] = "tiktoklink"
+        await update.message.reply_text("Bạn đã chọn đính kèm link Tiktok.")
     else:
         await update.message.reply_text(
             "Lựa chọn không hợp lệ. Vui lòng chọn loại link từ menu."
@@ -65,6 +68,8 @@ async def handle_links(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         await update.message.reply_text(f"Đã nhận YouTube Link: {link}")
     elif link_type == "facebooklink" and "facebook.com" in link:
         await update.message.reply_text(f"Đã nhận Facebook Link: {link}")
+    elif link_type == "tiktoklink" and "tiktok.com" in link:
+        await update.message.reply_text(f"Đã nhận Tiktok Link: {link}")
     else:
         await update.message.reply_text("Link không đúng định dạng, vui lòng thử lại.")
 
@@ -83,7 +88,7 @@ def initial_bot_telegram():
     # Đăng ký handler để xử lý lựa chọn loại link
     application.add_handler(
         MessageHandler(
-            filters.TEXT & filters.Regex("^(YouTube Link|Facebook Link)$"),
+            filters.TEXT & filters.Regex("^(YouTube Link|Facebook Link|Tiktok Link)$"),
             select_link_type,
         )
     )

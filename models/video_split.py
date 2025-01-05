@@ -1,6 +1,5 @@
 from database_init import db
 
-
 class VideoSplit(db.Model):
     __tablename__ = "video_split"
 
@@ -11,6 +10,13 @@ class VideoSplit(db.Model):
     type = db.Column(
         db.String(50), nullable=False
     )  # type = 'facebook', 'youtube', or 'tiktok'
+
+    # Cột type_duration với kiểu dữ liệu Integer
+    type_duration = db.Column(db.Integer)  # Cột type_duration kiểu int
+
+    # Khóa ngoại video_id tham chiếu tới bảng Video
+    video_id = db.Column(db.Integer, db.ForeignKey("video.id"), nullable=True)
+    video = db.relationship("Video", backref=db.backref("splits", lazy=True))
 
     # Mối quan hệ với Category thông qua bảng phụ 'video_split_category'
     categories = db.relationship(

@@ -78,3 +78,27 @@ def split_video_route(video_id):
         flash("Video không hợp lệ hoặc chưa có đường dẫn", "info")
 
     return redirect(url_for("video.index"))
+
+# Route để chia các video đã chọn
+@video_bp.route("/split_selected_videos", methods=["POST"])
+def split_selected_videos():
+    ids = request.form.getlist(
+        "selected_videos"
+    )  # Lấy danh sách video_id đã chọn
+    split_duration = request.form.get("split_duration", type=int)
+
+    # Lặp qua từng video đã chọn và chia video
+    for id in ids:
+        video = Video.query.filter_by(id=id).first()
+        print(video.path)
+
+        if video and video.path:
+            try:
+                split_video(video.path, split_duration)
+                flash(f"Video {video.title} đã được chia thành các phần", "success")
+            except Exception as e:
+                flash(f"Đã xảy ra lỗi khi chia video {video.title}: {e}", "danger")
+        else:
+            flash(f"Video {id} không hợp lệ hoặc chưa có đường dẫn", "info")
+
+    return redirect(url_for("video.index"))
