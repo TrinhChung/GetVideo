@@ -65,15 +65,15 @@ def create_video_post(page_id, access_token, video_path, message=""):
                 'access_token': access_token,
                 'description': message,
             }
-        response = requests.post(UPLOAD_URL, data=payload, files=files)
+        response = requests.post(upload_url, data=payload, files=files)
 
         # Lấy ID của phiên tải lên
-        upload_session_id = response.json().get("id")
+        video_id = response.json().get("id")
 
         if not upload_session_id:
             raise Exception("Không nhận được session ID cho phiên tải lên video.")
 
-        print(f"Phiên tải lên video đã được tạo thành công: {upload_session_id}")
+        plash(f"Tải lên video đã được tạo thành công: {video_id}")
 
     except RequestException as e:
         raise Exception(f"Lỗi khi tải video lên: {e}")
