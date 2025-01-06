@@ -53,86 +53,30 @@ def create_video_post(page_id, access_token, video_path, message=""):
     file_size = os.path.getsize(video_path)
 
     # URL cho việc tạo phiên tải lên
-    upload_url = f"https://graph.facebook.com/v21.0/{APP_ID}/uploads?access_token={access_token}&file_name={file_name}&file_type=video/mp4&file_length={file_size}"
+    upload_url = f"https://graph-video.facebook.com/v21.0/{page_id}/videos"
 
     upload_session_id= None
 
     try:
         # Gửi yêu cầu POST để tạo phiên tải lên
-        response = requests.post(upload_url)
+        with open(video_path, 'rb') as video_file:
+        files = {'file': video_file}
+        payload = {
+            'access_token': access_token,
+            'description': message,
+        }
+        response = requests.post(UPLOAD_URL, data=payload, files=files)
 
         # Lấy ID của phiên tải lên
         upload_session_id = response.json().get("id")
+
         if not upload_session_id:
             raise Exception("Không nhận được session ID cho phiên tải lên video.")
 
         print(f"Phiên tải lên video đã được tạo thành công: {upload_session_id}")
 
     except RequestException as e:
-        print(f"Lỗi khi tạo phiên tải lên: {e}")
-        raise Exception(f"Lỗi khi tạo phiên tải lên: {e}")
-
-    # Bước 2: Bắt đầu tải lên video
-    with open(video_path, "rb") as video_file:
-        try:
-            # URL để tải lên video
-            upload_url = f"https://graph.facebook.com/v21.0/{upload_session_id}"
-
-            # Thiết lập header và các tham số
-            headers = {
-                "Authorization": f"OAuth {access_token}",
-                "file_offset": "0",  # Bắt đầu từ offset 0
-            }
-
-            # Gửi yêu cầu POST để bắt đầu tải video lên
-            video_data = video_file.read()
-            response = requests.post(upload_url, headers=headers, data=video_data)
-
-            # Kiểm tra nếu thành công
-            response.raise_for_status()
-
-            # Nhận file handle từ Facebook
-            uploaded_file_handle = response.json().get("h")
-            if not uploaded_file_handle:
-                raise Exception("Không nhận được file handle khi tải lên video.")
-
-            print("------------------------")
-            print(response.json())
-            print("------------------------")
-            print(
-                f"{uploaded_file_handle}"
-            )
-            print("------------------------")
-
-        except RequestException as e:
-            print(f"Lỗi khi tải video lên: {e}")
-            raise
-
-    # Bước 3: Đăng video lên Facebook
-    try:
-        # Tạo URL đăng video
-        post_url = f"https://graph-video.facebook.com/v21.0/{page_id}/videos"
-        form_data = {
-            "access_token": access_token,
-            "title": file_name,
-            "description": file_name,
-            "fbuploader_video_file_chunk": uploaded_file_handle,
-        }
-
-        # Gửi yêu cầu POST để đăng video
-        response = requests.post(post_url, data=form_data)
-        response.raise_for_status()  # Kiểm tra nếu có lỗi HTTP
-
-        # Nhận ID bài đăng của video
-        post_id = response.json().get("id")
-        if not post_id:
-            raise Exception("Không thể đăng video lên trang.")
-
-        print(f"Video đã được đăng thành công. ID bài viết: {post_id}")
-
-    except RequestException as e:
-        print(f"Lỗi khi đăng video: {e}")
-        raise
+        raise Exception(f"Lỗi khi tải video lên: {e}")
 
 
 def create_post_by_request(access_token):
