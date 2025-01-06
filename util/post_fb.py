@@ -60,11 +60,11 @@ def create_video_post(page_id, access_token, video_path, message=""):
     try:
         # Gửi yêu cầu POST để tạo phiên tải lên
         with open(video_path, 'rb') as video_file:
-        files = {'file': video_file}
-        payload = {
-            'access_token': access_token,
-            'description': message,
-        }
+            files = {'file': video_file}
+            payload = {
+                'access_token': access_token,
+                'description': message,
+            }
         response = requests.post(UPLOAD_URL, data=payload, files=files)
 
         # Lấy ID của phiên tải lên
