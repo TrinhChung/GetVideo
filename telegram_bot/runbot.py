@@ -1,5 +1,6 @@
 import asyncio
-from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
+import os
+from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -7,8 +8,8 @@ from telegram.ext import (
     ContextTypes,
     filters,
 )
-import os
 from dotenv import load_dotenv
+from dump import get_pages  # Đảm bảo hàm get_pages được định nghĩa để lấy danh sách page
 
 # Load các biến môi trường từ file .env
 load_dotenv()
@@ -21,35 +22,43 @@ user_data = {}
 
 # Hàm xử lý khi nhận lệnh /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    keyboard = [["YouTube Link", "Facebook Link", "Tiktok Link"]]
+    # Lấy danh sách page từ cơ sở dữ liệu hoặc file
+    pages = get_pages()  # Hàm get_pages trả về danh sách tuple (page_id, page_name, ...)
+    if not pages:
+        await update.message.reply_text("Không có page nào để chọn.")
+        return
+
+    # Tạo từ điển ánh xạ tên page -> page_id
+    context.user_data["page_mapping"] = {page[1]: page[0] for page in pages}
+
+    # Tạo bàn phím với danh sách các tên page
+    keyboard = [[page[1]] for page in pages]
     reply_markup = ReplyKeyboardMarkup(
         keyboard, resize_keyboard=True, one_time_keyboard=False
     )
 
     await update.message.reply_text(
-        "Chọn loại link bạn muốn đính kèm:",
+        "Chọn page bạn muốn đính kèm:",
         reply_markup=reply_markup,
     )
 
 
-# Hàm xử lý lựa chọn loại link
+# Hàm xử lý lựa chọn loại page
 async def select_link_type(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id = update.message.from_user.id
-    text = update.message.text
+    selected_page_name = update.message.text
 
-    if text == "YouTube Link":
-        user_data[user_id] = "youtubelink"
-        await update.message.reply_text("Bạn đã chọn đính kèm link YouTube.")
-    elif text == "Facebook Link":
-        user_data[user_id] = "facebooklink"
-        await update.message.reply_text("Bạn đã chọn đính kèm link Facebook.")
-    elif text == "Tiktok Link":
-        user_data[user_id] = "tiktoklink"
-        await update.message.reply_text("Bạn đã chọn đính kèm link Tiktok.")
-    else:
-        await update.message.reply_text(
-            "Lựa chọn không hợp lệ. Vui lòng chọn loại link từ menu."
-        )
+    # Lấy page_id từ page_mapping
+    page_mapping = context.user_data.get("page_mapping", {})
+    selected_page_id = page_mapping.get(selected_page_name)
+
+    if not selected_page_id:
+        await update.message.reply_text("Page không hợp lệ, vui lòng chọn lại.")
+        return
+
+    # Lưu trạng thái lựa chọn page (sử dụng page_id)
+    user_data[user_id] = selected_page_id
+    await update.message.reply_text(f"Bạn đã chọn page: {selected_page_name}")
 
 
 # Hàm xử lý link gửi đến
@@ -57,19 +66,17 @@ async def handle_links(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     user_id = update.message.from_user.id
     link = update.message.text
 
-    # Kiểm tra loại link đã chọn
-    link_type = user_data.get(user_id, None)
-    if not link_type:
-        await update.message.reply_text("Hãy chọn loại link trước khi gửi.")
+    # Kiểm tra loại page đã chọn
+    selected_page_id = user_data.get(user_id, None)
+    if not selected_page_id:
+        await update.message.reply_text("Hãy chọn page trước khi gửi link.")
         return
 
     # Xác minh định dạng link
-    if link_type == "youtubelink" and ("youtube.com" in link or "youtu.be" in link):
-        await update.message.reply_text(f"Đã nhận YouTube Link: {link}")
-    elif link_type == "facebooklink" and "facebook.com" in link:
-        await update.message.reply_text(f"Đã nhận Facebook Link: {link}")
-    elif link_type == "tiktoklink" and "tiktok.com" in link:
-        await update.message.reply_text(f"Đã nhận Tiktok Link: {link}")
+    if "http" in link or "www" in link:
+        await update.message.reply_text(
+            f"Đã nhận link cho page ID {selected_page_id}: {link}"
+        )
     else:
         await update.message.reply_text("Link không đúng định dạng, vui lòng thử lại.")
 
@@ -85,12 +92,9 @@ def initial_bot_telegram():
     # Đăng ký handler cho lệnh /start
     application.add_handler(CommandHandler("start", start))
 
-    # Đăng ký handler để xử lý lựa chọn loại link
+    # Đăng ký handler để xử lý lựa chọn loại page
     application.add_handler(
-        MessageHandler(
-            filters.TEXT & filters.Regex("^(YouTube Link|Facebook Link|Tiktok Link)$"),
-            select_link_type,
-        )
+        MessageHandler(filters.TEXT & ~filters.COMMAND, select_link_type)
     )
 
     # Đăng ký handler để xử lý link

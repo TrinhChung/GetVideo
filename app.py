@@ -6,6 +6,8 @@ import os
 import secrets
 from flask_wtf.csrf import CSRFProtect
 from datetime import timedelta
+from cronjob.init_schedule import scheduler
+from log import setup_logging
 
 # Import tất cả các mô hình
 from models.category_playlist import CategoryPlaylist
@@ -26,6 +28,10 @@ migrate = Migrate()
 
 def create_app():
     app = Flask(__name__, static_url_path="/static")
+
+    # Cấu hình logging
+    setup_logging()
+
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
     # Cấu hình thời gian sống của session
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
@@ -76,6 +82,12 @@ def create_app():
         if "user_id" not in session and request.endpoint not in allowed_routes:
             flash("Bạn cần đăng nhập để truy cập trang này.", "danger")
             return redirect(url_for("auth.login"))
+    
+    # Bắt đầu scheduler
+    if not scheduler.running:
+        scheduler.start()
+
+
 
     return app
 
@@ -86,4 +98,5 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
     
+
     app.run(debug=True)
