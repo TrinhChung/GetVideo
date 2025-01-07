@@ -67,6 +67,46 @@ def start_video_upload_for_reels(page_id, access_token):
         print(f"Đã xảy ra lỗi khi gửi yêu cầu: {e}")
         return None
 
+def publish_video_reel(page_id: str, access_token: str, video_id: str, description: str) -> dict:
+    """
+    Publish a video reel on Facebook after uploading
+    
+    Args:
+        page_id (str): Facebook page ID
+        access_token (str): Facebook page access token  
+        video_id (str): ID of the uploaded video
+        description (str): Description/caption for the reel
+        
+    Returns:
+        dict: Response from the Facebook API
+        
+    Raises:
+        Exception: If publishing fails
+    """
+    try:
+        # API endpoint
+        publish_url = f"https://graph.facebook.com/v21.0/{page_id}/video_reels"
+        
+        # Request parameters
+        params = {
+            'access_token': access_token,
+            'video_id': video_id,
+            'upload_phase': 'finish',
+            'video_state': 'PUBLISHED',
+            'description': description
+        }
+        
+        # Send POST request to publish the video
+        response = requests.post(publish_url, params=params)
+        
+        # Check if request was successful
+        if response.status_code == 200:
+            print("Step publish finish success")
+        else:
+            raise Exception(f"Publishing failed with status code {response.status_code}: {response.text}")
+            
+    except Exception as e:
+        raise Exception(f"Error publishing video reel: {str(e)}")
 
 def upload_video_to_reel(video_path, access_token, page_id, message):
     """
@@ -99,21 +139,16 @@ def upload_video_to_reel(video_path, access_token, page_id, message):
     try:
         # Gửi yêu cầu POST với dữ liệu video
         with open(video_path, "rb") as video_file:
-            files = {"file": video_file}
-            payload = {
-                "access_token": access_token,
-                "description": message,
-                "title": message,
-            }
             response = requests.post(
-                upload_url, headers=headers, data=payload, files=files
+                upload_url,
+                headers=headers,
+                data=video_file,
             )
 
         # Kiểm tra phản hồi từ Facebook
         if response.status_code == 200:
-            print("Video tải lên thành công!")
-            print(response.json())
-            return response.json()  # Trả về dữ liệu JSON nếu cần
+            print("Video tải lên reel thành công!")
+            publish_video_reel(page_id, access_token, video_id, message)
         else:
             print(f"Lỗi khi tải video lên: {response.status_code}")
             print(response.text)

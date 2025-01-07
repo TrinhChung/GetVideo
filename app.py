@@ -72,7 +72,7 @@ def create_app():
 
     @app.before_request
     def require_login():
-        allowed_routes = ["auth.login", "auth.register", "static"]
+        allowed_routes = ["auth.login", "auth.register","video.serve_video", "static"]
         if "user_id" not in session and request.endpoint not in allowed_routes:
             flash("Bạn cần đăng nhập để truy cập trang này.", "danger")
             return redirect(url_for("auth.login"))

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, send_from_directory
 from database_init import db
 from models.video import Video
 from util.youtube import download_video
@@ -7,6 +7,7 @@ from Form.video import VideoDownloadForm, VideoSplitForm
 
 video_bp = Blueprint("video", __name__)
 
+VIDEO_FOLDER = './'
 
 # Route để hiển thị và quản lý video
 @video_bp.route("/videos", methods=["GET"])
@@ -102,3 +103,13 @@ def split_selected_videos():
             flash(f"Video {id} không hợp lệ hoặc chưa có đường dẫn", "info")
 
     return redirect(url_for("video.index"))
+
+@video_bp.route('/videos/<path:filename>')
+def serve_video(filename):
+    try:
+        # Serve the file with correct Content-Type
+        response = send_from_directory(VIDEO_FOLDER, filename)
+        response.headers["Content-Type"] = "video/mp4"
+        return response
+    except FileNotFoundError:
+        return Response("File not found", status=404)
