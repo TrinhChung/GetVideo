@@ -32,6 +32,10 @@ def index():
     # Lấy danh sách bài đăng
     stack_posts = query.all()
 
+    if stack_posts:
+        print("First post ID:", stack_posts[0].id)
+        print("First post status:", stack_posts[0].status)
+
     # Lấy danh sách các trang để hiển thị trong form lọc
     pages = Page.query.all()
 
@@ -54,7 +58,7 @@ def post_video(post_id):
             # Lấy thông tin stack post
             post = StackPost.query.get_or_404(post_id)
             
-            print(post)
+            print(post.id)
 
             # Lấy thông tin page
             page = Page.query.get(post.page_id)

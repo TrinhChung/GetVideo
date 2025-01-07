@@ -67,6 +67,7 @@
 							</tr>
 						</thead>
 						<tbody>
+							<form></form>
 							{% for video in videos %}
 							<tr>
 								<td>{{ video.id }}</td>
@@ -77,8 +78,8 @@
 								<td>{{ video.path if video.path else 'Chưa có đường dẫn' }}</td>
 								{% if not video.crawled %}
 								<td>
-									<form method="GET" action="{{ url_for('video.download_video_route', video_id=video.video_id) }}">
-										<button type="submit" class="btn btn-success">
+									<form method="GET" id="download_form_request_{{ video.video_id }}"  action="{{ url_for('video.download_video_route', video_id=video.video_id) }}">
+										<button type="submit" form="download_form_request_{{ video.video_id }}" class="btn btn-success">
 											<i class="fas fa-download"></i> Tải Video
 										</button>
 									</form>
@@ -91,9 +92,9 @@
 								<!-- Nút Split video -->
 								{% if video.path %}
 								<td>
-									<form method="POST" action="{{ url_for('video.split_video_route', video_id=video.video_id) }}">
+									<form method="POST" id="split_form_request_{{ video.video_id }}" action="{{ url_for('video.split_video_route', video_id=video.video_id) }}">
 										{{ form.csrf_token }} <!-- CSRF token -->
-										<button type="submit" class="btn btn-warning">Split Video</button>
+										<button type="submit" form="split_form_request_{{ video.video_id }}" class="btn btn-warning">Split Video</button>
 									</form>
 								</td>
 								{% else %}
