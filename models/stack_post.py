@@ -13,6 +13,7 @@ class StackPost(db.Model):
     video_split_id = db.Column(
         db.Integer, db.ForeignKey("video_split.id"), nullable=False
     )  # Liên kết với video_splits
+    posted_video_id = db.Column(db.String(64), nullable=True)
     title = db.Column(db.String(255), nullable=False)  # Tiêu đề bài đăng
     status = db.Column(
         db.String(50), nullable=False

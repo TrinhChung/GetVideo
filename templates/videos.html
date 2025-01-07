@@ -89,7 +89,7 @@
 								</td>
 								{% endif %}
 								<!-- Nút Split video -->
-								{% if video.path and not video.splited %}
+								{% if video.path %}
 								<td>
 									<form method="POST" action="{{ url_for('video.split_video_route', video_id=video.video_id) }}">
 										{{ form.csrf_token }} <!-- CSRF token -->
@@ -103,11 +103,7 @@
 								{% endif %}
 								<!-- Checkbox chọn video -->
 								<td>
-									{% if not video.splited %}
 									<input type="checkbox" name="selected_videos" value="{{ video.id }}">
-									{% else %}
-									<span class="text-muted">--</span>
-									{% endif %}
 								</td>
 							</tr>
 							{% else %}

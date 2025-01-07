@@ -14,7 +14,7 @@ def index():
     form = StackPostForm()
 
     # Lấy tham số từ query string
-    page_id = request.args.get("page_id", type=int)
+    page_id = request.args.get("page_id")
     status = request.args.get("status")
 
     # Query cơ bản
@@ -32,10 +32,16 @@ def index():
     # Lấy danh sách bài đăng
     stack_posts = query.all()
 
+    # Lấy danh sách các trang để hiển thị trong form lọc
+    pages = Page.query.all()
+
     return render_template(
         "stack_posts.html",
         stack_posts=stack_posts,
+        pages=pages,  # Truyền danh sách các trang
         form=form,  # Truyền form vào template
+        page_id=page_id,  # Truyền page_id để giữ lại giá trị trong form
+        status=status,
     )
 
 
@@ -47,6 +53,8 @@ def post_video(post_id):
         try:
             # Lấy thông tin stack post
             post = StackPost.query.get_or_404(post_id)
+            
+            print(post)
 
             # Lấy thông tin page
             page = Page.query.get(post.page_id)
@@ -65,7 +73,7 @@ def post_video(post_id):
 
             # Thực hiện đăng video
             try:
-                create_video_post(
+                posted_video_id = create_video_post(
                     page_id=page.page_id,
                     access_token=page.access_token,
                     video_path=post.video_split.path,
@@ -74,6 +82,7 @@ def post_video(post_id):
 
                 # Cập nhật trạng thái thành công
                 post.status = "posted"
+                post.video_id = posted_video_id  # Cập nhật ID video
                 db.session.commit()
                 flash("Đăng video thành công", "success")
 
@@ -90,4 +99,28 @@ def post_video(post_id):
 
     # Nếu form chưa được submit hoặc không hợp lệ, chỉ render lại trang danh sách bài viết
     flash("Dữ liệu không hợp lệ hoặc yêu cầu không được gửi đúng cách", "danger")
+    return redirect(url_for("stack_post.index"))
+
+
+@stack_post_bp.route("/stack_posts/delete_selected", methods=["POST"])
+def delete_selected():
+    selected_posts = request.form.getlist(
+        "selected_posts[]"
+    )  # Lấy danh sách ID từ request
+    print(selected_posts)  # Kiểm tra danh sách ID
+    if not selected_posts:
+        flash("Không có bài viết nào được chọn để xóa.", "warning")
+        return redirect(url_for("stack_post.index"))
+
+    try:
+        # Xóa các bài viết được chọn
+        StackPost.query.filter(StackPost.id.in_(selected_posts)).delete(
+            synchronize_session=False
+        )
+        db.session.commit()
+        flash(f"Đã xóa {len(selected_posts)} bài viết.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Lỗi khi xóa bài viết: {str(e)}", "danger")
+
     return redirect(url_for("stack_post.index"))

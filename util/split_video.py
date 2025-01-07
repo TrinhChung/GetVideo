@@ -25,13 +25,12 @@ def clean_title(title):
     """
     # Loại bỏ định dạng video ở cuối (vd: .mp4, .avi, .mkv, ...), case-insensitive
     title = re.sub(r"\.(mp4|avi|mkv|mov|flv|wmv|webm)$", "", title, flags=re.IGNORECASE)
-    
+
     # Loại bỏ các đoạn chứa '[Review Phim]' hoặc những gì nằm sau dấu '|'
     title = re.sub(r"\[.*?\]", "", title)  # Xóa phần trong dấu []
     title = re.sub(r"\|.*", "", title)  # Xóa phần sau dấu '|'
 
     # Loại bỏ các ký tự đặc biệt không cần thiết (ngoại trừ dấu cách và chữ cái, số)
-    title = re.sub(r"[^\w\s]", "", title)  # Xóa ký tự đặc biệt
     title = title.strip()  # Loại bỏ khoảng trắng thừa ở đầu và cuối
 
     return title
@@ -78,7 +77,7 @@ def split_video(
         video_obj.splited = True  # Đánh dấu video là đã được chia nhỏ
         video_id = video_obj.id
 
-    #Tính toán số lượng video đã được chia nhỏ trước đó với video_id và type_duration
+    # Tính toán số lượng video đã được chia nhỏ trước đó với video_id và type_duration
     existing_video_splits_count = VideoSplit.query.filter_by(
         video_id=video_id, type_duration=segment_duration_sec
     ).count()
@@ -107,15 +106,18 @@ def split_video(
         start_time = end_time
         end_time += segment_duration_sec
 
-    # Nếu video còn lại một đoạn nhỏ cuối cùng
-    if start_time < video.duration:
-        subclip = video.subclip(start_time, video.duration)
+    # Nếu video còn lại một đoạn lớn hơn 30 giây
+    remaining_duration = video.duration - start_time
+    if remaining_duration > 30:
+        end_time = video.duration - 30  # Lấy đoạn cuối không chứa 30 giây cuối
+        subclip = video.subclip(start_time, end_time)
+        output_path = os.path.join(output_dir, f"{clean_video_title}_Phần_{i}.mp4")
         subclip.write_videofile(output_path, codec=codec)
 
         video_split = VideoSplit(
             path=output_path,
             title=f"{clean_video_title}_Phần_{i}",
-            duration=int(video.duration - start_time),
+            duration=int(end_time - start_time),
             type_duration=segment_duration_sec,
             video_id=video_id,
             type=video_type,
