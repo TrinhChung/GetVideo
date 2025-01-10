@@ -56,3 +56,17 @@ flask db migrate -m "Add splited field to Video model"
 ```bash
 flask db upgrade
 ```
+
+
+# Run APP WITH DOCKER
+```bash
+docker build -t flask-app .
+
+docker compose up
+```
+
+
+# Run DOWN DOCKER
+```bash
+docker compose down -v
+```

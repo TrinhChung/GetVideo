@@ -8,6 +8,8 @@ from flask_wtf.csrf import CSRFProtect
 from datetime import timedelta
 from cronjob.init_schedule import scheduler
 from log import setup_logging
+from flask_seeder import FlaskSeeder
+from seeds.user_seeder import UserSeeder
 
 # Import tất cả các mô hình
 from models.category_playlist import CategoryPlaylist
@@ -49,12 +51,16 @@ def create_app():
 
     csrf = CSRFProtect(app)
     app.config["SQLALCHEMY_DATABASE_URI"] = (
-        f"mysql://root:{os.getenv('PASSWORD_DB')}@localhost/video"
+        f"mysql://{os.getenv('USER_DB')}:{os.getenv('PASSWORD_DB')}@{os.getenv('ADDRESS_DB')}/{os.getenv('NAME_DB')}"
     )
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     db.init_app(app)
     migrate.init_app(app, db)
+
+    # Cấu hình Flask-Seeder
+    seeder = FlaskSeeder()
+    seeder.init_app(app, db)
 
     from routes.home import home_bp
     from routes.playlist import playlist_bp
