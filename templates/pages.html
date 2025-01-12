@@ -87,16 +87,21 @@
 						</tr>
 					</thead>
 					<tbody>
+						{% if pages|length == 0 %}
+						<tr>
+							<td colspan="6" class="text-center">Chưa có page được thêm vào</td>
+						</tr>
+						{% else %}
 						{% for page in pages %}
 						<tr>
-							<td class="col-page-id">{{ page.page_id }}</td> <!-- Sử dụng page.page_id -->
-							<td class="col-name">{{ page.name }}</td> <!-- Sử dụng page.name -->
-							<td class="col-category">{{ page.category }}</td> <!-- Sử dụng page.category -->
+							<td class="col-page-id">{{ page.page_id }}</td>
+							<td class="col-name">{{ page.name }}</td>
+							<td class="col-category">{{ page.category }}</td>
 							<td class="col-token">
 								<div class="token-wrapper">
-									<div class="token-content">{{ page.access_token }}</div> <!-- Sử dụng page.access_token -->
-									<button class="btn btn-sm btn-outline-primary copy-btn"
-										onclick="copyToken(this, '{{ page.access_token }}')" title="Copy token">
+									<div class="token-content">{{ page.access_token }}</div>
+									<button class="btn btn-sm btn-outline-primary copy-btn" onclick="copyToken(this, '{{ page.access_token }}')"
+										title="Copy token">
 										Copy
 									</button>
 								</div>
@@ -116,9 +121,10 @@
 										Debug Token
 									</button>
 								</form>
-							</td> <!-- Sử dụng page.facebook_account_id -->
+							</td>
 						</tr>
 						{% endfor %}
+						{% endif %}
 					</tbody>
 				</table>
 			</div>
