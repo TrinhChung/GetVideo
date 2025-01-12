@@ -72,6 +72,7 @@ def create_app():
     from routes.auth import auth_bp
     from routes.video_split import video_split_bp
     from routes.stack_post import stack_post_bp
+    from routes.ads_manager import ads_manager_bp
 
     app.register_blueprint(home_bp)
     app.register_blueprint(playlist_bp)
@@ -82,6 +83,7 @@ def create_app():
     app.register_blueprint(pages_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(stack_post_bp)
+    app.register_blueprint(ads_manager_bp)
 
     @app.before_request
     def require_login():

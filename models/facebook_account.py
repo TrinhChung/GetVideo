@@ -25,5 +25,10 @@ class FacebookAccount(db.Model):
         "FacebookAdAccount", back_populates="facebook_account", lazy=True
     )
 
+    # Quan hệ với FacebookCampaign
+    facebook_campaigns = db.relationship(
+        "FacebookCampaign", back_populates="facebook_account", lazy=True
+    )
+
     def __repr__(self):
         return f"<FacebookAccount {self.facebook_user_id}>"

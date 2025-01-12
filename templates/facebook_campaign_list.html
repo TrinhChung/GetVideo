@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Facebook Campaigns{% endblock %}
+{% block content %}
+<div class="container">
+	<h2 class="my-4">Facebook Campaigns</h2>
+
+	{% if campaigns %}
+	<table class="table">
+		<thead>
+			<tr>
+				<th scope="col">Campaign ID</th>
+				<th scope="col">Name</th>
+				<th scope="col">Objective</th>
+				<th scope="col">Status</th>
+				<th scope="col">Created Time</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for campaign in campaigns %}
+			<tr>
+				<td>{{ campaign.facebook_campaign_id }}</td>
+				<td>{{ campaign.name }}</td>
+				<td>{{ campaign.objective }}</td>
+				<td>{{ campaign.status }}</td>
+				<td>{{ campaign.created_time }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+	{% else %}
+	<p>No campaigns found.</p>
+	{% endif %}
+</div>
+{% endblock %}
