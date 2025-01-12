@@ -18,7 +18,7 @@ def video_splits():
 
     user_id = session.get("user_id")  # Lấy user_id từ session
     if not user_id:
-        flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
+        flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
     # Lấy tất cả video splits từ cơ sở dữ liệu
@@ -44,7 +44,7 @@ def add_to_schedule():
 
     user_id = session.get("user_id")  # Lấy user_id từ session
     if not user_id:
-        flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
+        flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
     # Lấy tất cả pages và video splits để cập nhật choices

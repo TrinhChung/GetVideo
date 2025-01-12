@@ -22,16 +22,16 @@
 				<thead class="table-dark">
 					<tr>
 						<th>#</th>
-						<th>Tên Tài Khoản</th>
-						<th>ID Tài Khoản</th>
-						<th>Trạng Thái</th>
-						<th>Tiền Tệ</th>
-						<th>Số Dư</th>
-						<th>Tiêu Hao</th>
-						<th>Giới Hạn Chi Tiêu</th>
-						<th>Múi Giờ</th>
-						<th>Doanh Nghiệp</th>
-						<th>Ngày Tạo</th>
+						<th>Account Name</th>
+						<th>Account ID</th>
+						<th>Status</th>
+						<th>Currency</th>
+						<th>Balance</th>
+						<th>Amount Spent</th>
+						<th>Spend Limit</th>
+						<th>Timezone</th>
+						<th>Business</th>
+						<th>Created Date</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -42,17 +42,17 @@
 						<td>{{ account.facebook_ad_account_id }}</td>
 						<td>
 							{% if account.account_status == 1 %}
-							<span class="badge bg-success">Đang Hoạt Động</span>
+							<span class="badge bg-success">Active</span>
 							{% elif account.account_status == 2 %}
-							<span class="badge bg-warning text-dark">Ngừng Hoạt Động</span>
+							<span class="badge bg-warning text-dark">Inactive</span>
 							{% else %}
-							<span class="badge bg-danger">Bị Khóa</span>
+							<span class="badge bg-danger">Locked</span>
 							{% endif %}
 						</td>
 						<td>{{ account.currency }}</td>
 						<td>{{ account.balance or 0 }}</td>
 						<td>{{ account.amount_spent or 0 }}</td>
-						<td>{{ account.spend_cap or "Không giới hạn" }}</td>
+						<td>{{ account.spend_cap or "Unlimited" }}</td>
 						<td>{{ account.timezone_name }} (UTC{{ account.timezone_offset_hours_utc }})</td>
 						<td>{{ account.business_name or "N/A" }}</td>
 						<td>{{ account.created_time.strftime('%d-%m-%Y') if account.created_time else "N/A" }}</td>

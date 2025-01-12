@@ -26,7 +26,7 @@ def index():
 
     user_id = session.get("user_id")  # Lấy user_id từ session
     if not user_id:
-        flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
+        flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
     
     videos = Video.query.filter_by(user_id=user_id).all()
@@ -63,7 +63,7 @@ def download_all_videos():
 
     user_id = session.get("user_id")  # Lấy user_id từ session
     if not user_id:
-        flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
+        flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
     
     videos_to_download = Video.query.filter_by(crawled=False, user_id=user_id).all()
@@ -89,7 +89,7 @@ def download_all_videos():
 def split_video_route(video_id):
     user_id = session.get("user_id")  # Lấy user_id từ session
     if not user_id:
-        flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
+        flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
     video = Video.query.filter_by(video_id=video_id).first()
@@ -112,7 +112,7 @@ def split_video_route(video_id):
 def split_selected_videos():
     user_id = session.get("user_id")  # Lấy user_id từ session
     if not user_id:
-        flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
+        flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
     
     ids = request.form.getlist(

@@ -30,7 +30,7 @@ def account_fb():
 
     user_id = session.get("user_id")  # Lấy user_id từ session
     if not user_id:
-        flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
+        flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
     accounts = FacebookAccount.query.filter_by(user_id=user_id).all()  # Lấy tất cả các tài khoản từ bảng
@@ -46,7 +46,7 @@ def add_fb_account():
 
     user_id = session.get("user_id")  # Get user_id from session
     if not user_id:
-        flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
+        flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
     # Get existing Facebook accounts for the user
@@ -115,6 +115,7 @@ def add_fb_account():
 def delete_fb_account(id):
     try:
         account = FacebookAccount.query.get(id)  # Tìm tài khoản theo ID
+        print(account.facebook_ad_accounts)
 
         if account:
             # Xóa tất cả các Page liên kết với tài khoản
@@ -125,23 +126,20 @@ def delete_fb_account(id):
             for ad_account in account.facebook_ad_accounts:
                 db.session.delete(ad_account)
 
-            # Sau khi đã xóa các Page và Ad Account, xóa tài khoản Facebook
+            # Sau khi đã xóa các Page, xóa tài khoản Facebook
             db.session.delete(account)  # Xóa tài khoản Facebook
 
-            db.session.flush()  # Đảm bảo xóa các đối tượng đã được thực hiện trước khi commit
-
-            # Cam kết thay đổi vào cơ sở dữ liệu
-            db.session.commit()
+            db.session.commit()  # Cam kết thay đổi vào cơ sở dữ liệu
 
             flash(
-                "Facebook account, related pages, and ad accounts deleted successfully!",
+                "Facebook account and related pages and ad accounts deleted successfully!",
                 "success",
             )
         else:
             flash("Account not found.", "danger")
     except Exception as e:
         db.session.rollback()  # Nếu có lỗi, rollback để đảm bảo tính toàn vẹn dữ liệu
-        flash(f"Error: {str(e)}", "danger")  # Cải thiện thông báo lỗi
+        flash(f"Error: {str(e)}", "danger")
 
     return redirect(url_for("facebook.account_fb"))
 
@@ -154,40 +152,37 @@ def get_pages():
 
     user_id = session.get("user_id")  # Lấy user_id từ session
     if not user_id:
-        flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
+        flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
     if not access_token:
-        flash("Access token không được cung cấp.", "danger")
-        error_message = "Access token không được cung cấp."
-        return render_template("error.html", error_message=error_message)
+        flash("Access token is not provided or has insufficient permissions.", "danger")
 
     try:
         # Gọi hàm get_account để lấy danh sách các trang
         pages = get_account(access_token, id, user_id)
         if pages:
-            flash("Lấy thông tin các trang thành công", "success")
-            return redirect(url_for("pages.show_pages"))
+            flash("Retrieve page information successfully", "success")
+            return redirect(url_for("facebook.account_fb"))
         else:
             flash("Không thể lấy thông tin trang.", "danger")
-            error_message = "Không thể lấy thông tin trang."
-            return render_template("error.html", error_message=error_message)
+            return redirect(url_for("facebook.account_fb"))
     except Exception as e:
         flash(f"Lỗi: {e}", "danger")
-        error_message = f"Lỗi: {e}"
-        return render_template("error.html", error_message=error_message)
+        return redirect(url_for("facebook.account_fb"))
 
 
 @facebook_bp.route("/account_fb/get_account_ads", methods=["POST"])
 def get_account_ads():
     access_token = request.form.get("access_token")
+    id = request.form.get("id")
 
     user_id = session.get("user_id")  # Lấy user_id từ session
     if not user_id:
-        flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
+        flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
-    get_ad_accounts(access_token, user_id)
+    get_ad_accounts(access_token, user_id, id)
 
     return redirect(url_for("facebook.account_fb"))
 
@@ -199,7 +194,7 @@ def list_ad_accounts():
     """
     user_id = session.get("user_id")  # Lấy user_id từ session
     if not user_id:
-        flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
+        flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
     
     # Lấy tất cả tài khoản quảng cáo theo user_id

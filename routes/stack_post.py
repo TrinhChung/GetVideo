@@ -15,7 +15,7 @@ def index():
 
     user_id = session.get("user_id")  # Lấy user_id từ session
     if not user_id:
-        flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
+        flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
     # Lấy tham số từ query string

@@ -382,7 +382,7 @@ def check_token_expiry(access_token, page_id):
         return None, None
 
 
-def get_ad_accounts(access_token, user_id):
+def get_ad_accounts(access_token, user_id, facebook_account_id):
     """
     Lấy danh sách các tài khoản quảng cáo mà người dùng quản lý và lưu vào database.
 
@@ -462,6 +462,7 @@ def get_ad_accounts(access_token, user_id):
                     if ad_account.get("created_time")
                     else None
                 )
+                existing_account.facebook_account_id = facebook_account_id
             else:
                 # Tạo mới nếu chưa tồn tại
                 new_account = FacebookAdAccount(
@@ -498,6 +499,7 @@ def get_ad_accounts(access_token, user_id):
                         else None
                     ),
                     user_id=user_id,
+                    facebook_account_id=facebook_account_id,
                 )
                 db.session.add(new_account)
 
