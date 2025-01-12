@@ -144,45 +144,62 @@
 			}(document, 'script', 'facebook-jssdk'));
 
 			function fbLogin() {
-				FB.login(function (response) {
-					if (response.authResponse) {
-						const accessToken = response.authResponse.accessToken;
-						const userID = response.authResponse.userID;
-						console.log(response.authResponse)
+					FB.login(function (response) {
+						if (response.authResponse) {
+							const accessToken = response.authResponse.accessToken;
+							const userID = response.authResponse.userID;
 
-						// Gửi thông tin đăng nhập đến backend để lưu trữ
-						fetch('/account_fb/add_account', {
-							method: 'POST',
-							headers: {
-								'Content-Type': 'application/json',
-								'X-CSRFToken': '{{ form.csrf_token._value() }}', // Nếu bạn đang sử dụng CSRF protection
-							},
-							body: JSON.stringify({
-								access_token: accessToken,
-								facebook_user_id: userID
+							// Gửi thông tin đăng nhập đến backend để lưu trữ
+							fetch('/account_fb/add_account', {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json',
+									'X-CSRFToken': '{{ form.csrf_token._value() }}', // Nếu bạn đang sử dụng CSRF protection
+								},
+								body: JSON.stringify({
+									access_token: accessToken,
+									facebook_user_id: userID
+								})
 							})
-						})
-							.then(response => response.json())
-							.then(data => {
-								if (data.success) {
-									console.log("Đăng nhập thành công và thông tin đã được lưu!");
-									return response.text();
-									//window.location.href = "/account_fb/";
-								} else {
-									console.log("Có lỗi khi lưu thông tin đăng nhập.");
-									return response.text();
-									//window.location.href = "/account_fb/";
-								}
-							})
-							.catch(error => {
-								console.error('Error:', error);
-								window.location.href = "/account_fb/";
-							});
-					} else {
-						alert("Đăng nhập thất bại!");
-					}
-				}, { scope: 'email, read_insights, publish_video, pages_show_list, ads_management, ads_read, business_management, page_events, pages_read_engagement, pages_read_user_content, pages_manage_ads, pages_manage_posts, pages_manage_engagement' });
-			}
+								.then(response => {
+									// Kiểm tra xem phản hồi có phải là JSON không
+									if (response.ok) {
+										const contentType = response.headers.get("Content-Type");
+
+										// Nếu phản hồi là JSON
+										if (contentType && contentType.includes("application/json")) {
+											return response.json();
+										} else {
+											// Nếu phản hồi là HTML (hoặc loại khác), xử lý HTML
+											return response.text();
+										}
+									} else {
+										throw new Error("Network response was not ok");
+									}
+								})
+								.then(data => {
+									if (typeof data === 'object' && data.success) {
+										console.log("Đăng nhập thành công và thông tin đã được lưu!");
+										window.location.href = "/account_fb/";
+									} else {
+										// Nếu phản hồi là HTML, xử lý việc chuyển hướng hoặc hiển thị thông báo lỗi
+										console.log("Có lỗi khi lưu thông tin đăng nhập.");
+										window.location.href = "/account_fb/"; // Hoặc xử lý theo cách khác
+									}
+								})
+								.catch(error => {
+									console.error('Error:', error);
+									alert("Đã xảy ra lỗi khi đăng nhập.");
+								});
+						} else {
+							console.log("Đăng nhập thất bại!");
+							window.location.href = "/account_fb/";
+						}
+					}, {
+						scope: 'email, read_insights, publish_video, pages_show_list, ads_management, ads_read, business_management, page_events, pages_read_engagement, pages_read_user_content, pages_manage_ads, pages_manage_posts, pages_manage_engagement'
+					});
+				}
+
 		</script>
 	</body>
 </html>

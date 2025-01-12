@@ -1,4 +1,13 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import (
+    Blueprint,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    flash,
+    session,
+    jsonify,
+)
 from database_init import db
 from models.facebook_account import FacebookAccount
 from util.post_fb import get_account
@@ -59,9 +68,18 @@ def add_fb_account():
             try:
                 db.session.commit()
                 flash("Facebook account updated successfully!", "success")
+                # If the request is an API request, return a JSON response
+                if request.is_json:
+                    return jsonify(
+                        {
+                            "success": True,
+                            "message": "Facebook account updated successfully!",
+                        }
+                    )
             except Exception as e:
                 db.session.rollback()
                 flash(f"Error: {e}", "danger")
+                return jsonify({"success": False, "message": f"Error: {e}"}), 500
         else:
             # Create new account if not exists
             new_account = FacebookAccount(
@@ -73,12 +91,22 @@ def add_fb_account():
                 db.session.add(new_account)
                 db.session.commit()
                 flash("Facebook account added successfully!", "success")
+                # If the request is an API request, return a JSON response
+                if request.is_json:
+                    return jsonify(
+                        {
+                            "success": True,
+                            "message": "Facebook account added successfully!",
+                        }
+                    )
+                return redirect(url_for("facebook.account_fb"))
             except Exception as e:
                 db.session.rollback()
                 flash(f"Error: {e}", "danger")
+                return jsonify({"success": False, "message": f"Error: {e}"}), 500
     else:
         flash("Giá trị điền không hợp lệ!", "danger")
-    return redirect(url_for("facebook.account_fb"))
+        return redirect(url_for("facebook.account_fb"))
 
 
 # Xóa tài khoản Facebook
