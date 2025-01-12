@@ -1,0 +1,70 @@
+<!-- templates/ad_accounts.html -->
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+		<title>Danh Sách Tài Khoản Quảng Cáo</title>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+	</head>
+	<body>
+		{% include 'header.html' %}
+		{% include 'message.html' %}
+
+		<div class="container mt-5">
+			<h1 class="text-dark mb-4">Danh Sách Tài Khoản Quảng Cáo</h1>
+
+			{% if ad_accounts %}
+			<table class="table table-hover table-bordered">
+				<thead class="table-dark">
+					<tr>
+						<th>#</th>
+						<th>Tên Tài Khoản</th>
+						<th>ID Tài Khoản</th>
+						<th>Trạng Thái</th>
+						<th>Tiền Tệ</th>
+						<th>Số Dư</th>
+						<th>Tiêu Hao</th>
+						<th>Giới Hạn Chi Tiêu</th>
+						<th>Múi Giờ</th>
+						<th>Doanh Nghiệp</th>
+						<th>Ngày Tạo</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for account in ad_accounts %}
+					<tr>
+						<td>{{ loop.index }}</td>
+						<td>{{ account.name }}</td>
+						<td>{{ account.facebook_ad_account_id }}</td>
+						<td>
+							{% if account.account_status == 1 %}
+							<span class="badge bg-success">Đang Hoạt Động</span>
+							{% elif account.account_status == 2 %}
+							<span class="badge bg-warning text-dark">Ngừng Hoạt Động</span>
+							{% else %}
+							<span class="badge bg-danger">Bị Khóa</span>
+							{% endif %}
+						</td>
+						<td>{{ account.currency }}</td>
+						<td>{{ account.balance or 0 }}</td>
+						<td>{{ account.amount_spent or 0 }}</td>
+						<td>{{ account.spend_cap or "Không giới hạn" }}</td>
+						<td>{{ account.timezone_name }} (UTC{{ account.timezone_offset_hours_utc }})</td>
+						<td>{{ account.business_name or "N/A" }}</td>
+						<td>{{ account.created_time.strftime('%d-%m-%Y') if account.created_time else "N/A" }}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+			{% else %}
+			<div class="alert alert-info">Không tìm thấy tài khoản quảng cáo nào.</div>
+			{% endif %}
+		</div>
+
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+	</body>
+</html>

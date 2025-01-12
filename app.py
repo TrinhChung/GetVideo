@@ -23,6 +23,7 @@ from models.video_category import VideoCategory
 from models.video_split_category import VideoSplitCategory
 from models.video_split import VideoSplit
 from models.video import Video
+from models.facebook_ad_account import FacebookAdAccount
 
 load_dotenv()
 
@@ -84,16 +85,20 @@ def create_app():
 
     @app.before_request
     def require_login():
-        allowed_routes = ["auth.login", "auth.register","video.serve_video", "static"]
+        allowed_routes = [
+            "auth.login",
+            "home.polices",
+            "auth.register",
+            "video.serve_video",
+            "static",
+        ]
         if "user_id" not in session and request.endpoint not in allowed_routes:
             flash("Bạn cần đăng nhập để truy cập trang này.", "danger")
             return redirect(url_for("auth.login"))
-    
+
     # Bắt đầu scheduler
     if not scheduler.running:
         scheduler.start()
-
-
 
     return app
 

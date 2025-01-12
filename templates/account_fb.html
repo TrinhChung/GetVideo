@@ -46,7 +46,7 @@
 			<h1 class="text-dark mb-4">Facebook Account Manager</h1>
 			<form action="{{ url_for('facebook.add_fb_account') }}" method="POST" class="mb-4">
 				{{ form.csrf_token }} <!-- CSRF token -->
-				<div class="mb-3">
+				<!-- <div class="mb-3">
 					<label for="facebook_user_id" class="form-label">Facebook User ID</label>
 					<input type="text" class="form-control" id="facebook_user_id" name="facebook_user_id" required>
 				</div>
@@ -55,11 +55,11 @@
 					<textarea class="form-control" id="access_token" name="access_token" rows="2" required></textarea>
 				</div>
 				<button type="submit" class="btn btn-success btn-lg">
-					<i class="fas fa-plus-circle"></i> Thêm tài khoản
-				</button>
+					<i class="fas fa-plus-circle"></i> Add Account
+				</button> -->
 
 				<button type="button" class="btn btn-primary btn-lg" onclick="fbLogin()">
-					<i class="fab fa-facebook-f"></i> Đăng nhập bằng Facebook
+					<i class="fab fa-facebook-f"></i> Login By Facebook
 				</button>
 			</form>
 
@@ -76,7 +76,7 @@
 				<tbody>
 					{% if accounts|length == 0 %}
 					<tr>
-						<td colspan="4" class="text-center">Chưa có tài khoản nào được thêm</td>
+						<td colspan="4" class="text-center">No accounts have been added yet</td>
 					</tr>
 					{% else %}
 					{% for account in accounts %}
@@ -100,6 +100,14 @@
 								<button type="submit" class="btn btn-info btn-sm">Get Pages</button>
 							</form>
 							<a href="{{ url_for('facebook.delete_fb_account', id=account.id) }}" class="btn btn-danger btn-sm">Delete</a>
+						</td>
+						<td>
+							<form action="{{ url_for('facebook.get_account_ads') }}" method="POST" style="display: inline;">
+								{{ form.csrf_token }} <!-- CSRF token -->
+								<input type="hidden" name="id" value="{{ account.id }}">
+								<input type="hidden" name="access_token" value="{{ account.access_token }}">
+								<button type="submit" class="btn btn-warning btn-sm">Get Ads</button> <!-- New button for Get Ads -->
+							</form>
 						</td>
 					</tr>
 					{% endfor %}
@@ -204,7 +212,7 @@
 							window.location.href = "/account_fb/";
 						}
 					}, {
-						scope: 'email, read_insights, publish_video, pages_show_list, ads_management, ads_read, business_management, page_events, pages_read_engagement, pages_read_user_content, pages_manage_ads, pages_manage_posts, pages_manage_engagement'
+						scope: 'read_insights, publish_video, business_management, pages_read_engagement, pages_manage_ads, pages_manage_posts, pages_manage_engagement'
 					});
 				}
 

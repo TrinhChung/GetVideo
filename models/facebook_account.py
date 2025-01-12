@@ -19,5 +19,10 @@ class FacebookAccount(db.Model):
     # Quan hệ với bảng Page
     pages = db.relationship("Page", back_populates="facebook_account", lazy=True)
 
+    # Quan hệ với bảng FacebookAdAccount
+    facebook_ad_accounts = db.relationship(
+        "FacebookAdAccount", backref="facebook_account", lazy=True
+    )
+
     def __repr__(self):
         return f"<FacebookAccount {self.email}>"

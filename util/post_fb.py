@@ -8,6 +8,7 @@ from database_init import db  # Assuming db is initialized in database_init.py
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 from requests.exceptions import RequestException
+from models.facebook_ad_account import FacebookAdAccount
 
 # Tải các biến môi trường từ file .env
 load_dotenv()
@@ -379,3 +380,134 @@ def check_token_expiry(access_token, page_id):
     except Exception as e:
         print(f"Lỗi: {str(e)}")
         return None, None
+
+
+def get_ad_accounts(access_token, user_id):
+    """
+    Lấy danh sách các tài khoản quảng cáo mà người dùng quản lý và lưu vào database.
+
+    Args:
+        access_token (str): Token truy cập Facebook API.
+        user_id (int): ID người dùng trong hệ thống.
+
+    Returns:
+        list: Danh sách các tài khoản quảng cáo.
+    """
+    try:
+        # Khởi tạo GraphAPI
+        graph = GraphAPI(access_token=access_token)
+
+        # Lấy thông tin chi tiết về các tài khoản quảng cáo
+        fields = (
+            "adaccounts{account_id,name,id,account_status,currency,balance,"
+            "amount_spent,spend_cap,timezone_name,timezone_offset_hours_utc,"
+            "business{id,name},created_time}"
+        )
+
+        response = graph.get_object(f"me?fields={fields}")
+
+        # Debug response
+        print(response)
+
+        # Lấy danh sách tài khoản quảng cáo
+        ad_accounts = response.get("adaccounts", {}).get("data", [])
+
+        if not ad_accounts:
+            flash(
+                "Không có tài khoản quảng cáo nào được liên kết với tài khoản này.",
+                "danger",
+            )
+            return []
+
+        print(f"Đã tìm thấy {len(ad_accounts)} tài khoản quảng cáo.")
+
+        for ad_account in ad_accounts:
+            # Kiểm tra tài khoản đã tồn tại chưa
+            existing_account = FacebookAdAccount.query.filter_by(
+                facebook_ad_account_id=ad_account.get("account_id")
+            ).first()
+
+            if existing_account:
+                # Cập nhật thông tin nếu đã tồn tại
+                existing_account.name = ad_account.get("name")
+                existing_account.account_status = ad_account.get("account_status")
+                existing_account.currency = ad_account.get("currency")
+                existing_account.balance = (
+                    float(ad_account.get("balance", 0))
+                    if ad_account.get("balance")
+                    else None
+                )
+                existing_account.amount_spent = (
+                    float(ad_account.get("amount_spent", 0))
+                    if ad_account.get("amount_spent")
+                    else None
+                )
+                existing_account.spend_cap = (
+                    float(ad_account.get("spend_cap", 0))
+                    if ad_account.get("spend_cap")
+                    else None
+                )
+                existing_account.timezone_name = ad_account.get("timezone_name")
+                existing_account.timezone_offset_hours_utc = float(
+                    ad_account.get("timezone_offset_hours_utc", 0)
+                )
+                existing_account.business_id = ad_account.get("business", {}).get("id")
+                existing_account.business_name = ad_account.get("business", {}).get(
+                    "name"
+                )
+                existing_account.created_time = (
+                    datetime.strptime(
+                        ad_account.get("created_time"), "%Y-%m-%dT%H:%M:%S%z"
+                    )
+                    if ad_account.get("created_time")
+                    else None
+                )
+            else:
+                # Tạo mới nếu chưa tồn tại
+                new_account = FacebookAdAccount(
+                    facebook_ad_account_id=ad_account.get("account_id"),
+                    name=ad_account.get("name"),
+                    account_status=ad_account.get("account_status"),
+                    currency=ad_account.get("currency"),
+                    balance=(
+                        float(ad_account.get("balance", 0))
+                        if ad_account.get("balance")
+                        else None
+                    ),
+                    amount_spent=(
+                        float(ad_account.get("amount_spent", 0))
+                        if ad_account.get("amount_spent")
+                        else None
+                    ),
+                    spend_cap=(
+                        float(ad_account.get("spend_cap", 0))
+                        if ad_account.get("spend_cap")
+                        else None
+                    ),
+                    timezone_name=ad_account.get("timezone_name"),
+                    timezone_offset_hours_utc=float(
+                        ad_account.get("timezone_offset_hours_utc", 0)
+                    ),
+                    business_id=ad_account.get("business", {}).get("id"),
+                    business_name=ad_account.get("business", {}).get("name"),
+                    created_time=(
+                        datetime.strptime(
+                            ad_account.get("created_time"), "%Y-%m-%dT%H:%M:%S%z"
+                        )
+                        if ad_account.get("created_time")
+                        else None
+                    ),
+                    user_id=user_id,
+                )
+                db.session.add(new_account)
+
+        # Lưu thay đổi vào database
+        db.session.commit()
+        flash("Đã cập nhật thông tin tài khoản quảng cáo thành công.", "success")
+
+        return ad_accounts
+
+    except requests.RequestException as e:
+        print(f"Đã xảy ra lỗi khi lấy danh sách tài khoản quảng cáo: {str(e)}")
+        flash("Đã xảy ra lỗi khi lấy danh sách tài khoản quảng cáo.", "danger")
+        return []

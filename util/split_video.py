@@ -37,7 +37,10 @@ def clean_title(title):
 
 
 def split_video(
-    video_path, segment_duration_sec, output_prefix="output_part", codec="libx264"
+    video_path,
+    segment_duration_sec,
+    user_id, output_prefix="output_part",
+    codec="libx264",
 ):
     """
     Chia video thành các phần nhỏ và lưu vào thư mục cố định.
@@ -99,6 +102,7 @@ def split_video(
             type_duration=segment_duration_sec,
             video_id=video_id,
             type=video_type,
+            user_id=user_id,
         )
         db.session.add(video_split)
 
@@ -121,6 +125,7 @@ def split_video(
             type_duration=segment_duration_sec,
             video_id=video_id,
             type=video_type,
+            user_id=user_id,
         )
         db.session.add(video_split)
 

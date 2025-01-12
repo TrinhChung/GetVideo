@@ -10,10 +10,11 @@ from flask import (
 )
 from database_init import db
 from models.facebook_account import FacebookAccount
-from util.post_fb import get_account
+from util.post_fb import get_account, get_ad_accounts
 from Form.account_fb import AddFacebookAccountForm
 import os
 from dotenv import load_dotenv
+from models.facebook_ad_account import FacebookAdAccount
 
 load_dotenv()  # Đọc file .env
 
@@ -115,9 +116,20 @@ def delete_fb_account(id):
     try:
         account = FacebookAccount.query.get(id)  # Tìm tài khoản theo ID
         if account:
-            db.session.delete(account)  # Xóa tài khoản
+            # Xóa tất cả các Page liên kết với tài khoản
+            for page in account.pages:
+                db.session.delete(page)
+
+            # Xóa tất cả các Facebook Ad Account liên kết với tài khoản
+            for ad_account in account.facebook_ad_accounts:
+                db.session.delete(ad_account)
+
+            db.session.delete(account)  # Xóa tài khoản Facebook
             db.session.commit()  # Cam kết thay đổi vào cơ sở dữ liệu
-            flash("Facebook account deleted successfully!", "success")
+            flash(
+                "Facebook account, related pages, and ad accounts deleted successfully!",
+                "success",
+            )
         else:
             flash("Account not found.", "danger")
     except Exception as e:
@@ -157,3 +169,33 @@ def get_pages():
         flash(f"Lỗi: {e}", "danger")
         error_message = f"Lỗi: {e}"
         return render_template("error.html", error_message=error_message)
+
+
+@facebook_bp.route("/account_fb/get_account_ads", methods=["POST"])
+def get_account_ads():
+    access_token = request.form.get("access_token")
+
+    user_id = session.get("user_id")  # Lấy user_id từ session
+    if not user_id:
+        flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
+        return redirect(url_for("auth.login"))
+
+    get_ad_accounts(access_token, user_id)
+
+    return redirect(url_for("facebook.account_fb"))
+
+
+@facebook_bp.route("/ad_accounts", methods=["GET"])
+def list_ad_accounts():
+    """
+    Lấy danh sách tất cả tài khoản quảng cáo của user và hiển thị.
+    """
+    user_id = session.get("user_id")  # Lấy user_id từ session
+    if not user_id:
+        flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
+        return redirect(url_for("auth.login"))
+    
+    # Lấy tất cả tài khoản quảng cáo theo user_id
+    ad_accounts = FacebookAdAccount.query.filter_by(user_id=user_id).all()
+
+    return render_template("ad_accounts.html", ad_accounts=ad_accounts)

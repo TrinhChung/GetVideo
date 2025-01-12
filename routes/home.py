@@ -8,6 +8,16 @@ def home():
     return render_template("home.html")
 
 
+@home_bp.route("/polices", methods=["GET", "POST"])
+def polices():
+    return render_template("polices.html")
+
+
+@home_bp.route("/permissions", methods=["GET", "POST"])
+def permissions():
+    return render_template("permission.html")
+
+
 @home_bp.route("/favicon.ico")
 def favicon():
     return send_from_directory(

@@ -87,12 +87,17 @@ def download_all_videos():
 # Route để chia video
 @video_bp.route("/split_video/<video_id>", methods=["POST"])
 def split_video_route(video_id):
+    user_id = session.get("user_id")  # Lấy user_id từ session
+    if not user_id:
+        flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
+        return redirect(url_for("auth.login"))
+
     video = Video.query.filter_by(video_id=video_id).first()
 
     if video and video.path:
         try:
             segment_duration_sec = 60  # Chỉnh sửa thời gian chia đoạn theo nhu cầu
-            split_video(video.path, segment_duration_sec)
+            split_video(video.path, segment_duration_sec, user_id)
 
             flash("Video đã được chia thành các phần", "success")
         except Exception as e:
@@ -105,6 +110,11 @@ def split_video_route(video_id):
 # Route để chia các video đã chọn
 @video_bp.route("/split_selected_videos", methods=["POST"])
 def split_selected_videos():
+    user_id = session.get("user_id")  # Lấy user_id từ session
+    if not user_id:
+        flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
+        return redirect(url_for("auth.login"))
+    
     ids = request.form.getlist(
         "selected_videos"
     )  # Lấy danh sách video_id đã chọn
@@ -117,7 +127,7 @@ def split_selected_videos():
 
         if video and video.path:
             try:
-                split_video(video.path, split_duration)
+                split_video(video.path, split_duration, user_id)
                 flash(f"Video {video.title} đã được chia thành các phần", "success")
             except Exception as e:
                 flash(f"Đã xảy ra lỗi khi chia video {video.title}: {e}", "danger")
