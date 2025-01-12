@@ -1,4 +1,14 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, send_from_directory
+from flask import (
+    Blueprint,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    flash,
+    send_from_directory,
+    Response,
+    session,
+)
 from database_init import db
 from models.video import Video
 from util.youtube import download_video
@@ -13,7 +23,13 @@ VIDEO_FOLDER = './'
 @video_bp.route("/videos", methods=["GET"])
 def index():
     form = VideoDownloadForm()
-    videos = Video.query.all()
+
+    user_id = session.get("user_id")  # Lấy user_id từ session
+    if not user_id:
+        flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
+        return redirect(url_for("auth.login"))
+    
+    videos = Video.query.filter_by(user_id=user_id).all()
     form = VideoDownloadForm()
     return render_template("videos.html", videos=videos, form=form)
 
@@ -44,7 +60,13 @@ def download_video_route(video_id):
 # Route để tải tất cả video chưa được tải xuống
 @video_bp.route("/video/download_all", methods=["POST"])
 def download_all_videos():
-    videos_to_download = Video.query.filter_by(crawled=False).all()
+
+    user_id = session.get("user_id")  # Lấy user_id từ session
+    if not user_id:
+        flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
+        return redirect(url_for("auth.login"))
+    
+    videos_to_download = Video.query.filter_by(crawled=False, user_id=user_id).all()
 
     for video in videos_to_download:
         try:

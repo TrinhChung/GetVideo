@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from models.stack_post import StackPost
 from models.page import Page
 from database_init import db
@@ -13,6 +13,11 @@ def index():
     # Khởi tạo form
     form = StackPostForm()
 
+    user_id = session.get("user_id")  # Lấy user_id từ session
+    if not user_id:
+        flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
+        return redirect(url_for("auth.login"))
+
     # Lấy tham số từ query string
     page_id = request.args.get("page_id")
     status = request.args.get("status")
@@ -22,18 +27,18 @@ def index():
 
     # Áp dụng các bộ lọc nếu có
     if page_id:
-        query = query.filter_by(page_id=page_id)
+        query = query.filter_by(page_id=page_id, user_id=user_id)
     if status:
-        query = query.filter_by(status=status)
+        query = query.filter_by(status=status, user_id=user_id)
 
     # Sắp xếp theo thời gian
     query = query.order_by(StackPost.time.asc())
 
     # Lấy danh sách bài đăng
-    stack_posts = query.all()
+    stack_posts = query.filter_by(user_id=user_id)
 
     # Lấy danh sách các trang để hiển thị trong form lọc
-    pages = Page.query.all()
+    pages = Page.query.filter_by(user_id=user_id)
 
     return render_template(
         "stack_posts.html",

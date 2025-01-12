@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from models.video_split import VideoSplit
 from models.page import Page
 from models.stack_post import StackPost
@@ -16,11 +16,16 @@ def video_splits():
     # Tạo form mới
     form = VideoSplitScheduleForm()
 
+    user_id = session.get("user_id")  # Lấy user_id từ session
+    if not user_id:
+        flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
+        return redirect(url_for("auth.login"))
+
     # Lấy tất cả video splits từ cơ sở dữ liệu
-    video_splits = VideoSplit.query.all()
+    video_splits = VideoSplit.query.filter_by(user_id=user_id).all()
 
     # Lấy tất cả các trang (Page)
-    pages = Page.query.all()
+    pages = Page.query.filter_by(user_id=user_id).all()
 
     # Cập nhật choices cho form
     form.page_id.choices = [(page.page_id, page.name) for page in pages]
@@ -37,9 +42,14 @@ def video_splits():
 def add_to_schedule():
     form = VideoSplitScheduleForm()
 
+    user_id = session.get("user_id")  # Lấy user_id từ session
+    if not user_id:
+        flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
+        return redirect(url_for("auth.login"))
+
     # Lấy tất cả pages và video splits để cập nhật choices
-    pages = Page.query.all()
-    video_splits = VideoSplit.query.all()
+    pages = Page.query.filter_by(user_id=user_id).all()
+    video_splits = VideoSplit.query.filter_by(user_id=user_id).all()
     form.page_id.choices = [(page.page_id, page.name) for page in pages]
     form.selected_splits.choices = [(split.id, split.title) for split in video_splits]
 
@@ -66,7 +76,7 @@ def add_to_schedule():
             for index, split_id in enumerate(form.selected_splits.data):
                 # Kiểm tra xem bản ghi đã tồn tại chưa
                 existing_post = StackPost.query.filter_by(
-                    page_id=form.page_id.data, video_split_id=split_id
+                    page_id=form.page_id.data, video_split_id=split_id, user_id=user_id
                 ).first()
 
                 if existing_post:
@@ -91,6 +101,7 @@ def add_to_schedule():
                     video_split_id=split_id,
                     title=title,
                     status="waiting",
+                    user_id=user_id
                 )
 
                 db.session.add(new_stack_post)

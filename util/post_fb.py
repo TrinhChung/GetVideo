@@ -227,7 +227,7 @@ def get_access_token_page_by_id(page_id, access_token):
         print(f"Error occurred: {str(e)}")
 
 
-def get_account(access_token, facebook_account_id):
+def get_account(access_token, facebook_account_id, user_id):
     try:
         # Tạo kết nối Graph API
         graph = GraphAPI(access_token=access_token)
@@ -237,8 +237,11 @@ def get_account(access_token, facebook_account_id):
         pages = response.get("data", [])
 
         if not pages:
-            print("Không có trang nào được liên kết với tài khoản này.")
-            return False
+            flash(
+                f"Không có trang nào được liên kết với tài khoản này.",
+                "danger",
+            )
+            return
 
         print(f"Đã tìm thấy {len(pages)} trang. Đang lưu vào cơ sở dữ liệu...")
 
@@ -274,6 +277,7 @@ def get_account(access_token, facebook_account_id):
                     access_token=page_access_token,
                     expires_at=expires_at,
                     facebook_account_id=facebook_account_id,
+                    user_id=user_id,
                 )
                 db.session.add(new_page)
 

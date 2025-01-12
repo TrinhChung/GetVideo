@@ -23,7 +23,7 @@ def get_existing_playlist(playlist_id):
     return playlist.title, existing_video_ids
 
 
-def get_playlist_info_and_video_details(playlist_id):
+def get_playlist_info_and_video_details(playlist_id, user_id):
     """
     Hàm chính để xử lý playlist và cập nhật database.
     """
@@ -55,14 +55,14 @@ def get_playlist_info_and_video_details(playlist_id):
 
             if new_videos:
                 save_playlist_and_videos_to_mysql(
-                    playlist_id, yt_playlist_title, new_videos
+                    playlist_id, yt_playlist_title, new_videos, user_id
                 )
                 print(f"Đã thêm {len(new_videos)} video mới vào playlist")
             else:
                 print("Không có video mới để thêm")
         else:
             print("Thêm playlist mới...")
-            save_playlist_and_videos_to_mysql(playlist_id, yt_playlist_title, yt_videos)
+            save_playlist_and_videos_to_mysql(playlist_id, yt_playlist_title, yt_videos, user_id)
             print(f"Đã thêm playlist mới với {len(yt_videos)} video")
 
     except Exception as e:
@@ -70,13 +70,13 @@ def get_playlist_info_and_video_details(playlist_id):
 
 
 # Lưu thông tin vào bảng playlist và videos
-def save_playlist_and_videos_to_mysql(playlist_id, playlist_title, video_data):
+def save_playlist_and_videos_to_mysql(playlist_id, playlist_title, video_data, user_id):
     print("Đang lưu thông tin playlist và video...")
 
     # Lưu thông tin playlist vào bảng playlist
     playlist = Playlist.query.filter_by(id=playlist_id).first()
     if not playlist:
-        playlist = Playlist(id=playlist_id, title=playlist_title)
+        playlist = Playlist(id=playlist_id, title=playlist_title, user_id=user_id)
         db.session.add(playlist)
 
     # Lưu thông tin video vào bảng videos
@@ -90,6 +90,7 @@ def save_playlist_and_videos_to_mysql(playlist_id, playlist_title, video_data):
                 title=video["title"],
                 playlist_id=playlist_id,
                 crawled=False,  # False: video chưa được crawl
+                user_id=user_id
             )
             db.session.add(video_entry)
 

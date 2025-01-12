@@ -59,8 +59,8 @@ def create_app():
     migrate.init_app(app, db)
 
     # Cấu hình Flask-Seeder
-    seeder = FlaskSeeder()
-    seeder.init_app(app, db)
+    # seeder = FlaskSeeder()
+    # seeder.init_app(app, db)
 
     from routes.home import home_bp
     from routes.playlist import playlist_bp

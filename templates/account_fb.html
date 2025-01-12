@@ -54,6 +54,10 @@
 					<textarea class="form-control" id="access_token" name="access_token" rows="2" required></textarea>
 				</div>
 				<button type="submit" class="btn btn-primary">Add Account</button>
+
+				<button type="button" class="btn btn-primary" onclick="fbLogin()">
+					Đăng nhập bằng Facebook
+				</button>
 			</form>
 
 			<h2>Accounts</h2>
@@ -74,8 +78,8 @@
 						<td class="text-truncate" style="max-width: 300px;">
 							<div class="token-wrapper">
 								<div class="token-content">{{ account.access_token }}</div>
-								<button class="btn btn-sm btn-outline-primary copy-btn" onclick="copyToken(this, '{{ account.access_token }}')"
-									title="Copy token">
+								<button class="btn btn-sm btn-outline-primary copy-btn"
+									onclick="copyToken(this, '{{ account.access_token }}')" title="Copy token">
 									Copy
 								</button>
 							</div>
@@ -87,7 +91,8 @@
 								<input type="hidden" name="access_token" value="{{ account.access_token }}">
 								<button type="submit" class="btn btn-info btn-sm">Get Pages</button>
 							</form>
-							<a href="{{ url_for('facebook.delete_fb_account', id=account.id) }}" class="btn btn-danger btn-sm">Delete</a>
+							<a href="{{ url_for('facebook.delete_fb_account', id=account.id) }}"
+								class="btn btn-danger btn-sm">Delete</a>
 						</td>
 					</tr>
 					{% endfor %}

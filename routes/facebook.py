@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from database_init import db
 from models.facebook_account import FacebookAccount
 from util.post_fb import get_account
@@ -11,7 +11,13 @@ facebook_bp = Blueprint("facebook", __name__)
 @facebook_bp.route("/account_fb/")
 def account_fb():
     form = AddFacebookAccountForm()
-    accounts = FacebookAccount.query.all()  # Lấy tất cả các tài khoản từ bảng
+
+    user_id = session.get("user_id")  # Lấy user_id từ session
+    if not user_id:
+        flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
+        return redirect(url_for("auth.login"))
+    
+    accounts = FacebookAccount.query.filter_by(user_id=user_id).all()  # Lấy tất cả các tài khoản từ bảng
     return render_template("account_fb.html", accounts=accounts, form=form)
 
 
@@ -20,8 +26,13 @@ def account_fb():
 def add_fb_account():
     form = AddFacebookAccountForm()
 
+    user_id = session.get("user_id")  # Lấy user_id từ session
+    if not user_id:
+        flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
+        return redirect(url_for("auth.login"))
+
     # Lấy danh sách tài khoản Facebook hiện có
-    accounts = FacebookAccount.query.all()
+    accounts = FacebookAccount.query.filter_by(user_id=user_id).all()
 
     if form.validate_on_submit():
         email = form.email.data
@@ -41,7 +52,7 @@ def add_fb_account():
                 flash(f"Error: {e}", "danger")
         else:
             # Nếu tài khoản chưa tồn tại, tạo tài khoản mới
-            new_account = FacebookAccount(email=email, access_token=access_token)
+            new_account = FacebookAccount(email=email, access_token=access_token, user_id=user_id)
             try:
                 db.session.add(new_account)  # Thêm vào phiên làm việc của SQLAlchemy
                 db.session.commit()  # Cam kết thay đổi vào cơ sở dữ liệu
@@ -80,6 +91,11 @@ def get_pages():
     access_token = request.form.get("access_token")
     id = request.form.get("id")
 
+    user_id = session.get("user_id")  # Lấy user_id từ session
+    if not user_id:
+        flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
+        return redirect(url_for("auth.login"))
+
     if not access_token:
         flash("Access token không được cung cấp.", "danger")
         error_message = "Access token không được cung cấp."
@@ -87,7 +103,7 @@ def get_pages():
 
     try:
         # Gọi hàm get_account để lấy danh sách các trang
-        pages = get_account(access_token, id)
+        pages = get_account(access_token, id, user_id)
         if pages:
             flash("Lấy thông tin các trang thành công", "success")
             return redirect(url_for("pages.show_pages"))

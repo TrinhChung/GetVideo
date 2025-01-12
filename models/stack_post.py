@@ -24,5 +24,12 @@ class StackPost(db.Model):
         "VideoSplit", backref=db.backref("stack_post", lazy=True)
     )
 
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("user.id"), nullable=False
+    )  # Khóa ngoại liên kết với bảng User
+
+    # Quan hệ với bảng User
+    user = db.relationship("User", backref=db.backref("stack_posts", lazy=True))
+
     # Mối quan hệ giữa StackPost và Page
     page = db.relationship("Page", backref="stack_posts", lazy=True)
