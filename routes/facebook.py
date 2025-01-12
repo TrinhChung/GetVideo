@@ -3,6 +3,10 @@ from database_init import db
 from models.facebook_account import FacebookAccount
 from util.post_fb import get_account
 from Form.account_fb import AddFacebookAccountForm
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # Đọc file .env
 
 facebook_bp = Blueprint("facebook", __name__)
 
@@ -10,15 +14,19 @@ facebook_bp = Blueprint("facebook", __name__)
 # Lấy danh sách tài khoản Facebook
 @facebook_bp.route("/account_fb/")
 def account_fb():
+    facebook_app_id = os.getenv("APP_ID")
+
     form = AddFacebookAccountForm()
 
     user_id = session.get("user_id")  # Lấy user_id từ session
     if not user_id:
         flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
         return redirect(url_for("auth.login"))
-    
+
     accounts = FacebookAccount.query.filter_by(user_id=user_id).all()  # Lấy tất cả các tài khoản từ bảng
-    return render_template("account_fb.html", accounts=accounts, form=form)
+    return render_template(
+        "account_fb.html", accounts=accounts, form=form, facebook_app_id=facebook_app_id
+    )
 
 
 # Thêm hoặc cập nhật tài khoản Facebook
@@ -26,45 +34,51 @@ def account_fb():
 def add_fb_account():
     form = AddFacebookAccountForm()
 
-    user_id = session.get("user_id")  # Lấy user_id từ session
+    user_id = session.get("user_id")  # Get user_id from session
     if not user_id:
         flash("Bạn cần đăng nhập để sử dụng chức năng này", "danger")
         return redirect(url_for("auth.login"))
 
-    # Lấy danh sách tài khoản Facebook hiện có
+    # Get existing Facebook accounts for the user
     accounts = FacebookAccount.query.filter_by(user_id=user_id).all()
 
     if form.validate_on_submit():
-        email = form.email.data
+        facebook_user_id = (
+            form.facebook_user_id.data
+        )  # Assuming 'email' form field is now facebook_user_id
         access_token = form.access_token.data
 
-        # Kiểm tra nếu tài khoản đã tồn tại
-        existing_account = FacebookAccount.query.filter_by(email=email).first()
+        # Check if account already exists
+        existing_account = FacebookAccount.query.filter_by(
+            facebook_user_id=facebook_user_id
+        ).first()
 
         if existing_account:
-            # Nếu tài khoản đã tồn tại, cập nhật thông tin access_token
+            # Update access_token if account exists
             existing_account.access_token = access_token
             try:
-                db.session.commit()  # Cam kết thay đổi vào cơ sở dữ liệu
+                db.session.commit()
                 flash("Facebook account updated successfully!", "success")
             except Exception as e:
-                db.session.rollback()  # Nếu có lỗi, rollback để đảm bảo tính toàn vẹn dữ liệu
+                db.session.rollback()
                 flash(f"Error: {e}", "danger")
         else:
-            # Nếu tài khoản chưa tồn tại, tạo tài khoản mới
-            new_account = FacebookAccount(email=email, access_token=access_token, user_id=user_id)
+            # Create new account if not exists
+            new_account = FacebookAccount(
+                facebook_user_id=facebook_user_id,
+                access_token=access_token,
+                user_id=user_id,
+            )
             try:
-                db.session.add(new_account)  # Thêm vào phiên làm việc của SQLAlchemy
-                db.session.commit()  # Cam kết thay đổi vào cơ sở dữ liệu
+                db.session.add(new_account)
+                db.session.commit()
                 flash("Facebook account added successfully!", "success")
             except Exception as e:
-                db.session.rollback()  # Nếu có lỗi, rollback để đảm bảo tính toàn vẹn dữ liệu
+                db.session.rollback()
                 flash(f"Error: {e}", "danger")
-
-        return redirect(url_for("facebook.account_fb"))
-
-    # Nếu form không hợp lệ, trả về trang account_fb với thông tin tài khoản và form hiện tại
-    return render_template("account_fb.html", accounts=accounts, form=form)
+    else:
+        flash("Giá trị điền không hợp lệ!", "danger")
+    return redirect(url_for("facebook.account_fb"))
 
 
 # Xóa tài khoản Facebook

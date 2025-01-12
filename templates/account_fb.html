@@ -46,8 +46,8 @@
 			<form action="{{ url_for('facebook.add_fb_account') }}" method="POST" class="mb-4">
 				{{ form.csrf_token }} <!-- CSRF token -->
 				<div class="mb-3">
-					<label for="email" class="form-label">Email</label>
-					<input type="email" class="form-control" id="email" name="email" required>
+					<label for="facebook_user_id" class="form-label">Facebook User ID</label>
+					<input type="text" class="form-control" id="facebook_user_id" name="facebook_user_id" required>
 				</div>
 				<div class="mb-3">
 					<label for="access_token" class="form-label">Access Token</label>
@@ -65,7 +65,7 @@
 				<thead>
 					<tr>
 						<th>ID</th>
-						<th>Email</th>
+						<th>Facebook User ID</th>
 						<th>Access Token</th>
 						<th>Actions</th>
 					</tr>
@@ -74,7 +74,7 @@
 					{% for account in accounts %}
 					<tr>
 						<td>{{ account.id }}</td>
-						<td>{{ account.email }}</td>
+						<td>{{ account.facebook_user_id }}</td>
 						<td class="text-truncate" style="max-width: 300px;">
 							<div class="token-wrapper">
 								<div class="token-content">{{ account.access_token }}</div>
@@ -119,6 +119,69 @@
 					button.textContent = 'Error';
 					button.classList.add('btn-danger');
 				});
+			}
+		</script>
+
+		<script>
+			window.fbAsyncInit = function () {
+				FB.init({
+					appId: '{{ facebook_app_id }}',
+					cookie: true,
+					xfbml: true,
+					version: 'v21.0'
+				});
+
+				FB.AppEvents.logPageView();
+
+			};
+
+			(function (d, s, id) {
+				var js, fjs = d.getElementsByTagName(s)[0];
+				if (d.getElementById(id)) { return; }
+				js = d.createElement(s); js.id = id;
+				js.src = "https://connect.facebook.net/en_US/sdk.js";
+				fjs.parentNode.insertBefore(js, fjs);
+			}(document, 'script', 'facebook-jssdk'));
+
+			function fbLogin() {
+				FB.login(function (response) {
+					if (response.authResponse) {
+						const accessToken = response.authResponse.accessToken;
+						const userID = response.authResponse.userID;
+						console.log(response.authResponse)
+
+						// Gửi thông tin đăng nhập đến backend để lưu trữ
+						fetch('/account_fb/add_account', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+								'X-CSRFToken': '{{ form.csrf_token._value() }}', // Nếu bạn đang sử dụng CSRF protection
+							},
+							body: JSON.stringify({
+								access_token: accessToken,
+								facebook_user_id: userID
+							})
+						})
+							.then(response => response.json())
+							.then(data => {
+								if (data.success) {
+									console.log("Đăng nhập thành công và thông tin đã được lưu!");
+									return response.text();
+									//window.location.href = "/account_fb/";
+								} else {
+									console.log("Có lỗi khi lưu thông tin đăng nhập.");
+									return response.text();
+									//window.location.href = "/account_fb/";
+								}
+							})
+							.catch(error => {
+								console.error('Error:', error);
+								window.location.href = "/account_fb/";
+							});
+					} else {
+						alert("Đăng nhập thất bại!");
+					}
+				}, { scope: 'email, read_insights, publish_video, pages_show_list, ads_management, ads_read, business_management, page_events, pages_read_engagement, pages_read_user_content, pages_manage_ads, pages_manage_posts, pages_manage_engagement' });
 			}
 		</script>
 	</body>
