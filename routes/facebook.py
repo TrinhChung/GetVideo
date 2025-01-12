@@ -115,6 +115,7 @@ def add_fb_account():
 def delete_fb_account(id):
     try:
         account = FacebookAccount.query.get(id)  # Tìm tài khoản theo ID
+
         if account:
             # Xóa tất cả các Page liên kết với tài khoản
             for page in account.pages:
@@ -124,8 +125,14 @@ def delete_fb_account(id):
             for ad_account in account.facebook_ad_accounts:
                 db.session.delete(ad_account)
 
+            # Sau khi đã xóa các Page và Ad Account, xóa tài khoản Facebook
             db.session.delete(account)  # Xóa tài khoản Facebook
-            db.session.commit()  # Cam kết thay đổi vào cơ sở dữ liệu
+
+            db.session.flush()  # Đảm bảo xóa các đối tượng đã được thực hiện trước khi commit
+
+            # Cam kết thay đổi vào cơ sở dữ liệu
+            db.session.commit()
+
             flash(
                 "Facebook account, related pages, and ad accounts deleted successfully!",
                 "success",
@@ -134,7 +141,7 @@ def delete_fb_account(id):
             flash("Account not found.", "danger")
     except Exception as e:
         db.session.rollback()  # Nếu có lỗi, rollback để đảm bảo tính toàn vẹn dữ liệu
-        flash(f"Error: {e}", "danger")
+        flash(f"Error: {str(e)}", "danger")  # Cải thiện thông báo lỗi
 
     return redirect(url_for("facebook.account_fb"))
 

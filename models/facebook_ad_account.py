@@ -46,5 +46,13 @@ class FacebookAdAccount(db.Model):
     # ID người dùng liên kết
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 
+    # Khóa ngoại liên kết với FacebookAccount
+    facebook_account_id = db.Column(db.Integer, db.ForeignKey("facebook_account.id"))
+
+    # Thiết lập mối quan hệ với FacebookAccount sử dụng back_populates
+    facebook_account = db.relationship(
+        "FacebookAccount", back_populates="facebook_ad_accounts"
+    )
+
     # Thiết lập mối quan hệ với bảng User
     user = db.relationship("User", backref="facebook_ad_accounts")
