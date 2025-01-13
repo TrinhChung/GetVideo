@@ -63,3 +63,10 @@ def format_datetime(value, format="%Y-%m-%d %H:%M:%S"):
     if isinstance(value, datetime):
         return value.strftime(format)
     return value
+
+
+def convert_to_mysql_datetime(dt):
+    if dt:
+        # Remove timezone information (if any) and format as string for MySQL
+        return dt.replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S")
+    return None

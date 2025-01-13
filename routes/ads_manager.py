@@ -6,9 +6,8 @@ from models.facebook_ad_account import FacebookAdAccount
 from datetime import datetime
 from database_init import db
 from Form.create_campaign import FacebookCampaignForm, CampaignForm  # Import form
-import requests
 from util.ads import create_facebook_campaign, fetch_facebook_campaigns
-
+from util.until import convert_to_mysql_datetime
 
 ads_manager_bp = Blueprint("ads_manager", __name__)
 
@@ -121,7 +120,6 @@ def sync_campaigns():
         return redirect(url_for("facebook.add_fb_account"))
 
     access_token = facebook_account.access_token
-
     facebook_ad_accounts = FacebookAdAccount.query.filter_by(user_id=user_id).all()
 
     if not facebook_ad_accounts:
@@ -145,6 +143,34 @@ def sync_campaigns():
                 facebook_campaign_id=campaign["id"]
             ).first()
 
+            # Parse datetime strings into Python datetime objects
+            created_time = campaign.get("created_time")
+            start_time = campaign.get("start_time")
+            end_time = campaign.get("end_time")
+
+            # Convert to datetime objects if they are in string format
+            if created_time:
+                created_time = datetime.strptime(created_time, "%Y-%m-%dT%H:%M:%S%z")
+                created_time = convert_to_mysql_datetime(created_time)
+            if start_time:
+                start_time = (
+                    datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%S%z")
+                    if start_time != "1970-01-01T00:00:00+0000"
+                    else None
+                )
+                start_time = convert_to_mysql_datetime(start_time)
+            if end_time:
+                end_time = (
+                    datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S%z")
+                    if end_time != "1970-01-01T00:00:00+0000"
+                    else None
+                )
+                end_time = convert_to_mysql_datetime(end_time)
+
+            special_ad_categories = campaign.get("special_ad_categories", "")
+            if isinstance(special_ad_categories, list):
+                special_ad_categories = ",".join(special_ad_categories)  # Or any other separator if necessary
+
             if existing_campaign:
                 existing_campaign.name = campaign.get("name", existing_campaign.name)
                 existing_campaign.objective = campaign.get(
@@ -153,19 +179,14 @@ def sync_campaigns():
                 existing_campaign.status = campaign.get(
                     "status", existing_campaign.status
                 )
-                existing_campaign.created_time = campaign.get(
-                    "created_time", existing_campaign.created_time
+                existing_campaign.created_time = (
+                    created_time or existing_campaign.created_time
                 )
-                existing_campaign.start_time = campaign.get(
-                    "start_time", existing_campaign.start_time
+                existing_campaign.start_time = (
+                    start_time or existing_campaign.start_time
                 )
-                existing_campaign.end_time = campaign.get(
-                    "end_time", existing_campaign.end_time
-                )
-                existing_campaign.special_ad_categories = campaign.get(
-                    "special_ad_categories", existing_campaign.special_ad_categories
-                )
-
+                existing_campaign.end_time = end_time or existing_campaign.end_time
+                existing_campaign.special_ad_categories = special_ad_categories
                 db.session.commit()
                 flash(
                     f"Campaign {existing_campaign.name} updated successfully!",
@@ -177,12 +198,12 @@ def sync_campaigns():
                     name=campaign.get("name"),
                     objective=campaign.get("objective"),
                     status=campaign.get("status"),
-                    created_time=campaign.get("created_time"),
-                    start_time=campaign.get("start_time"),
-                    end_time=campaign.get("end_time"),
+                    created_time=created_time,
+                    start_time=start_time,
+                    end_time=end_time,
                     user_id=user_id,
-                    facebook_account_id=campaign.get("account_id"),
-                    special_ad_categories=campaign.get("special_ad_categories", ""),
+                    facebook_account_id=facebook_account.id,
+                    special_ad_categories=special_ad_categories,
                     facebook_ad_account_id=ad_account.id,
                 )
                 db.session.add(new_campaign)

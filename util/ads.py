@@ -21,7 +21,7 @@ def create_facebook_campaign(ad_account_id, campaign_data, access_token):
 
 def fetch_facebook_campaigns(ad_account_id, access_token):
     try:
-        url = f"https://graph.facebook.com/v21.0/act_{ad_account_id}/campaigns"
+        url = f"https://graph.facebook.com/v21.0/act_{ad_account_id}/campaigns?fields=start_time,objective,name,status,created_time,stop_time,special_ad_categories"
         params = {"access_token": access_token}
         response = requests.get(url, params=params)
 
