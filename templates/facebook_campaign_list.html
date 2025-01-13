@@ -1,19 +1,23 @@
 {% extends 'base.html' %}
 {% block title %}Facebook Campaigns{% endblock %}
 {% block content %}
-<div class="container">
+<div >
 	<h2 class="my-4">Facebook Campaigns</h2>
 
 	<!-- Button Đồng Bộ Chiến Dịch với Facebook -->
 	<form method="POST" action="{{ url_for('ads_manager.sync_campaigns') }}">
 		{{ form.csrf_token }}
-		<button type="submit" class="btn btn-success mb-3">Sync Campaigns with Facebook</button>
+		<button type="submit" class="btn btn-success mb-3">
+			<i class="bi bi-arrow-clockwise"></i> Sync Facebook Campaigns
+		</button>
 	</form>
 
 	<!-- Button Xóa các Dòng Đã Chọn -->
 	<form method="POST" action="{{ url_for('ads_manager.delete_selected_campaigns') }}">
 		{{ form.csrf_token }}
-		<button type="submit" class="btn btn-danger mb-3" id="delete_selected">Delete Selected Campaigns</button>
+		<button type="submit" class="btn btn-danger mb-3" id="delete_selected">
+			<i class="bi bi-trash"></i> Delete Selected
+		</button>
 
 		<!-- Bảng Chiến Dịch -->
 		{% if campaigns %}
@@ -29,8 +33,9 @@
 					<th scope="col">Objective</th>
 					<th scope="col">Status</th>
 					<th scope="col">Created Time</th>
+					<th scope="col">Start Time</th> <!-- Thêm cột Start Time -->
+					<th scope="col">End Time</th> <!-- Thêm cột End Time -->
 					<th scope="col">Special Ad Categories</th>
-					<th scope="col">Actions</th> <!-- Cột Button Modify -->
 				</tr>
 			</thead>
 			<tbody>
@@ -45,17 +50,14 @@
 					<td>{{ campaign.objective }}</td>
 					<td>{{ campaign.status }}</td>
 					<td>{{ campaign.created_time }}</td>
+					<td>{{ campaign.start_time if campaign.start_time else 'N/A' }}</td> <!-- Hiển thị start_time -->
+					<td>{{ campaign.end_time if campaign.end_time else 'N/A' }}</td> <!-- Hiển thị end_time -->
 					<td>
 						{% if campaign.special_ad_categories %}
 						{{ campaign.special_ad_categories }}
 						{% else %}
 						None
 						{% endif %}
-					</td>
-					<!-- Button Modify cho mỗi bản ghi -->
-					<td>
-						<a href="{{ url_for('ads_manager.modify_campaign', campaign_id=campaign.facebook_campaign_id) }}"
-							class="btn btn-warning btn-sm">Modify</a>
 					</td>
 				</tr>
 				{% endfor %}

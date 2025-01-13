@@ -126,6 +126,9 @@ def sync_campaigns():
         flash("No Facebook Ad Accounts found for the user", "danger")
         return redirect(url_for("ads_manager.list_fb_campaigns"))
 
+    updated_count = 0
+    created_count = 0
+
     for ad_account in facebook_ad_accounts:
         try:
             campaigns = fetch_facebook_campaigns(
@@ -169,7 +172,9 @@ def sync_campaigns():
 
             special_ad_categories = campaign.get("special_ad_categories", "")
             if isinstance(special_ad_categories, list):
-                special_ad_categories = ",".join(special_ad_categories)  # Or any other separator if necessary
+                special_ad_categories = ",".join(
+                    special_ad_categories
+                )  # Or any other separator if necessary
 
             if existing_campaign:
                 existing_campaign.name = campaign.get("name", existing_campaign.name)
@@ -188,10 +193,7 @@ def sync_campaigns():
                 existing_campaign.end_time = end_time or existing_campaign.end_time
                 existing_campaign.special_ad_categories = special_ad_categories
                 db.session.commit()
-                flash(
-                    f"Campaign {existing_campaign.name} updated successfully!",
-                    "success",
-                )
+                updated_count += 1
             else:
                 new_campaign = FacebookCampaign(
                     facebook_campaign_id=campaign["id"],
@@ -208,7 +210,12 @@ def sync_campaigns():
                 )
                 db.session.add(new_campaign)
                 db.session.commit()
-                flash(f"Campaign {new_campaign.name} created successfully!", "success")
+                created_count += 1
+
+    flash(
+        f"Sync completed: {created_count} new campaigns created, {updated_count} campaigns updated.",
+        "success",
+    )
 
     return redirect(url_for("ads_manager.list_fb_campaigns"))
 
