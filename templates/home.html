@@ -4,27 +4,160 @@
 
 {% block content %}
 <div class="container mt-5">
-	<h1 class="text-center mb-4">Video Downloader</h1>
-	<p class="text-center mb-5">Choose an option below to start downloading videos:</p>
-	<div class="d-flex flex-column align-items-center">
-		<button class="btn btn-primary mb-3 w-75 w-sm-50 w-md-40" onclick="redirectToBatch()">Batch Download YouTube
-			Videos</button>
-		<button class="btn btn-primary mb-3 w-75 w-sm-50 w-md-40" onclick="redirectToURL()">Download Video from URL</button>
-		<button class="btn btn-primary w-75 w-sm-50 w-md-40" onclick="redirectToAccount()">Account</button>
+	<h1 class="text-center mb-4">DUCK BUSINESS MANAGER</h1>
+	<p class="text-center mb-5">Choose an option below to manage your business:</p>
+
+	<!-- Facebook Section -->
+	<h2 class="mb-4">Facebook Management</h2>
+	<div class="row justify-content-center">
+		<div class="col-md-4 mb-4">
+			<div class="card h-100">
+				<div class="card-body d-flex flex-column">
+					<h5 class="card-title">Facebook Accounts</h5>
+					<p class="card-text flex-grow-1">Manage your Facebook account settings and configurations.</p>
+					<button class="btn btn-primary mt-auto" onclick="window.location.href='/account_fb'">Manage Accounts</button>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4 mb-4">
+			<div class="card h-100">
+				<div class="card-body d-flex flex-column">
+					<h5 class="card-title">Pages</h5>
+					<p class="card-text flex-grow-1">View and manage your Facebook pages and their content.</p>
+					<button class="btn btn-primary mt-auto" onclick="window.location.href='/pages'">Manage Pages</button>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4 mb-4">
+			<div class="card h-100">
+				<div class="card-body d-flex flex-column">
+					<h5 class="card-title">Ads Accounts</h5>
+					<p class="card-text flex-grow-1">Configure and manage your Facebook advertising accounts.</p>
+					<button class="btn btn-primary mt-auto" onclick="window.location.href='/ad_accounts'">Manage Ads</button>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4 mb-4">
+			<div class="card h-100">
+				<div class="card-body d-flex flex-column">
+					<h5 class="card-title">Create Campaign</h5>
+					<p class="card-text flex-grow-1">Start a new Facebook advertising campaign.</p>
+					<button class="btn btn-primary mt-auto" onclick="window.location.href='/campaign_fb/create'">Create
+						Campaign</button>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4 mb-4">
+			<div class="card h-100">
+				<div class="card-body d-flex flex-column">
+					<h5 class="card-title">Facebook Campaigns</h5>
+					<p class="card-text flex-grow-1">View and manage your existing Facebook campaigns.</p>
+					<button class="btn btn-primary mt-auto" onclick="window.location.href='/campaign_fb/list'">View
+						Campaigns</button>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4 mb-4">
+			<div class="card h-100">
+				<div class="card-body d-flex flex-column">
+					<h5 class="card-title">Stack Posts</h5>
+					<p class="card-text flex-grow-1">Manage your queued and scheduled Facebook posts.</p>
+					<button class="btn btn-primary mt-auto" onclick="window.location.href='/stack_posts'">Manage Posts</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- YouTube Section -->
+	<h2 class="mb-4">YouTube Tools</h2>
+	<div class="row justify-content-center">
+		<div class="col-md-4 mb-4">
+			<div class="card h-100">
+				<div class="card-body d-flex flex-column">
+					<h5 class="card-title">Download Videos</h5>
+					<p class="card-text flex-grow-1">Download individual YouTube videos by URL.</p>
+					<button class="btn btn-primary mt-auto" onclick="window.location.href='/download-url'">Download Video</button>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4 mb-4">
+			<div class="card h-100">
+				<div class="card-body d-flex flex-column">
+					<h5 class="card-title">YouTube Playlist</h5>
+					<p class="card-text flex-grow-1">Download entire YouTube playlists at once.</p>
+					<button class="btn btn-primary mt-auto" onclick="window.location.href='/batch/playlist'">Download
+						Playlist</button>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4 mb-4">
+			<div class="card h-100">
+				<div class="card-body d-flex flex-column">
+					<h5 class="card-title">Videos</h5>
+					<p class="card-text flex-grow-1">Manage your downloaded YouTube videos.</p>
+					<button class="btn btn-primary mt-auto" onclick="window.location.href='/videos'">Manage Videos</button>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4 mb-4">
+			<div class="card h-100">
+				<div class="card-body d-flex flex-column">
+					<h5 class="card-title">Video Splits</h5>
+					<p class="card-text flex-grow-1">Split and manage video segments.</p>
+					<button class="btn btn-primary mt-auto" onclick="window.location.href='/video_splits'">Manage Splits</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Legal Section -->
+	<h2 class="mb-4">Legal Information</h2>
+	<div class="row justify-content-center">
+		<div class="col-md-4 mb-4">
+			<div class="card h-100">
+				<div class="card-body d-flex flex-column">
+					<h5 class="card-title">Privacy Policy</h5>
+					<p class="card-text flex-grow-1">View our privacy policy and data handling practices.</p>
+					<button class="btn btn-primary mt-auto" onclick="window.location.href='/polices'">View Policy</button>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4 mb-4">
+			<div class="card h-100">
+				<div class="card-body d-flex flex-column">
+					<h5 class="card-title">Permissions</h5>
+					<p class="card-text flex-grow-1">View and manage application permissions.</p>
+					<button class="btn btn-primary mt-auto" onclick="window.location.href='/permissions'">View
+						Permissions</button>
+				</div>
+			</div>
+		</div>
 	</div>
 </div>
 
-<script>
-	function redirectToBatch() {
-		window.location.href = '/batch/playlist';
+<style>
+	.card {
+		transition: transform 0.2s;
 	}
 
-	function redirectToURL() {
-		window.location.href = '/download-url';
+	.card:hover {
+		transform: translateY(-5px);
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 	}
 
-	function redirectToAccount() {
-		window.location.href = '/account_fb';
+	.card-body {
+		padding: 1.5rem;
+		height: 100%;
 	}
-</script>
+
+	.btn {
+		width: 100%;
+	}
+
+	h2 {
+		color: #333;
+		padding-left: 15px;
+		border-left: 4px solid #007bff;
+	}
+</style>
 {% endblock %}
