@@ -2,7 +2,7 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session
 from models.page import Page  # Import model Page đã tạo
 from util.post_fb import check_token_expiry  # Import hàm check_token_expiry
-
+from Form.page import PageForm  # Import form PageForm đã tạo
 # Tạo blueprint cho pages
 pages_bp = Blueprint("pages", __name__)
 
@@ -10,6 +10,7 @@ pages_bp = Blueprint("pages", __name__)
 # Route để hiển thị danh sách các pages
 @pages_bp.route("/pages")
 def show_pages():
+    form = PageForm()  # Tạo form mới
 
     user_id = session.get("user_id")  # Lấy user_id từ session
     if not user_id:
@@ -19,7 +20,7 @@ def show_pages():
     # Sử dụng SQLAlchemy để lấy tất cả các pages
     pages = Page.query.filter_by(user_id=user_id).all()  # Lấy tất cả các trang từ bảng 'pages'
     # Trả về trang HTML với danh sách pages
-    return render_template("pages.html", pages=pages)
+    return render_template("pages.html", pages=pages, form=form)
 
 # Route để debug token và lưu expires_at
 @pages_bp.route("/pages/debug-token", methods=["POST"])

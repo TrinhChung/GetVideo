@@ -115,6 +115,7 @@
 							</td>
 							<td class="col-account-id">
 								<form action="/pages/debug-token" method="POST">
+									{{ form.csrf_token }}
 									<input type="hidden" name="token" value="{{ page.access_token }}">
 									<input type="hidden" name="page_id" value="{{ page.page_id }}">
 									<button type="submit" class="btn btn-sm btn-outline-secondary" title="Debug token">

@@ -97,12 +97,24 @@ def list_fb_campaigns():
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
-    # Lấy thông tin chiến dịch từ cơ sở dữ liệu
-    campaigns = FacebookCampaign.query.filter_by(user_id=user_id).all()
+    # Lấy danh sách tài khoản quảng cáo của người dùng
+    facebook_ad_accounts = FacebookAdAccount.query.filter_by(user_id=user_id).all()
+
+    # Lọc theo tài khoản quảng cáo nếu có
+    ad_account_filter = request.args.get("ad_account_filter")
+    if ad_account_filter:
+        campaigns = FacebookCampaign.query.filter_by(
+            user_id=user_id, facebook_ad_account_id=ad_account_filter
+        ).all()
+    else:
+        campaigns = FacebookCampaign.query.filter_by(user_id=user_id).all()
 
     # Render danh sách chiến dịch
     return render_template(
-        "facebook_campaign_list.html", campaigns=campaigns, form=form
+        "facebook_campaign_list.html",
+        campaigns=campaigns,
+        form=form,
+        facebook_ad_accounts=facebook_ad_accounts,
     )
 
 

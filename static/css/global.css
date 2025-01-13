@@ -35,3 +35,10 @@ body {
     background-color: #d1ecf1;
     border-color: #bee5eb;
 }
+.filter-btn {
+    display: flex!important;
+    flex-direction: row;
+    gap: 5px;
+    justify-content: center;
+    align-items: center;
+}

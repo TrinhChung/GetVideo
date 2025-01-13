@@ -1,22 +1,47 @@
 {% extends 'base.html' %}
 {% block title %}Facebook Campaigns{% endblock %}
 {% block content %}
-<div >
-	<h2 class="my-4">Facebook Campaigns</h2>
+<div>
+	<h2 class="my-4 text-primary"><i class="fab fa-facebook-square"></i> Facebook Campaigns</h2>
+
+	<!-- Form lọc chiến dịch theo tài khoản quảng cáo -->
+	<form method="GET" action="{{ url_for('ads_manager.list_fb_campaigns') }}" class="mb-3">
+		{{ form.csrf_token }}
+		<label for="ad_account_filter" class="mr-2 font-weight-bold"><i class="fas fa-filter"></i> Filter by Ads
+			Account</label>
+		<div class="form-group d-flex align-items-center">
+			<select name="ad_account_filter" id="ad_account_filter" class="form-control mr-2">
+				<option value="">All Accounts</option>
+				{% for account in facebook_ad_accounts %}
+				<option value="{{ account.id }}"
+					{% if request.args.get('ad_account_filter') == account.id|string %}selected{% endif %}>{{ account.name }}
+				</option>
+				{% endfor %}
+			</select>
+			<button type="submit" class="btn btn-primary flex flex-row m-lg-1 filter-btn">
+				<i class="fas fa-search"></i><div>Filter</div>
+			</button>
+		</div>
+	</form>
 
 	<!-- Button Đồng Bộ Chiến Dịch với Facebook -->
 	<form method="POST" action="{{ url_for('ads_manager.sync_campaigns') }}">
 		{{ form.csrf_token }}
 		<button type="submit" class="btn btn-success mb-3">
-			<i class="bi bi-arrow-clockwise"></i> Sync Facebook Campaigns
+			<i class="fas fa-sync-alt"></i> Sync Facebook Campaigns
 		</button>
+
+		<!-- Button Tạo Campaign Mới -->
+		<a href="{{ url_for('ads_manager.create_fb_campaign') }}" class="btn btn-info mb-3">
+			<i class="fas fa-plus-circle"></i> Create New Campaign
+		</a>
 	</form>
 
 	<!-- Button Xóa các Dòng Đã Chọn -->
 	<form method="POST" action="{{ url_for('ads_manager.delete_selected_campaigns') }}">
 		{{ form.csrf_token }}
 		<button type="submit" class="btn btn-danger mb-3" id="delete_selected">
-			<i class="bi bi-trash"></i> Delete Selected
+			<i class="fas fa-trash-alt"></i> Delete Selected
 		</button>
 
 		<!-- Bảng Chiến Dịch -->
@@ -33,44 +58,40 @@
 					<th scope="col">Objective</th>
 					<th scope="col">Status</th>
 					<th scope="col">Created Time</th>
-					<th scope="col">Start Time</th> <!-- Thêm cột Start Time -->
-					<th scope="col">End Time</th> <!-- Thêm cột End Time -->
+					<th scope="col">Start Time</th>
+					<th scope="col">End Time</th>
 					<th scope="col">Special Ad Categories</th>
 				</tr>
 			</thead>
 			<tbody>
 				{% for campaign in campaigns %}
 				<tr>
-					<!-- Cột Checkbox Cho Mỗi Dòng -->
 					<td>
 						<input type="checkbox" name="selected_campaigns" value="{{ campaign.facebook_campaign_id }}">
 					</td>
 					<td class="fw-bold text-primary">{{ campaign.facebook_campaign_id }}</td>
 					<td>{{ campaign.name }}</td>
 					<td>{{ campaign.objective }}</td>
-					<td>{{ campaign.status }}</td>
-					<td>{{ campaign.created_time }}</td>
-					<td>{{ campaign.start_time if campaign.start_time else 'N/A' }}</td> <!-- Hiển thị start_time -->
-					<td>{{ campaign.end_time if campaign.end_time else 'N/A' }}</td> <!-- Hiển thị end_time -->
 					<td>
-						{% if campaign.special_ad_categories %}
-						{{ campaign.special_ad_categories }}
-						{% else %}
-						None
-						{% endif %}
+						<span class="badge {% if campaign.status == 'ACTIVE' %}bg-success{% else %}bg-secondary{% endif %}">
+							{{ campaign.status }}
+						</span>
 					</td>
+					<td>{{ campaign.created_time }}</td>
+					<td>{{ campaign.start_time if campaign.start_time else 'N/A' }}</td>
+					<td>{{ campaign.end_time if campaign.end_time else 'N/A' }}</td>
+					<td>{{ campaign.special_ad_categories if campaign.special_ad_categories else 'None' }}</td>
 				</tr>
 				{% endfor %}
 			</tbody>
 		</table>
 		{% else %}
-		<p>No campaigns found.</p>
+		<p class="text-muted">No campaigns found.</p>
 		{% endif %}
 	</form>
 </div>
 
 <script>
-	// Chọn/Deselect tất cả các checkbox khi click vào checkbox Select All
 	function selectAll() {
 		const checkboxes = document.querySelectorAll('input[name="selected_campaigns"]');
 		const selectAllCheckbox = document.getElementById('select_all');

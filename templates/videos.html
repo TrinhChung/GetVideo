@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>Danh sách Video</title>
+		<title>Video List</title>
 		<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
-		<!-- Thêm Font Awesome -->
+		<!-- Add Font Awesome -->
 		<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 		<style>
 			/* Ensure word wrap in the title column */
@@ -20,7 +20,7 @@
 				width: 150px;
 			}
 
-			/* Điều chỉnh độ rộng của cột đường dẫn */
+			/* Adjust the width of the path column */
 			.table td:nth-child(4) {
 				width: 400px;
 				word-wrap: break-word;
@@ -32,38 +32,38 @@
 		{% include 'header.html' %}
 		{% include 'message.html' %}
 		<div class="container mt-5">
-			<h1 class="text-center mb-4">Danh sách Video Playlist</h1>
+			<h1 class="text-center mb-4">Video Playlist List</h1>
 
-			<!-- Button Tải tất cả với icon -->
+			<!-- Download All Button with icon -->
 			<form method="POST" action="{{ url_for('video.download_all_videos') }}" class="mt-4">
 				{{ form.csrf_token }} <!-- CSRF token -->
 				<button type="submit" class="btn btn-danger">
-					<i class="fas fa-download"></i> Tải Tất Cả Video
+					<i class="fas fa-download"></i> Download All Videos
 				</button>
 			</form>
 
 			<form method="POST" action="{{ url_for('video.split_selected_videos') }}" class="mt-4">
 				{{ form.csrf_token }} <!-- CSRF token -->
 				<select name="split_duration" class="form-select">
-					<option value="60" {% if selected_duration == 60 %}selected{% endif %}>1 phút</option>
-					<option value="180" {% if selected_duration == 180 %}selected{% endif %}>3 phút</option>
-					<option value="300" {% if selected_duration == 300 %}selected{% endif %}>5 phút</option>
-					<option value="600" {% if selected_duration == 600 %}selected{% endif %}>10 phút</option>
+					<option value="60" {% if selected_duration == 60 %}selected{% endif %}>1 minute</option>
+					<option value="180" {% if selected_duration == 180 %}selected{% endif %}>3 minutes</option>
+					<option value="300" {% if selected_duration == 300 %}selected{% endif %}>5 minutes</option>
+					<option value="600" {% if selected_duration == 600 %}selected{% endif %}>10 minutes</option>
 				</select>
-				<button type="submit" class="btn btn-warning mt-2">Tách video đã chọn</button>
-				<!-- Danh sách các video cần tách sẽ được gửi ở đây -->
+				<button type="submit" class="btn btn-warning mt-2">Split Selected Videos</button>
+				<!-- List of videos to split will be sent here -->
 				<div class="mt-2">
-					<h3 class="mt-5">Danh sách Video</h3>
+					<h3 class="mt-5">Video List</h3>
 					<table class="table table-bordered mt-3">
 						<thead class="table-light">
 							<tr>
 								<th>ID</th>
 								<th>Playlist ID</th>
-								<th>Thời gian</th>
-								<th>Đường dẫn</th>
-								<th>Tải Video</th>
-								<th>Split TikTok</th> <!-- Cột Split mới -->
-								<th>Chọn</th> <!-- Cột chọn video -->
+								<th>Duration</th>
+								<th>Path</th>
+								<th>Download Video</th>
+								<th>Split TikTok</th> <!-- New Split Column -->
+								<th>Select</th> <!-- Select Video Column -->
 							</tr>
 						</thead>
 						<tbody>
@@ -73,28 +73,31 @@
 								<td>{{ video.id }}</td>
 								<td>{{ video.playlist_id }}</td>
 								<td data-duration="{{ video.duration if video.duration else '' }}">
-									{{ video.duration if video.duration else 'Chưa có thông tin' }}
+									{{ video.duration if video.duration else 'No information available' }}
 								</td>
-								<td>{{ video.path if video.path else 'Chưa có đường dẫn' }}</td>
+								<td>{{ video.path if video.path else 'No path available' }}</td>
 								{% if not video.crawled %}
 								<td>
-									<form method="GET" id="download_form_request_{{ video.video_id }}"  action="{{ url_for('video.download_video_route', video_id=video.video_id) }}">
+									<form method="GET" id="download_form_request_{{ video.video_id }}"
+										action="{{ url_for('video.download_video_route', video_id=video.video_id) }}">
 										<button type="submit" form="download_form_request_{{ video.video_id }}" class="btn btn-success">
-											<i class="fas fa-download"></i> Tải Video
+											<i class="fas fa-download"></i> Download Video
 										</button>
 									</form>
 								</td>
 								{% else %}
 								<td class="text-center">
-									<span class="text-success">Đã tải xong</span>
+									<span class="text-success">Downloaded</span>
 								</td>
 								{% endif %}
-								<!-- Nút Split video -->
+								<!-- Split Video Button -->
 								{% if video.path %}
 								<td>
-									<form method="POST" id="split_form_request_{{ video.video_id }}" action="{{ url_for('video.split_video_route', video_id=video.video_id) }}">
+									<form method="POST" id="split_form_request_{{ video.video_id }}"
+										action="{{ url_for('video.split_video_route', video_id=video.video_id) }}">
 										{{ form.csrf_token }} <!-- CSRF token -->
-										<button type="submit" form="split_form_request_{{ video.video_id }}" class="btn btn-warning">Split Video</button>
+										<button type="submit" form="split_form_request_{{ video.video_id }}" class="btn btn-warning">Split
+											Video</button>
 									</form>
 								</td>
 								{% else %}
@@ -102,14 +105,14 @@
 									<span class="text-muted">--</span>
 								</td>
 								{% endif %}
-								<!-- Checkbox chọn video -->
+								<!-- Video Selection Checkbox -->
 								<td>
 									<input type="checkbox" name="selected_videos" value="{{ video.id }}">
 								</td>
 							</tr>
 							{% else %}
 							<tr>
-								<td colspan="7" class="text-center">Không có video nào để hiển thị.</td>
+								<td colspan="7" class="text-center">No videos to display.</td>
 							</tr>
 							{% endfor %}
 						</tbody>

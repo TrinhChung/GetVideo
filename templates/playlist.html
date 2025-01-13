@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>Danh Sách Playlist</title>
+		<title>Playlist List</title>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
@@ -16,45 +16,45 @@
 			<!-- Breadcrumb -->
 			<nav aria-label="breadcrumb">
 				<ol class="breadcrumb">
-					<li class="breadcrumb-item"><a href="/">Trang Chủ</a></li>
-					<li class="breadcrumb-item active" aria-current="page">Danh Sách Playlist</li>
+					<li class="breadcrumb-item"><a href="/">Home</a></li>
+					<li class="breadcrumb-item active" aria-current="page">Playlist List</li>
 				</ol>
 			</nav>
 
-			<h2 class="mb-4">Quản Lý Playlist</h2>
+			<h2 class="mb-4">Manage Playlist</h2>
 
-			<!-- Thêm Playlist Form -->
+			<!-- Add Playlist Form -->
 			<div class="card mb-4">
 				<div class="card-header">
-					<h5>Thêm Playlist Mới</h5>
+					<h5>Add New Playlist</h5>
 				</div>
 				<div class="card-body">
 					<form method="POST" action="{{ url_for('playlist.batch_youtube_playlist') }}">
-						{{ form.csrf_token }} <!-- Token bảo mật CSRF -->
+						{{ form.csrf_token }} <!-- CSRF security token -->
 						<div class="mb-3">
-							<label for="playlist_url" class="form-label">URL Playlist</label>
+							<label for="playlist_url" class="form-label">Playlist URL</label>
 							<input type="text" class="form-control" id="playlist_url" name="playlist_url" required>
 						</div>
 						<button type="submit" class="btn btn-success">
-							<i class="fa fa-plus-circle"></i> Thêm Playlist
+							<i class="fa fa-plus-circle"></i> Add Playlist
 						</button>
 					</form>
 				</div>
 			</div>
 
-			<!-- Danh Sách Playlist -->
+			<!-- Playlist List -->
 			{% if playlists %}
 			<div class="card">
 				<div class="card-header">
-					<h5>Danh Sách Playlist</h5>
+					<h5>Playlist List</h5>
 				</div>
 				<div class="card-body">
 					<table class="table table-hover table-responsive">
 						<thead class="table-dark">
 							<tr>
 								<th>ID</th>
-								<th>Tiêu Đề</th>
-								<th>Hành Động</th>
+								<th>Title</th>
+								<th>Actions</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -64,10 +64,10 @@
 								<td>{{ playlist.title }}</td>
 								<td>
 									<form method="POST" action="{{ url_for('playlist.get_video_from_playlist') }}" class="d-inline">
-										{{ form.csrf_token }} <!-- CSRF token --> <!-- Token bảo mật CSRF -->
+										{{ form.csrf_token }} <!-- CSRF token --> <!-- CSRF security token -->
 										<input type="hidden" name="playlist_id" value="{{ playlist.id }}">
 										<button type="submit" class="btn btn-primary btn-sm">
-											<i class="fa fa-download"></i> Lấy Video
+											<i class="fa fa-download"></i> Get Video
 										</button>
 									</form>
 								</td>
@@ -79,15 +79,15 @@
 			</div>
 			{% else %}
 			<div class="alert alert-info mt-4">
-				<i class="fa fa-info-circle"></i> Không tìm thấy playlist nào.
+				<i class="fa fa-info-circle"></i> No playlists found.
 			</div>
 			{% endif %}
 
-			<!-- Nút lấy tất cả video -->
+			<!-- Button to get all videos -->
 			<form method="POST" action="{{ url_for('playlist.get_all_videos') }}" class="text-center mt-4">
-				{{ form.csrf_token }} <!-- Token bảo mật CSRF -->
+				{{ form.csrf_token }} <!-- CSRF security token -->
 				<button type="submit" class="btn btn-warning">
-					<i class="fa fa-cloud-download-alt"></i> Lấy Tất Cả Video
+					<i class="fa fa-cloud-download-alt"></i> Get All Videos
 				</button>
 			</form>
 		</div>
