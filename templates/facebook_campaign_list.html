@@ -5,24 +5,32 @@
 	<h2 class="my-4">Facebook Campaigns</h2>
 
 	{% if campaigns %}
-	<table class="table">
-		<thead>
+	<table class="table table-bordered table-striped">
+		<thead class="table-dark">
 			<tr>
 				<th scope="col">Campaign ID</th>
 				<th scope="col">Name</th>
 				<th scope="col">Objective</th>
 				<th scope="col">Status</th>
 				<th scope="col">Created Time</th>
+				<th scope="col">Special Ad Categories</th> <!-- Thêm cột Special Ad Categories -->
 			</tr>
 		</thead>
 		<tbody>
 			{% for campaign in campaigns %}
 			<tr>
-				<td>{{ campaign.facebook_campaign_id }}</td>
+				<td class="fw-bold text-primary">{{ campaign.facebook_campaign_id }}</td> <!-- Nổi bật cột Campaign ID -->
 				<td>{{ campaign.name }}</td>
 				<td>{{ campaign.objective }}</td>
 				<td>{{ campaign.status }}</td>
 				<td>{{ campaign.created_time }}</td>
+				<td>
+					{% if campaign.special_ad_categories %}
+					{{ campaign.special_ad_categories }} <!-- Hiển thị Special Ad Categories -->
+					{% else %}
+					None
+					{% endif %}
+				</td>
 			</tr>
 			{% endfor %}
 		</tbody>

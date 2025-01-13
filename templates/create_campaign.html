@@ -36,7 +36,14 @@
 
 		<div class="mb-3">
 			<label for="special_ad_categories" class="form-label">Special Ad Categories</label>
-			{{ form.special_ad_categories(class="form-control", id="special_ad_categories") }}
+			<select class="form-control" id="special_ad_categories" name="special_ad_categories" required>
+				<option value="NONE" {% if form.special_ad_categories.data == 'NONE' %}selected{% endif %}>None</option>
+				<option value="HOUSING" {% if form.special_ad_categories.data == 'HOUSING' %}selected{% endif %}>Housing
+				</option>
+				<option value="EMPLOYMENT" {% if form.special_ad_categories.data == 'EMPLOYMENT' %}selected{% endif %}>
+					Employment</option>
+				<option value="CREDIT" {% if form.special_ad_categories.data == 'CREDIT' %}selected{% endif %}>Credit</option>
+			</select>
 		</div>
 
 		<button type="submit" class="btn btn-primary">Create Campaign</button>
