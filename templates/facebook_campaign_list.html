@@ -4,39 +4,80 @@
 <div class="container">
 	<h2 class="my-4">Facebook Campaigns</h2>
 
-	{% if campaigns %}
-	<table class="table table-bordered table-striped">
-		<thead class="table-dark">
-			<tr>
-				<th scope="col">Campaign ID</th>
-				<th scope="col">Name</th>
-				<th scope="col">Objective</th>
-				<th scope="col">Status</th>
-				<th scope="col">Created Time</th>
-				<th scope="col">Special Ad Categories</th> <!-- Thêm cột Special Ad Categories -->
-			</tr>
-		</thead>
-		<tbody>
-			{% for campaign in campaigns %}
-			<tr>
-				<td class="fw-bold text-primary">{{ campaign.facebook_campaign_id }}</td> <!-- Nổi bật cột Campaign ID -->
-				<td>{{ campaign.name }}</td>
-				<td>{{ campaign.objective }}</td>
-				<td>{{ campaign.status }}</td>
-				<td>{{ campaign.created_time }}</td>
-				<td>
-					{% if campaign.special_ad_categories %}
-					{{ campaign.special_ad_categories }} <!-- Hiển thị Special Ad Categories -->
-					{% else %}
-					None
-					{% endif %}
-				</td>
-			</tr>
-			{% endfor %}
-		</tbody>
-	</table>
-	{% else %}
-	<p>No campaigns found.</p>
-	{% endif %}
+	<!-- Button Đồng Bộ Chiến Dịch với Facebook -->
+	<button type="button" class="btn btn-success mb-3" onclick="syncCampaigns()">Sync Campaigns with Facebook</button>
+
+	<!-- Button Xóa các Dòng Đã Chọn -->
+	<form method="POST" action="{{ url_for('ads_manager.delete_selected_campaigns') }}">
+		{{ form.csrf_token }}
+		<button type="submit" class="btn btn-danger mb-3" id="delete_selected">Delete Selected Campaigns</button>
+
+		<!-- Bảng Chiến Dịch -->
+		{% if campaigns %}
+		<table class="table table-bordered table-striped">
+			<thead class="table-dark">
+				<tr>
+					<!-- Cột Checkbox Select All -->
+					<th scope="col">
+						<input type="checkbox" id="select_all" onclick="selectAll()">
+					</th>
+					<th scope="col">Campaign ID</th>
+					<th scope="col">Name</th>
+					<th scope="col">Objective</th>
+					<th scope="col">Status</th>
+					<th scope="col">Created Time</th>
+					<th scope="col">Special Ad Categories</th>
+					<th scope="col">Actions</th> <!-- Cột Button Modify -->
+				</tr>
+			</thead>
+			<tbody>
+				{% for campaign in campaigns %}
+				<tr>
+					<!-- Cột Checkbox Cho Mỗi Dòng -->
+					<td>
+						<input type="checkbox" name="selected_campaigns" value="{{ campaign.facebook_campaign_id }}">
+					</td>
+					<td class="fw-bold text-primary">{{ campaign.facebook_campaign_id }}</td>
+					<td>{{ campaign.name }}</td>
+					<td>{{ campaign.objective }}</td>
+					<td>{{ campaign.status }}</td>
+					<td>{{ campaign.created_time }}</td>
+					<td>
+						{% if campaign.special_ad_categories %}
+						{{ campaign.special_ad_categories }}
+						{% else %}
+						None
+						{% endif %}
+					</td>
+					<!-- Button Modify cho mỗi bản ghi -->
+					<td>
+						<a href="{{ url_for('ads_manager.modify_campaign', campaign_id=campaign.facebook_campaign_id) }}"
+							class="btn btn-warning btn-sm">Modify</a>
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		{% else %}
+		<p>No campaigns found.</p>
+		{% endif %}
+	</form>
 </div>
+
+<script>
+	// Chọn/Deselect tất cả các checkbox khi click vào checkbox Select All
+	function selectAll() {
+		const checkboxes = document.querySelectorAll('input[name="selected_campaigns"]');
+		const selectAllCheckbox = document.getElementById('select_all');
+		checkboxes.forEach(checkbox => {
+			checkbox.checked = selectAllCheckbox.checked;
+		});
+	}
+
+	// Hàm đồng bộ chiến dịch với Facebook (ví dụ)
+	function syncCampaigns() {
+		alert('Campaigns are being synced with Facebook...');
+		// Thực hiện logic đồng bộ ở đây (ví dụ: gửi request API)
+	}
+</script>
 {% endblock %}

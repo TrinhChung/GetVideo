@@ -82,6 +82,8 @@ def create_fb_campaign():
                     status=form.status.data,
                     special_ad_categories=form.special_ad_categories.data,
                     created_time=datetime.now(),
+                    start_time=form.start_time.data,  # Lưu thời gian bắt đầu
+                    end_time=form.end_time.data,  # Lưu thời gian kết thúc
                     user_id=user_id,
                     facebook_account_id=facebook_account.id,
                 )

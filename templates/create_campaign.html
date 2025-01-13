@@ -35,6 +35,16 @@
 		</div>
 
 		<div class="mb-3">
+			<label for="start_time" class="form-label">Start Time</label>
+			<input type="datetime-local" class="form-control" id="start_time" name="start_time" required>
+		</div>
+
+		<div class="mb-3">
+			<label for="end_time" class="form-label">End Time</label>
+			<input type="datetime-local" class="form-control" id="end_time" name="end_time" required>
+		</div>
+
+		<div class="mb-3">
 			<label for="special_ad_categories" class="form-label">Special Ad Categories</label>
 			<select class="form-control" id="special_ad_categories" name="special_ad_categories" required>
 				<option value="NONE" {% if form.special_ad_categories.data == 'NONE' %}selected{% endif %}>None</option>

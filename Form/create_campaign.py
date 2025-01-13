@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, SubmitField
+from wtforms import StringField, SelectField, SubmitField, DateTimeField
 from wtforms.validators import DataRequired, Length
 
 
@@ -41,5 +41,11 @@ class FacebookCampaignForm(FlaskForm):
             ("ISSUES_ELECTIONS_POLITICS", "Issues, Elections, or Politics"),
         ],
         validators=[DataRequired()],
+    )
+    start_time = DateTimeField(
+        "Start Time", format="%Y-%m-%d %H:%M:%S", validators=[DataRequired()]
+    )
+    end_time = DateTimeField(
+        "End Time", format="%Y-%m-%d %H:%M:%S", validators=[DataRequired()]
     )
     submit = SubmitField("Create Campaign")
