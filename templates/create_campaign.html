@@ -5,37 +5,38 @@
 	<h2 class="my-4">Create Facebook Campaign</h2>
 
 	<form method="POST" action="{{ url_for('ads_manager.create_fb_campaign') }}">
+		{{ form.csrf_token }}
+
 		<div class="mb-3">
 			<label for="ad_account_id" class="form-label">Select Ad Account</label>
 			<select class="form-control" id="ad_account_id" name="ad_account_id" required>
 				<option value="" disabled selected>Select an ad account</option>
 				{% for ad_account in ad_accounts %}
-				<option value="{{ ad_account.facebook_ad_account_id }}">{{ ad_account.name }}</option>
+				<option value="{{ ad_account.facebook_ad_account_id }}"
+					{% if ad_account.facebook_ad_account_id == form.ad_account_id.data %}selected{% endif %}>{{ ad_account.name }}
+				</option>
 				{% endfor %}
 			</select>
 		</div>
+
 		<div class="mb-3">
 			<label for="campaign_name" class="form-label">Campaign Name</label>
-			<input type="text" class="form-control" id="campaign_name" name="campaign_name" required>
+			{{ form.campaign_name(class="form-control", id="campaign_name") }}
 		</div>
+
 		<div class="mb-3">
 			<label for="objective" class="form-label">Objective</label>
-			<select class="form-control" id="objective" name="objective">
-				<option value="CONVERSIONS">Conversions</option>
-				<option value="LINK_CLICKS">Link Clicks</option>
-				<option value="PAGE_LIKES">Page Likes</option>
-				<option value="APP_INSTALLS">App Installs</option>
-				<option value="REACH">Reach</option>
-				<option value="ENGAGEMENT">Engagement</option>
-			</select>
+			{{ form.objective(class="form-control", id="objective") }}
 		</div>
+
 		<div class="mb-3">
 			<label for="status" class="form-label">Status</label>
-			<select class="form-control" id="status" name="status">
-				<option value="PAUSED">Paused</option>
-				<option value="ACTIVE">Active</option>
-				<option value="DELETED">Deleted</option>
-			</select>
+			{{ form.status(class="form-control", id="status") }}
+		</div>
+
+		<div class="mb-3">
+			<label for="special_ad_categories" class="form-label">Special Ad Categories</label>
+			{{ form.special_ad_categories(class="form-control", id="special_ad_categories") }}
 		</div>
 
 		<button type="submit" class="btn btn-primary">Create Campaign</button>

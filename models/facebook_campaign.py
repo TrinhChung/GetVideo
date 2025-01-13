@@ -1,5 +1,6 @@
-# models/facebook_campaign.py
 from database_init import db
+from sqlalchemy import Column, String, DateTime, Integer
+
 
 class FacebookCampaign(db.Model):
     __tablename__ = "facebook_campaign"
@@ -19,6 +20,9 @@ class FacebookCampaign(db.Model):
     facebook_account = db.relationship(
         "FacebookAccount", back_populates="facebook_campaigns"
     )
+
+    # Added column for special ad categories
+    special_ad_categories = db.Column(db.String(255), nullable=True)
 
     def __repr__(self):
         return f"<FacebookCampaign {self.name}>"
