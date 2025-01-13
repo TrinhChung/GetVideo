@@ -1,4 +1,6 @@
 from urllib.parse import urlparse, parse_qs
+from datetime import datetime
+
 
 def extract_facebook_video_id(url):
     """
@@ -56,3 +58,8 @@ def generate_playlist_url(playlist_id):
         print(f"Đã xảy ra lỗi khi tạo URL từ playlist ID: {e}")
         return None
 
+
+def format_datetime(value, format="%Y-%m-%d %H:%M:%S"):
+    if isinstance(value, datetime):
+        return value.strftime(format)
+    return value

@@ -34,14 +34,17 @@
 			{{ form.status(class="form-control", id="status") }}
 		</div>
 
-		<div class="mb-3">
-			<label for="start_time" class="form-label">Start Time</label>
-			<input type="datetime-local" class="form-control" id="start_time" name="start_time" required>
-		</div>
-
-		<div class="mb-3">
-			<label for="end_time" class="form-label">End Time</label>
-			<input type="datetime-local" class="form-control" id="end_time" name="end_time" required>
+		<div class="row mb-3">
+			<div class="col-md-6">
+				<label for="start_time" class="form-label">Start Time</label>
+				<input type="datetime-local" class="form-control" id="start_time" name="start_time"
+					value="{{ form.start_time.data|datetimeformat('%Y-%m-%dT%H:%M') }}" required>
+			</div>
+			<div class="col-md-6">
+				<label for="end_time" class="form-label">End Time</label>
+				<input type="datetime-local" class="form-control" id="end_time" name="end_time"
+					value="{{ form.end_time.data|datetimeformat('%Y-%m-%dT%H:%M') }}" required>
+			</div>
 		</div>
 
 		<div class="mb-3">

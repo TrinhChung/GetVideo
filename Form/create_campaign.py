@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, SubmitField, DateTimeField
+from wtforms import StringField, SelectField, SubmitField, DateTimeField,SelectMultipleField
 from wtforms.validators import DataRequired, Length
-
+from wtforms.widgets import CheckboxInput
 
 class FacebookCampaignForm(FlaskForm):
     campaign_name = StringField(
@@ -42,10 +42,12 @@ class FacebookCampaignForm(FlaskForm):
         ],
         validators=[DataRequired()],
     )
-    start_time = DateTimeField(
-        "Start Time", format="%Y-%m-%d %H:%M:%S", validators=[DataRequired()]
-    )
-    end_time = DateTimeField(
-        "End Time", format="%Y-%m-%d %H:%M:%S", validators=[DataRequired()]
-    )
+    start_time = DateTimeField("Start Time", format="%Y-%m-%dT%H:%M", validators=[DataRequired()])
+    end_time = DateTimeField("End Time", format="%Y-%m-%dT%H:%M", validators=[DataRequired()])
     submit = SubmitField("Create Campaign")
+
+
+class CampaignForm(FlaskForm):
+    selected_campaigns = SelectMultipleField(
+        "Selected Campaigns", coerce=int, widget=CheckboxInput()
+    )

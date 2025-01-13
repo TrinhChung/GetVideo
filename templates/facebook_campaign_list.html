@@ -5,7 +5,10 @@
 	<h2 class="my-4">Facebook Campaigns</h2>
 
 	<!-- Button Đồng Bộ Chiến Dịch với Facebook -->
-	<button type="button" class="btn btn-success mb-3" onclick="syncCampaigns()">Sync Campaigns with Facebook</button>
+	<form method="POST" action="{{ url_for('ads_manager.sync_campaigns') }}">
+		{{ form.csrf_token }}
+		<button type="submit" class="btn btn-success mb-3">Sync Campaigns with Facebook</button>
+	</form>
 
 	<!-- Button Xóa các Dòng Đã Chọn -->
 	<form method="POST" action="{{ url_for('ads_manager.delete_selected_campaigns') }}">
@@ -72,12 +75,6 @@
 		checkboxes.forEach(checkbox => {
 			checkbox.checked = selectAllCheckbox.checked;
 		});
-	}
-
-	// Hàm đồng bộ chiến dịch với Facebook (ví dụ)
-	function syncCampaigns() {
-		alert('Campaigns are being synced with Facebook...');
-		// Thực hiện logic đồng bộ ở đây (ví dụ: gửi request API)
 	}
 </script>
 {% endblock %}

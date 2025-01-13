@@ -58,3 +58,11 @@ class FacebookAdAccount(db.Model):
 
     # Thiết lập mối quan hệ với bảng User
     user = db.relationship("User", backref="facebook_ad_accounts")
+
+    # Mối quan hệ với bảng FacebookCampaign
+    facebook_campaigns = db.relationship(
+        "FacebookCampaign", back_populates="facebook_ad_account"
+    )
+
+    def __repr__(self):
+        return f"<FacebookAdAccount {self.name}>"

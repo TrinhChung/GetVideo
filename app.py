@@ -10,6 +10,7 @@ from cronjob.init_schedule import scheduler
 from log import setup_logging
 from flask_seeder import FlaskSeeder
 from seeds.user_seeder import UserSeeder
+from util.until import format_datetime
 
 # Import tất cả các mô hình
 from models.category_playlist import CategoryPlaylist
@@ -55,6 +56,8 @@ def create_app():
         f"mysql://{os.getenv('USER_DB')}:{os.getenv('PASSWORD_DB')}@{os.getenv('ADDRESS_DB')}/{os.getenv('NAME_DB')}"
     )
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+    app.jinja_env.filters["datetimeformat"] = format_datetime
 
     db.init_app(app)
     migrate.init_app(app, db)
