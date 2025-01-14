@@ -120,7 +120,12 @@ def delete_fb_account(id):
         if account:
             # Xóa tất cả các Page liên kết với tài khoản
             for page in account.pages:
+                for stack_posts in page.stack_posts:
+                    db.session.delete(stack_posts)
                 db.session.delete(page)
+
+            for campaign in account.facebook_campaigns:
+                db.session.delete(campaign)
 
             # Xóa tất cả các Facebook Ad Account liên kết với tài khoản
             for ad_account in account.facebook_ad_accounts:

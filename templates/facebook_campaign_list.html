@@ -27,7 +27,7 @@
 	<!-- Button Đồng Bộ Chiến Dịch với Facebook -->
 	<form method="POST" action="{{ url_for('ads_manager.sync_campaigns') }}">
 		{{ form.csrf_token }}
-		<button type="submit" class="btn btn-success mb-3">
+		<button type="submit" id="sync-fb-button" class="btn btn-success mb-3">
 			<i class="fas fa-sync-alt"></i> Sync Facebook Campaigns
 		</button>
 

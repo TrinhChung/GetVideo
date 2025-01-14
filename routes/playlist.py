@@ -17,6 +17,7 @@ def batch_youtube_playlist():
     if not user_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
+    print(user_id)
 
     if form.validate_on_submit():
         playlist_url = form.playlist_url.data

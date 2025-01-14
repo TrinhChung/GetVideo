@@ -8,6 +8,12 @@ from database_init import db
 from Form.create_campaign import FacebookCampaignForm, CampaignForm  # Import form
 from util.ads import create_facebook_campaign, fetch_facebook_campaigns
 from util.until import convert_to_mysql_datetime
+import time
+
+total_requests = 15000
+requests_per_hour = 170
+batch_count = total_requests // requests_per_hour  # Số batch cần chạy
+remaining_requests = total_requests % requests_per_hour  # Số request còn lại
 
 ads_manager_bp = Blueprint("ads_manager", __name__)
 

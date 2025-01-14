@@ -9,33 +9,121 @@
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 		<style>
+			/* Định dạng cơ bản cho bảng */
+			.table {
+				width: 100%;
+				table-layout: fixed;
+				/* Giúp kiểm soát width tốt hơn */
+			}
+		
+			/* Định dạng từng cột */
+			.table th:nth-child(1),
+			.table td:nth-child(1) {
+				width: 8%;
+				/* Cột ID */
+			}
+		
+			.table th:nth-child(2),
+			.table td:nth-child(2) {
+				width: 15%;
+				/* Cột Facebook User ID */
+			}
+		
+			.table th:nth-child(3),
+			.table td:nth-child(3) {
+				width: 52%;
+				/* Cột Access Token - cho nhiều không gian nhất */
+			}
+		
+			.table th:nth-child(4),
+			.table td:nth-child(4) {
+				width: 25%;
+				/* Cột Actions */
+			}
+		
+			/* Cải thiện token wrapper */
 			.token-wrapper {
 				display: flex;
 				align-items: center;
-				/* Căn chỉnh dọc cho các phần tử */
 				gap: 8px;
 				width: 100%;
-				/* Đảm bảo không gian rộng đủ cho nội dung */
+				position: relative;
 			}
-
+		
 			.token-content {
+				font-family: monospace;
+				/* Sử dụng font monospace cho token */
+				background-color: #f8f9fa;
+				padding: 6px 8px;
+				border-radius: 4px;
 				max-height: 2.4em;
-				/* Khoảng 2 dòng */
 				overflow: hidden;
 				text-overflow: ellipsis;
 				display: -webkit-box;
-				-webkit-line-clamp: 2;
+				-webkit-line-clamp: 1;
+				/* Giảm xuống 1 dòng */
 				-webkit-box-orient: vertical;
 				flex-grow: 1;
-				/* Cho phép phần tử này chiếm phần còn lại của không gian */
+				font-size: 0.9em;
 			}
-
+		
+			/* Style cho nút copy */
 			.copy-btn {
 				padding: 2px 8px;
 				font-size: 0.8em;
-				margin-left: 5px;
 				white-space: nowrap;
-				/* Đảm bảo nút không bị gãy dòng */
+				flex-shrink: 0;
+				/* Ngăn nút bị co lại */
+				min-width: 60px;
+				/* Đảm bảo nút không bị quá nhỏ */
+			}
+		
+			/* Style cho phần actions */
+			td:last-child {
+				white-space: nowrap;
+				/* Giữ các nút trên cùng một dòng */
+				text-align: center;
+				/* Căn phải các nút */
+			}
+
+			th:last-child {
+				white-space: nowrap;
+				/* Giữ các nút trên cùng một dòng */
+				text-align: center;
+				/* Căn phải các nút */
+			}
+		
+			td:last-child form {
+				display: inline-block;
+				margin-right: 4px;
+				/* Khoảng cách giữa các nút */
+			}
+		
+			/* Responsive adjustments */
+			@media (max-width: 992px) {
+				.token-content {
+					-webkit-line-clamp: 2;
+					/* Cho phép 2 dòng trên màn hình nhỏ */
+				}
+		
+				td:last-child {
+					display: flex;
+					flex-wrap: wrap;
+					gap: 4px;
+					padding: 8px 4px;
+				}
+		
+				td:last-child form,
+				td:last-child a {
+					flex: 1;
+					min-width: 100px;
+					margin: 2px;
+				}
+		
+				.btn {
+					width: 100%;
+					margin: 0;
+				}
 			}
 		</style>
 	</head>
@@ -58,7 +146,7 @@
 					<i class="fas fa-plus-circle"></i> Add Account
 				</button> -->
 
-				<button type="button" class="btn btn-primary btn-lg" onclick="fbLogin()">
+				<button type="button" class="btn btn-primary" onclick="fbLogin()">
 					<i class="fab fa-facebook-f"></i> Login By Facebook
 				</button>
 			</form>
@@ -69,7 +157,7 @@
 					<tr>
 						<th>ID</th>
 						<th>Facebook User ID</th>
-						<th>Access Token</th>
+						<!-- <th>Access Token</th> -->
 						<th>Actions</th>
 					</tr>
 				</thead>
@@ -83,15 +171,7 @@
 					<tr>
 						<td>{{ account.id }}</td>
 						<td>{{ account.facebook_user_id }}</td>
-						<td class="text-truncate" style="max-width: 300px;">
-							<div class="token-wrapper">
-								<div class="token-content">{{ account.access_token }}</div>
-								<button class="btn btn-sm btn-outline-primary copy-btn" onclick="copyToken(this, '{{ account.access_token }}')"
-									title="Copy token">
-									Copy
-								</button>
-							</div>
-						</td>
+
 						<td>
 							<form action="{{ url_for('facebook.get_pages') }}" method="POST" style="display: inline;">
 								{{ form.csrf_token }} <!-- CSRF token -->
@@ -99,15 +179,15 @@
 								<input type="hidden" name="access_token" value="{{ account.access_token }}">
 								<button type="submit" class="btn btn-info btn-sm">Get Pages</button>
 							</form>
-							<a href="{{ url_for('facebook.delete_fb_account', id=account.id) }}" class="btn btn-danger btn-sm">Delete</a>
-						</td>
-						<td>
 							<form action="{{ url_for('facebook.get_account_ads') }}" method="POST" style="display: inline;">
 								{{ form.csrf_token }} <!-- CSRF token -->
 								<input type="hidden" name="id" value="{{ account.id }}">
 								<input type="hidden" name="access_token" value="{{ account.access_token }}">
 								<button type="submit" class="btn btn-warning btn-sm">Get Ads</button> <!-- New button for Get Ads -->
 							</form>
+							<a href="{{ url_for('facebook.delete_fb_account', id=account.id) }}"
+								class="btn btn-danger btn-sm">Delete</a>
+
 						</td>
 					</tr>
 					{% endfor %}
@@ -160,61 +240,61 @@
 			}(document, 'script', 'facebook-jssdk'));
 
 			function fbLogin() {
-					FB.login(function (response) {
-						if (response.authResponse) {
-							const accessToken = response.authResponse.accessToken;
-							const userID = response.authResponse.userID;
+				FB.login(function (response) {
+					if (response.authResponse) {
+						const accessToken = response.authResponse.accessToken;
+						const userID = response.authResponse.userID;
 
-							// Gửi thông tin đăng nhập đến backend để lưu trữ
-							fetch('/account_fb/add_account', {
-								method: 'POST',
-								headers: {
-									'Content-Type': 'application/json',
-									'X-CSRFToken': '{{ form.csrf_token._value() }}', // Nếu bạn đang sử dụng CSRF protection
-								},
-								body: JSON.stringify({
-									access_token: accessToken,
-									facebook_user_id: userID
-								})
+						// Gửi thông tin đăng nhập đến backend để lưu trữ
+						fetch('/account_fb/add_account', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+								'X-CSRFToken': '{{ form.csrf_token._value() }}', // Nếu bạn đang sử dụng CSRF protection
+							},
+							body: JSON.stringify({
+								access_token: accessToken,
+								facebook_user_id: userID
 							})
-								.then(response => {
-									// Kiểm tra xem phản hồi có phải là JSON không
-									if (response.ok) {
-										const contentType = response.headers.get("Content-Type");
+						})
+							.then(response => {
+								// Kiểm tra xem phản hồi có phải là JSON không
+								if (response.ok) {
+									const contentType = response.headers.get("Content-Type");
 
-										// Nếu phản hồi là JSON
-										if (contentType && contentType.includes("application/json")) {
-											return response.json();
-										} else {
-											// Nếu phản hồi là HTML (hoặc loại khác), xử lý HTML
-											return response.text();
-										}
+									// Nếu phản hồi là JSON
+									if (contentType && contentType.includes("application/json")) {
+										return response.json();
 									} else {
-										throw new Error("Network response was not ok");
+										// Nếu phản hồi là HTML (hoặc loại khác), xử lý HTML
+										return response.text();
 									}
-								})
-								.then(data => {
-									if (typeof data === 'object' && data.success) {
-										console.log("Đăng nhập thành công và thông tin đã được lưu!");
-										window.location.href = "/account_fb/";
-									} else {
-										// Nếu phản hồi là HTML, xử lý việc chuyển hướng hoặc hiển thị thông báo lỗi
-										console.log("Có lỗi khi lưu thông tin đăng nhập.");
-										window.location.href = "/account_fb/"; // Hoặc xử lý theo cách khác
-									}
-								})
-								.catch(error => {
-									console.error('Error:', error);
-									alert("Đã xảy ra lỗi khi đăng nhập.");
-								});
-						} else {
-							console.log("Đăng nhập thất bại!");
-							window.location.href = "/account_fb/";
-						}
-					}, {
-						scope: 'read_insights, publish_video,  pages_read_engagement, business_management,pages_manage_ads, ads_read, ads_management, pages_manage_engagement'
-					});
-				}
+								} else {
+									throw new Error("Network response was not ok");
+								}
+							})
+							.then(data => {
+								if (typeof data === 'object' && data.success) {
+									console.log("Đăng nhập thành công và thông tin đã được lưu!");
+									window.location.href = "/account_fb/";
+								} else {
+									// Nếu phản hồi là HTML, xử lý việc chuyển hướng hoặc hiển thị thông báo lỗi
+									console.log("Có lỗi khi lưu thông tin đăng nhập.");
+									window.location.href = "/account_fb/"; // Hoặc xử lý theo cách khác
+								}
+							})
+							.catch(error => {
+								console.error('Error:', error);
+								alert("Đã xảy ra lỗi khi đăng nhập.");
+							});
+					} else {
+						console.log("Đăng nhập thất bại!");
+						window.location.href = "/account_fb/";
+					}
+				}, {
+					scope: 'email, public_profile, read_insights, publish_video, pages_read_engagement, business_management,pages_manage_ads, ads_management, pages_manage_engagement'
+				});
+			}
 
 		</script>
 	</body>

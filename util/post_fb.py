@@ -9,6 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 from requests.exceptions import RequestException
 from models.facebook_ad_account import FacebookAdAccount
+import time
 
 # Tải các biến môi trường từ file .env
 load_dotenv()
@@ -191,7 +192,7 @@ def create_video_post(page_id, access_token, video_path, message=""):
 
         # Lấy ID của phiên tải lên
         video_id = response.json().get("id")
-
+        
         if not video_id:
             raise Exception("Không nhận được session ID cho phiên tải lên video.")
 
@@ -405,6 +406,16 @@ def get_ad_accounts(access_token, user_id, facebook_account_id):
         )
 
         response = graph.get_object(f"me?fields={fields}")
+
+        # time.sleep(3600)
+
+        for i in range(88):
+            for j in range(0,300):
+                response = graph.get_object(f"me?fields={fields}")
+                print(response)
+                print(f"Batch {i*300+j} hoàn thành.")
+            print(f"Batch {i} hoàn thành. Đợi 1 tiếng...")
+            time.sleep(3600)  # Đợi 1 tiếng (3600 giây)
 
         # Debug response
         print(response)

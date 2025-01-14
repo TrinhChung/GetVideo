@@ -59,6 +59,8 @@ def create_app():
 
     app.jinja_env.filters["datetimeformat"] = format_datetime
 
+    app.config["SEND_FILE_MAX_AGE_DEFAULT"] = timedelta(minutes=1200)
+
     db.init_app(app)
     migrate.init_app(app, db)
 
