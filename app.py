@@ -9,7 +9,7 @@ from datetime import timedelta
 from cronjob.init_schedule import scheduler
 from log import setup_logging
 from flask_seeder import FlaskSeeder
-from seeds.user_seeder import UserSeeder
+
 from util.until import format_datetime
 
 # Import tất cả các mô hình

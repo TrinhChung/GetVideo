@@ -187,7 +187,10 @@ def get_account_ads():
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
-    get_ad_accounts(access_token, user_id, id)
+    try:
+        get_ad_accounts(access_token, user_id, id)
+    except Exception as e:
+        flash(f"Lỗi: {e}", "danger")
 
     return redirect(url_for("facebook.account_fb"))
 

@@ -409,13 +409,10 @@ def get_ad_accounts(access_token, user_id, facebook_account_id):
 
         # time.sleep(3600)
 
-        for i in range(88):
-            for j in range(0,300):
-                response = graph.get_object(f"me?fields={fields}")
-                print(response)
-                print(f"Batch {i*300+j} hoàn thành.")
-            print(f"Batch {i} hoàn thành. Đợi 1 tiếng...")
-            time.sleep(3600)  # Đợi 1 tiếng (3600 giây)
+        for j in range(0,300):
+            response = graph.get_object(f"me?fields={fields}")
+            print(response)
+            print(f"Batch {j} hoàn thành.")
 
         # Debug response
         print(response)
