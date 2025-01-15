@@ -1,4 +1,4 @@
-#routes.auth.py
+# routes.auth.py
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash
 from models.user import User
@@ -83,5 +83,5 @@ def register():
 @auth_bp.route("/logout")
 def logout():
     session.pop("user_id", None)  # Remove user from session
-    flash("Đã đăng xuất", "info")
+    flash("Signed out", "info")
     return redirect(url_for("auth.login"))

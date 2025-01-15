@@ -155,7 +155,7 @@
 			<table class="table table-striped">
 				<thead>
 					<tr>
-						<th>ID</th>
+						<!-- <th>ID</th> -->
 						<th>Facebook User ID</th>
 						<!-- <th>Access Token</th> -->
 						<th>Actions</th>
@@ -169,7 +169,7 @@
 					{% else %}
 					{% for account in accounts %}
 					<tr>
-						<td>{{ account.id }}</td>
+						<!-- <td>{{ account.id }}</td> -->
 						<td>{{ account.facebook_user_id }}</td>
 
 						<td>
@@ -245,57 +245,60 @@
 						const accessToken = response.authResponse.accessToken;
 						const userID = response.authResponse.userID;
 
-						// Gửi thông tin đăng nhập đến backend để lưu trữ
-						fetch('/account_fb/add_account', {
-							method: 'POST',
-							headers: {
-								'Content-Type': 'application/json',
-								'X-CSRFToken': '{{ form.csrf_token._value() }}', // Nếu bạn đang sử dụng CSRF protection
-							},
-							body: JSON.stringify({
-								access_token: accessToken,
-								facebook_user_id: userID
-							})
-						})
-							.then(response => {
-								// Kiểm tra xem phản hồi có phải là JSON không
-								if (response.ok) {
-									const contentType = response.headers.get("Content-Type");
-
-									// Nếu phản hồi là JSON
-									if (contentType && contentType.includes("application/json")) {
-										return response.json();
-									} else {
-										// Nếu phản hồi là HTML (hoặc loại khác), xử lý HTML
-										return response.text();
-									}
-								} else {
-									throw new Error("Network response was not ok");
-								}
-							})
-							.then(data => {
-								if (typeof data === 'object' && data.success) {
-									console.log("Đăng nhập thành công và thông tin đã được lưu!");
-									window.location.href = "/account_fb/";
-								} else {
-									// Nếu phản hồi là HTML, xử lý việc chuyển hướng hoặc hiển thị thông báo lỗi
-									console.log("Có lỗi khi lưu thông tin đăng nhập.");
-									window.location.href = "/account_fb/"; // Hoặc xử lý theo cách khác
-								}
-							})
-							.catch(error => {
-								console.error('Error:', error);
-								alert("Đã xảy ra lỗi khi đăng nhập.");
-							});
+						// Gọi backend để lưu thông tin tài khoản Facebook
+						login_call_backend(accessToken, userID)
 					} else {
 						console.log("Đăng nhập thất bại!");
 						window.location.href = "/account_fb/";
 					}
 				}, {
-					scope: 'email, public_profile, read_insights, publish_video, pages_read_engagement, business_management,pages_manage_ads, ads_management, pages_manage_engagement'
+					scope: 'email, public_profile, pages_read_engagement,business_management, pages_show_list,ads_read ,ads_management'
 				});
-			}
 
+				function login_call_backend(accessToken, userID) {
+					fetch('/account_fb/add_account', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'X-CSRFToken': '{{ form.csrf_token._value() }}', // Nếu bạn đang sử dụng CSRF protection
+						},
+						body: JSON.stringify({
+							access_token: accessToken,
+							facebook_user_id: userID
+						})
+					})
+						.then(response => {
+							// Kiểm tra xem phản hồi có phải là JSON không
+							if (response.ok) {
+								const contentType = response.headers.get("Content-Type");
+
+								// Nếu phản hồi là JSON
+								if (contentType && contentType.includes("application/json")) {
+									return response.json();
+								} else {
+									// Nếu phản hồi là HTML (hoặc loại khác), xử lý HTML
+									return response.text();
+								}
+							} else {
+								throw new Error("Network response was not ok");
+							}
+						})
+						.then(data => {
+							if (typeof data === 'object' && data.success) {
+								console.log("Đăng nhập thành công và thông tin đã được lưu!");
+								window.location.href = "/account_fb/";
+							} else {
+								// Nếu phản hồi là HTML, xử lý việc chuyển hướng hoặc hiển thị thông báo lỗi
+								console.log("Có lỗi khi lưu thông tin đăng nhập.");
+								window.location.href = "/account_fb/"; // Hoặc xử lý theo cách khác
+							}
+						})
+						.catch(error => {
+							console.error('Error:', error);
+							alert("Đã xảy ra lỗi khi đăng nhập.");
+						});
+				}
+			}
 		</script>
 	</body>
 </html>

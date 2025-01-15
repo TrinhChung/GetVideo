@@ -12,6 +12,10 @@ def home():
 def polices():
     return render_template("polices.html")
 
+@home_bp.route("/terms", methods=["GET", "POST"])
+def terms():
+    return render_template("term.html")
+
 
 @home_bp.route("/permissions", methods=["GET", "POST"])
 def permissions():

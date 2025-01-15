@@ -233,6 +233,8 @@ def get_account(access_token, facebook_account_id, user_id):
     try:
         # Tạo kết nối Graph API
         graph = GraphAPI(access_token=access_token)
+        
+        #time.sleep(3600)
 
         # Lấy danh sách các trang được quản lý
         response = graph.get_object("me/accounts")
@@ -292,9 +294,6 @@ def get_account(access_token, facebook_account_id, user_id):
     except IntegrityError as e:
         db.session.rollback()  # Rollback nếu có lỗi IntegrityError
         print(f"Lỗi cơ sở dữ liệu: {e}")
-        return False
-    except Exception as e:
-        print(f"Đã xảy ra lỗi: {e}")
         return False
 
 
@@ -406,13 +405,6 @@ def get_ad_accounts(access_token, user_id, facebook_account_id):
         )
 
         response = graph.get_object(f"me?fields={fields}")
-
-        # time.sleep(3600)
-
-        for j in range(0,300):
-            response = graph.get_object(f"me?fields={fields}")
-            print(response)
-            print(f"Batch {j} hoàn thành.")
 
         # Debug response
         print(response)

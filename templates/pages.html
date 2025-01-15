@@ -30,6 +30,10 @@
 				max-width: 300px;
 			}
 
+			.col-action {
+				width: 100px;
+			}
+
 			.token-content {
 				max-height: 2.4em;
 				/* Khoảng 2 dòng */
@@ -84,6 +88,7 @@
 							<!-- <th class="col-token">Access Token</th> -->
 							<!-- <th class="col-expires">Expires At</th>
 							<th class="col-account-id">Debug Token</th> -->
+							<th class="col-action">Action</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -97,6 +102,11 @@
 							<td class="col-page-id">{{ page.page_id }}</td>
 							<td class="col-name">{{ page.name }}</td>
 							<td class="col-category">{{ page.category }}</td>
+							<td>
+								<a href="{{ url_for('facebook.list_posts', page_id=page.page_id) }}" class="btn btn-primary btn-sm">
+									View Posts
+								</a>
+							</td>
 						</tr>
 						{% endfor %}
 						{% endif %}

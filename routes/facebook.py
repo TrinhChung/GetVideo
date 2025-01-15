@@ -15,6 +15,8 @@ from Form.account_fb import AddFacebookAccountForm
 import os
 from dotenv import load_dotenv
 from models.facebook_ad_account import FacebookAdAccount
+from models.page import Page
+import requests
 
 load_dotenv()  # Đọc file .env
 
@@ -49,9 +51,6 @@ def add_fb_account():
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
-    # Get existing Facebook accounts for the user
-    accounts = FacebookAccount.query.filter_by(user_id=user_id).all()
-
     if form.validate_on_submit():
         facebook_user_id = (
             form.facebook_user_id.data
@@ -60,7 +59,7 @@ def add_fb_account():
 
         # Check if account already exists
         existing_account = FacebookAccount.query.filter_by(
-            facebook_user_id=facebook_user_id
+            facebook_user_id=facebook_user_id, user_id=user_id
         ).first()
 
         if existing_account:
@@ -115,7 +114,6 @@ def add_fb_account():
 def delete_fb_account(id):
     try:
         account = FacebookAccount.query.get(id)  # Tìm tài khoản theo ID
-        print(account.facebook_ad_accounts)
 
         if account:
             # Xóa tất cả các Page liên kết với tài khoản
@@ -170,7 +168,7 @@ def get_pages():
             flash("Retrieve page information successfully", "success")
             return redirect(url_for("facebook.account_fb"))
         else:
-            flash("Không thể lấy thông tin trang.", "danger")
+            flash("Phiên đăng nhập hết hạn vui lòng đăng nhập lại.", "danger")
             return redirect(url_for("facebook.account_fb"))
     except Exception as e:
         flash(f"Lỗi: {e}", "danger")
@@ -204,8 +202,39 @@ def list_ad_accounts():
     if not user_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
-    
+
     # Lấy tất cả tài khoản quảng cáo theo user_id
     ad_accounts = FacebookAdAccount.query.filter_by(user_id=user_id).all()
 
     return render_template("ad_accounts.html", ad_accounts=ad_accounts)
+
+
+@facebook_bp.route("/pages/<int:page_id>/posts", methods=["GET"])
+def list_posts(page_id):
+    """
+    Lấy danh sách bài viết của một page cụ thể cùng với lượt react và comment.
+    """
+    user_id = session.get("user_id")
+    if not user_id:
+        flash("You need to log in to use this function", "danger")
+        return redirect(url_for("auth.login"))
+
+    # Lấy thông tin page
+    page = Page.query.filter_by(page_id=page_id, user_id=user_id).first()
+    if not page:
+        flash("Page not found.", "danger")
+        return redirect(url_for("facebook.get_pages"))
+
+    # Gọi API Facebook để lấy bài viết, lượt react và comment
+    access_token = page.access_token
+    url = f"https://graph.facebook.com/v21.0/{page_id}/posts"
+    params = {
+        "fields": "id,message,created_time,reactions.summary(true),comments.summary(true)",
+        "access_token": access_token,
+    }
+
+    response = requests.get(url, params=params)
+    data = response.json()
+    posts = data.get("data", [])
+
+    return render_template("page_posts.html", page=page, posts=posts)
