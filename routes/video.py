@@ -24,7 +24,7 @@ VIDEO_FOLDER = './'
 def index():
     form = VideoDownloadForm()
 
-    user_id = session.get("user_id")  # Lấy user_id từ session
+    facebook_user_id = session.get("facebook_user_id")  # Lấy user_id từ session
     if not user_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
@@ -61,7 +61,7 @@ def download_video_route(video_id):
 @video_bp.route("/video/download_all", methods=["POST"])
 def download_all_videos():
 
-    user_id = session.get("user_id")  # Lấy user_id từ session
+    facebook_user_id = session.get("facebook_user_id")  # Lấy user_id từ session
     if not user_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
@@ -87,7 +87,7 @@ def download_all_videos():
 # Route để chia video
 @video_bp.route("/split_video/<video_id>", methods=["POST"])
 def split_video_route(video_id):
-    user_id = session.get("user_id")  # Lấy user_id từ session
+    facebook_user_id = session.get("facebook_user_id")  # Lấy user_id từ session
     if not user_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
@@ -110,7 +110,7 @@ def split_video_route(video_id):
 # Route để chia các video đã chọn
 @video_bp.route("/split_selected_videos", methods=["POST"])
 def split_selected_videos():
-    user_id = session.get("user_id")  # Lấy user_id từ session
+    facebook_user_id = session.get("facebook_user_id")  # Lấy user_id từ session
     if not user_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))

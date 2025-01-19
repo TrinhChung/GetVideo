@@ -8,7 +8,7 @@ from database_init import db
 from Form.create_campaign import FacebookCampaignForm, CampaignForm  # Import form
 from util.ads import create_facebook_campaign, fetch_facebook_campaigns
 from util.until import convert_to_mysql_datetime
-import time
+from flask_paginate import Pagination, get_page_parameter
 
 total_requests = 15000
 requests_per_hour = 170
@@ -22,13 +22,15 @@ ads_manager_bp = Blueprint("ads_manager", __name__)
 @ads_manager_bp.route("/campaign_fb/create", methods=["GET", "POST"])
 def create_fb_campaign():
     # Lấy user_id từ session
-    user_id = session.get("user_id")
-    if not user_id:
+    facebook_account_id = session.get("facebook_user_id")
+    if not facebook_account_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
     # Lấy danh sách tài khoản quảng cáo Facebook của người dùng
-    ad_accounts = FacebookAdAccount.query.filter_by(user_id=user_id).all()
+    ad_accounts = FacebookAdAccount.query.filter_by(
+        facebook_account_id=facebook_account_id
+    ).all()
     form = FacebookCampaignForm()
 
     # Đổ dữ liệu vào select field (chuyển ID sang str)
@@ -38,7 +40,9 @@ def create_fb_campaign():
 
     if form.validate_on_submit():
         # Lấy access_token của người dùng từ database
-        facebook_account = FacebookAccount.query.filter_by(user_id=user_id).first()
+        facebook_account = FacebookAccount.query.filter_by(
+            id=facebook_account_id
+        ).first()
         if not facebook_account:
             flash("Facebook account not found", "danger")
             return redirect(url_for("facebook.add_fb_account"))
@@ -76,7 +80,6 @@ def create_fb_campaign():
                 created_time=datetime.now(),
                 start_time=form.start_time.data,
                 end_time=form.end_time.data,
-                user_id=user_id,
                 facebook_account_id=facebook_account.id,
                 facebook_ad_account_id= ad_account.id,
             )
@@ -96,24 +99,37 @@ def create_fb_campaign():
 # Route hiển thị danh sách chiến dịch quảng cáo
 @ads_manager_bp.route("/campaign_fb/list", methods=["GET"])
 def list_fb_campaigns():
-    user_id = session.get("user_id")
+    facebook_account_id = session.get("facebook_user_id")
+    page = request.args.get(get_page_parameter(), type=int, default=1)
+    per_page = 10  # Số mục hiển thị trên mỗi trang
     form = CampaignForm()
 
-    if not user_id:
+    if not facebook_account_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
     # Lấy danh sách tài khoản quảng cáo của người dùng
-    facebook_ad_accounts = FacebookAdAccount.query.filter_by(user_id=user_id).all()
+    facebook_ad_accounts = FacebookAdAccount.query.filter_by(
+        facebook_account_id=facebook_account_id
+    ).all()
 
     # Lọc theo tài khoản quảng cáo nếu có
     ad_account_filter = request.args.get("ad_account_filter")
+    query = FacebookCampaign.query.filter_by(facebook_account_id=facebook_account_id)
+
     if ad_account_filter:
-        campaigns = FacebookCampaign.query.filter_by(
-            user_id=user_id, facebook_ad_account_id=ad_account_filter
-        ).all()
-    else:
-        campaigns = FacebookCampaign.query.filter_by(user_id=user_id).all()
+        query = query.filter(
+            FacebookCampaign.facebook_ad_account_id == ad_account_filter
+        )
+
+    # Lấy danh sách chiến dịch phân trang
+    total_campaigns = query.count()
+    campaigns = query.paginate(page=page, per_page=per_page, error_out=False).items
+
+    # Tạo đối tượng phân trang
+    pagination = Pagination(
+        page=page, total=total_campaigns, per_page=per_page, css_framework="bootstrap5"
+    )
 
     # Render danh sách chiến dịch
     return render_template(
@@ -121,18 +137,21 @@ def list_fb_campaigns():
         campaigns=campaigns,
         form=form,
         facebook_ad_accounts=facebook_ad_accounts,
+        pagination=pagination,
     )
 
 
 # Route đồng bộ chiến dịch với Facebook
 @ads_manager_bp.route("/campaign_fb/sync", methods=["POST"])
 def sync_campaigns():
-    user_id = session.get("user_id")
-    if not user_id:
+    facebook_account_id = session.get("facebook_user_id")
+    if not facebook_account_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
-    facebook_accounts = FacebookAccount.query.filter_by(user_id=user_id).all()
+    facebook_accounts = FacebookAccount.query.filter_by(
+        id=facebook_account_id
+    ).all()
     if not facebook_accounts:
         flash("No Facebook accounts found", "danger")
         return redirect(url_for("facebook.add_fb_account"))
@@ -142,7 +161,9 @@ def sync_campaigns():
 
     for facebook_account in facebook_accounts:
         access_token = facebook_account.access_token
-        facebook_ad_accounts = FacebookAdAccount.query.filter_by(user_id=user_id, facebook_account_id=facebook_account.id).all()
+        facebook_ad_accounts = FacebookAdAccount.query.filter_by(
+            facebook_account_id=facebook_account_id,
+        ).all()
 
         if not facebook_ad_accounts:
             flash(f"No Facebook Ad Accounts found for account {facebook_account.id}", "danger")
@@ -199,7 +220,6 @@ def sync_campaigns():
                         created_time=created_time,
                         start_time=start_time,
                         end_time=end_time,
-                        user_id=user_id,
                         facebook_account_id=facebook_account.id,
                         special_ad_categories=special_ad_categories,
                         facebook_ad_account_id=ad_account.id,
@@ -215,8 +235,8 @@ def sync_campaigns():
 # Route xóa các chiến dịch đã chọn
 @ads_manager_bp.route("/campaign_fb/delete_selected", methods=["POST"])
 def delete_selected_campaigns():
-    user_id = session.get("user_id")
-    if not user_id:
+    facebook_account_id = session.get("facebook_user_id")
+    if not facebook_account_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
@@ -228,7 +248,7 @@ def delete_selected_campaigns():
     # Xóa chiến dịch đã chọn
     for campaign_id in selected_campaign_ids:
         campaign = FacebookCampaign.query.filter_by(
-            facebook_campaign_id=campaign_id, user_id=user_id
+            facebook_campaign_id=campaign_id, facebook_account_id=facebook_account_id
         ).first()
         if campaign:
             db.session.delete(campaign)
@@ -241,13 +261,13 @@ def delete_selected_campaigns():
 # Route chỉnh sửa chiến dịch
 @ads_manager_bp.route("/campaign_fb/modify/<campaign_id>", methods=["GET", "POST"])
 def modify_campaign(campaign_id):
-    user_id = session.get("user_id")
-    if not user_id:
+    facebook_account_id = session.get("facebook_user_id")
+    if not facebook_account_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
     campaign = FacebookCampaign.query.filter_by(
-        facebook_campaign_id=campaign_id, user_id=user_id
+        facebook_campaign_id=campaign_id, facebook_account_id=facebook_account_id
     ).first()
     if not campaign:
         flash("Campaign not found", "danger")

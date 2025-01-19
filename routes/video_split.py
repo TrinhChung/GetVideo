@@ -16,7 +16,7 @@ def video_splits():
     # Tạo form mới
     form = VideoSplitScheduleForm()
 
-    user_id = session.get("user_id")  # Lấy user_id từ session
+    facebook_user_id = session.get("facebook_user_id")  # Lấy user_id từ session
     if not user_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
@@ -42,7 +42,7 @@ def video_splits():
 def add_to_schedule():
     form = VideoSplitScheduleForm()
 
-    user_id = session.get("user_id")  # Lấy user_id từ session
+    facebook_user_id = session.get("facebook_user_id")  # Lấy user_id từ session
     if not user_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))

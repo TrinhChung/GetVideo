@@ -119,7 +119,7 @@
 						</li>
 
 						<!-- Authentication -->
-						{% if session.get('user_id') %}
+						{% if session.get('facebook_user_id') %}
 						<li class="nav-item">
 							<a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
 						</li>

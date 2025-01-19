@@ -30,12 +30,14 @@ def account_fb():
 
     form = AddFacebookAccountForm()
 
-    user_id = session.get("user_id")  # Lấy user_id từ session
-    if not user_id:
+    facebook_user_id = session.get("facebook_user_id")  # Lấy user_id từ session
+    if not facebook_user_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
-    accounts = FacebookAccount.query.filter_by(user_id=user_id).all()  # Lấy tất cả các tài khoản từ bảng
+    accounts = FacebookAccount.query.filter_by(
+        id=facebook_user_id
+    ).all()  # Lấy tất cả các tài khoản từ bảng
     return render_template(
         "account_fb.html", accounts=accounts, form=form, facebook_app_id=facebook_app_id
     )
@@ -46,8 +48,9 @@ def account_fb():
 def add_fb_account():
     form = AddFacebookAccountForm()
 
-    user_id = session.get("user_id")  # Get user_id from session
-    if not user_id:
+    facebook_user_id = session.get("facebook_user_id")  # Get user_id from session
+    print(f"User ID: {facebook_user_id}")
+    if not facebook_user_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
@@ -59,7 +62,7 @@ def add_fb_account():
 
         # Check if account already exists
         existing_account = FacebookAccount.query.filter_by(
-            facebook_user_id=facebook_user_id, user_id=user_id
+            id=facebook_user_id
         ).first()
 
         if existing_account:
@@ -85,7 +88,6 @@ def add_fb_account():
             new_account = FacebookAccount(
                 facebook_user_id=facebook_user_id,
                 access_token=access_token,
-                user_id=user_id,
             )
             try:
                 db.session.add(new_account)
@@ -153,8 +155,8 @@ def get_pages():
     access_token = request.form.get("access_token")
     id = request.form.get("id")
 
-    user_id = session.get("user_id")  # Lấy user_id từ session
-    if not user_id:
+    facebook_user_id = session.get("facebook_user_id")  # Lấy user_id từ session
+    if not facebook_user_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
@@ -163,7 +165,7 @@ def get_pages():
 
     try:
         # Gọi hàm get_account để lấy danh sách các trang
-        pages = get_account(access_token, id, user_id)
+        pages = get_account(access_token, id)
         if pages:
             flash("Retrieve page information successfully", "success")
             return redirect(url_for("facebook.account_fb"))
@@ -180,13 +182,13 @@ def get_account_ads():
     access_token = request.form.get("access_token")
     id = request.form.get("id")
 
-    user_id = session.get("user_id")  # Lấy user_id từ session
-    if not user_id:
+    facebook_account_id = session.get("facebook_user_id")  # Lấy user_id từ session
+    if not facebook_account_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
     try:
-        get_ad_accounts(access_token, user_id, id)
+        get_ad_accounts(access_token, facebook_account_id)
     except Exception as e:
         flash(f"Lỗi: {e}", "danger")
 
@@ -198,13 +200,15 @@ def list_ad_accounts():
     """
     Lấy danh sách tất cả tài khoản quảng cáo của user và hiển thị.
     """
-    user_id = session.get("user_id")  # Lấy user_id từ session
-    if not user_id:
+    facebook_account_id = session.get("facebook_user_id")  # Lấy user_id từ session
+    if not facebook_account_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
     # Lấy tất cả tài khoản quảng cáo theo user_id
-    ad_accounts = FacebookAdAccount.query.filter_by(user_id=user_id).all()
+    ad_accounts = FacebookAdAccount.query.filter_by(
+        facebook_account_id=facebook_account_id
+    ).all()
 
     return render_template("ad_accounts.html", ad_accounts=ad_accounts)
 
@@ -214,13 +218,15 @@ def list_posts(page_id):
     """
     Lấy danh sách bài viết của một page cụ thể cùng với lượt react và comment.
     """
-    user_id = session.get("user_id")
-    if not user_id:
+    facebook_account_id = session.get("facebook_user_id")
+    if not facebook_account_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
     # Lấy thông tin page
-    page = Page.query.filter_by(page_id=page_id, user_id=user_id).first()
+    page = Page.query.filter_by(
+        page_id=page_id, facebook_account_id=facebook_account_id
+    ).first()
     if not page:
         flash("Page not found.", "danger")
         return redirect(url_for("facebook.get_pages"))

@@ -11,16 +11,10 @@
 		<!-- FontAwesome Icons -->
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
+		<!-- Global CSS -->
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+
 		<style>
-			body {
-				background: #f8f9fa;
-				font-family: Arial, sans-serif;
-				display: flex;
-				justify-content: center;
-				align-items: center;
-				height: 100vh;
-				margin: 0;
-			}
 
 			.login-container {
 				text-align: center;
@@ -30,12 +24,12 @@
 				box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 				width: 100%;
 				max-width: 400px;
+				margin: auto;
 			}
 
 			.login-container img {
 				max-width: 80px;
 				margin-bottom: 40px;
-				/* Increased padding */
 			}
 
 			.login-container h1 {
@@ -82,15 +76,21 @@
 		</style>
 	</head>
 	<body>
-		<div class="login-container">
-			<img src="/static/favicon.ico" alt="Logo">
-			<h1>DUCKER MANAGER</h1>
-			<p>"Quản lý dễ dàng, chiến dịch hiệu quả"</p>
-			<button onclick="fbLogin()" class="btn-facebook">
-				<i class="fab fa-facebook-f me-2"></i>Đăng nhập bằng Facebook
-			</button>
-			<div class="policy-links">
-				<a href="/polices">Điều khoản chính sách</a> | <a href="/terms">Điều khoản sử dụng</a>
+		<!-- Message container -->
+		{% include 'message.html' %}
+
+		<!-- Login content -->
+		<div class="mt-5">
+			<div class="login-container">
+				<img src="/static/favicon.ico" alt="Logo">
+				<h1>DUCKER MANAGER</h1>
+				<p>"Quản lý dễ dàng, chiến dịch hiệu quả"</p>
+				<button onclick="fbLogin()" class="btn-facebook">
+					<i class="fab fa-facebook-f me-2"></i>Đăng nhập bằng Facebook
+				</button>
+				<div class="policy-links">
+					<a href="/polices">Điều khoản chính sách</a> | <a href="/terms">Điều khoản sử dụng</a>
+				</div>
 			</div>
 		</div>
 
@@ -114,9 +114,7 @@
 				js.src = "https://connect.facebook.net/vi_VN/sdk.js";
 				fjs.parentNode.insertBefore(js, fjs);
 			}(document, 'script', 'facebook-jssdk'));
-		</script>
 
-		<script>
 			function fbLogin() {
 				FB.login(function (response) {
 					if (response.authResponse) {
@@ -135,7 +133,7 @@
 			}
 
 			function login_call_backend(accessToken, userID) {
-				fetch('/fb-login', {
+				fetch('/login', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
@@ -149,7 +147,7 @@
 					.then(response => response.json())
 					.then(data => {
 						if (data.success) {
-							window.location.href = "/dashboard";  // Chuyển hướng sau khi đăng nhập thành công
+							window.location.href = "/";  // Chuyển hướng sau khi đăng nhập thành công
 						} else {
 							alert("Đăng nhập thất bại, vui lòng thử lại.");
 						}

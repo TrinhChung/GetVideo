@@ -132,24 +132,6 @@
 		{% include 'message.html' %}
 		<div class="container mt-5">
 			<h1 class="text-dark mb-4">Facebook Account Manager</h1>
-			<form action="{{ url_for('facebook.add_fb_account') }}" method="POST" class="mb-4">
-				{{ form.csrf_token }} <!-- CSRF token -->
-				<!-- <div class="mb-3">
-					<label for="facebook_user_id" class="form-label">Facebook User ID</label>
-					<input type="text" class="form-control" id="facebook_user_id" name="facebook_user_id" required>
-				</div>
-				<div class="mb-3">
-					<label for="access_token" class="form-label">Access Token</label>
-					<textarea class="form-control" id="access_token" name="access_token" rows="2" required></textarea>
-				</div>
-				<button type="submit" class="btn btn-success btn-lg">
-					<i class="fas fa-plus-circle"></i> Add Account
-				</button> -->
-
-				<button type="button" class="btn btn-primary" onclick="fbLogin()">
-					<i class="fab fa-facebook-f"></i> Login By Facebook
-				</button>
-			</form>
 
 			<h2>Accounts</h2>
 			<table class="table table-striped">

@@ -17,9 +17,8 @@ class Video(db.Model):
     )  # Thêm trường splited với mặc định là False
     playlist = db.relationship("Playlist", backref=db.backref("video", lazy=True))
 
-    user_id = db.Column(
-        db.Integer, db.ForeignKey("user.id"), nullable=False
-    )  # Khóa ngoại liên kết với bảng User
-
-    # Quan hệ với bảng User
-    user = db.relationship("User", backref=db.backref("videos", lazy=True))
+    facebook_account_id = db.Column(db.Integer, db.ForeignKey("facebook_account.id"))
+    
+    facebook_account = db.relationship(
+        "FacebookAccount", backref=db.backref("videos", lazy=True)
+    )

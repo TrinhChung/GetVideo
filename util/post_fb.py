@@ -229,7 +229,7 @@ def get_access_token_page_by_id(page_id, access_token):
         print(f"Error occurred: {str(e)}")
 
 
-def get_account(access_token, facebook_account_id, user_id):
+def get_account(access_token, facebook_account_id):
     try:
         # Tạo kết nối Graph API
         graph = GraphAPI(access_token=access_token)
@@ -281,7 +281,6 @@ def get_account(access_token, facebook_account_id, user_id):
                     access_token=page_access_token,
                     expires_at=expires_at,
                     facebook_account_id=facebook_account_id,
-                    user_id=user_id,
                 )
                 db.session.add(new_page)
 
@@ -382,7 +381,7 @@ def check_token_expiry(access_token, page_id):
         return None, None
 
 
-def get_ad_accounts(access_token, user_id, facebook_account_id):
+def get_ad_accounts(access_token, facebook_account_id):
     """
     Lấy danh sách các tài khoản quảng cáo mà người dùng quản lý và lưu vào database.
 
@@ -424,7 +423,7 @@ def get_ad_accounts(access_token, user_id, facebook_account_id):
         for ad_account in ad_accounts:
             # Kiểm tra tài khoản đã tồn tại chưa
             existing_account = FacebookAdAccount.query.filter_by(
-                facebook_ad_account_id=ad_account.get("account_id"), user_id=user_id
+                facebook_ad_account_id=ad_account.get("account_id")
             ).first()
 
             if existing_account:
@@ -498,7 +497,6 @@ def get_ad_accounts(access_token, user_id, facebook_account_id):
                         if ad_account.get("created_time")
                         else None
                     ),
-                    user_id=user_id,
                     facebook_account_id=facebook_account_id,
                 )
                 db.session.add(new_account)

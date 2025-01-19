@@ -13,8 +13,8 @@ def index():
     # Khởi tạo form
     form = StackPostForm()
 
-    user_id = session.get("user_id")  # Lấy user_id từ session
-    if not user_id:
+    facebook_account_id = session.get("facebook_user_id")  # Lấy user_id từ session
+    if not facebook_account_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
@@ -27,18 +27,20 @@ def index():
 
     # Áp dụng các bộ lọc nếu có
     if page_id:
-        query = query.filter_by(page_id=page_id, user_id=user_id)
+        query = query.filter_by(
+            page_id=page_id, facebook_account_id=facebook_account_id
+        )
     if status:
-        query = query.filter_by(status=status, user_id=user_id)
+        query = query.filter_by(status=status, facebook_account_id=facebook_account_id)
 
     # Sắp xếp theo thời gian
     query = query.order_by(StackPost.time.asc())
 
     # Lấy danh sách bài đăng
-    stack_posts = query.filter_by(user_id=user_id)
+    stack_posts = query.filter_by(facebook_account_id=facebook_account_id)
 
     # Lấy danh sách các trang để hiển thị trong form lọc
-    pages = Page.query.filter_by(user_id=user_id)
+    pages = Page.query.filter_by(facebook_account_id=facebook_account_id)
 
     return render_template(
         "stack_posts.html",

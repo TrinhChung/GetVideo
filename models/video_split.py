@@ -18,12 +18,10 @@ class VideoSplit(db.Model):
     video_id = db.Column(db.Integer, db.ForeignKey("video.id"), nullable=True)
     video = db.relationship("Video", backref=db.backref("splits", lazy=True))
 
-    user_id = db.Column(
-        db.Integer, db.ForeignKey("user.id"), nullable=False
-    )  # Khóa ngoại liên kết với bảng User
-
-    # Quan hệ với bảng User
-    user = db.relationship("User", backref=db.backref("video_splits", lazy=True))
+    facebook_account_id = db.Column(db.Integer, db.ForeignKey("facebook_account.id"))
+    facebook_account = db.relationship(
+        "FacebookAccount", backref=db.backref("video_splits", lazy=True)
+    )
 
     # Mối quan hệ với Category thông qua bảng phụ 'video_split_category'
     categories = db.relationship(

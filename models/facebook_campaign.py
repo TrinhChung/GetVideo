@@ -11,7 +11,6 @@ class FacebookCampaign(db.Model):
     created_time = db.Column(db.DateTime, nullable=False)
     start_time = db.Column(db.DateTime, nullable=True)  # Thêm trường start_time
     end_time = db.Column(db.DateTime, nullable=True)  # Thêm trường end_time
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 
     # Quan hệ với bảng FacebookAccount
     facebook_account_id = db.Column(

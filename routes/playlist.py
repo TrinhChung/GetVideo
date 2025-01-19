@@ -13,11 +13,11 @@ playlist_bp = Blueprint("playlist", __name__)
 def batch_youtube_playlist():
     form = PlaylistForm()
 
-    user_id = session.get("user_id")  # Lấy user_id từ session
-    if not user_id:
+    facebook_account_id = session.get("facebook_user_id")  # Lấy user_id từ session
+    if not facebook_account_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
-    print(user_id)
+    print(facebook_account_id)
 
     if form.validate_on_submit():
         playlist_url = form.playlist_url.data
@@ -28,14 +28,14 @@ def batch_youtube_playlist():
             return redirect(url_for("playlist.batch_youtube_playlist"))
 
         try:
-            get_playlist_info_and_video_details(playlist_id, user_id)
+            get_playlist_info_and_video_details(playlist_id, facebook_account_id)
             flash("Playlist đã được thêm thành công", "success")
         except Exception as e:
             flash(f"Đã xảy ra lỗi khi thêm playlist: {e}", "danger")
 
         return redirect(url_for("playlist.batch_youtube_playlist"))
 
-    playlists = Playlist.query.filter_by(user_id=user_id).all()
+    playlists = Playlist.query.filter_by(facebook_account_id=facebook_account_id).all()
     return render_template("playlist.html", playlists=playlists, form=form)
 
 
@@ -44,8 +44,8 @@ def batch_youtube_playlist():
 def get_video_from_playlist():
     form = GetVideoFromPlaylistForm()
 
-    user_id = session.get("user_id")  # Lấy user_id từ session
-    if not user_id:
+    facebook_account_id = session.get("facebook_user_id")  # Lấy user_id từ session
+    if not facebook_account_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
@@ -53,7 +53,7 @@ def get_video_from_playlist():
         playlist_id = form.playlist_id.data
 
         try:
-            get_playlist_info_and_video_details(playlist_id, user_id)
+            get_playlist_info_and_video_details(playlist_id, facebook_account_id)
             flash("Video đã được thêm từ playlist", "success")
         except Exception as e:
             flash(f"Đã xảy ra lỗi khi lấy video từ playlist: {e}", "danger")
@@ -72,17 +72,19 @@ def get_video_from_playlist():
 def get_all_videos():
     form = GetAllVideosForm()
 
-    user_id = session.get("user_id")  # Lấy user_id từ session
-    if not user_id:
+    facebook_account_id = session.get("facebook_user_id")  # Lấy user_id từ session
+    if not facebook_account_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
     if form.validate_on_submit():
-        playlists = Playlist.query.filter_by(user_id=user_id).all()
+        playlists = Playlist.query.filter_by(
+            facebook_account_id=facebook_account_id
+        ).all()
 
         for playlist in playlists:
             try:
-                get_playlist_info_and_video_details(playlist.id, user_id)
+                get_playlist_info_and_video_details(playlist.id, facebook_account_id)
                 flash(f"Video đã được thêm từ playlist {playlist.title}", "success")
             except Exception as e:
                 flash(

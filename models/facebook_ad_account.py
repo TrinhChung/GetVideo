@@ -42,10 +42,7 @@ class FacebookAdAccount(db.Model):
 
     # Ngày tạo tài khoản
     created_time = db.Column(db.DateTime, nullable=True)
-
-    # ID người dùng liên kết
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-
+    
     # Khóa ngoại liên kết với FacebookAccount
     facebook_account_id = db.Column(
         db.Integer, db.ForeignKey("facebook_account.id", ondelete="CASCADE")
@@ -55,9 +52,6 @@ class FacebookAdAccount(db.Model):
     facebook_account = db.relationship(
         "FacebookAccount", back_populates="facebook_ad_accounts"
     )
-
-    # Thiết lập mối quan hệ với bảng User
-    user = db.relationship("User", backref="facebook_ad_accounts")
 
     # Mối quan hệ với bảng FacebookCampaign
     facebook_campaigns = db.relationship(

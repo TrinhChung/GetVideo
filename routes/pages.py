@@ -12,13 +12,15 @@ pages_bp = Blueprint("pages", __name__)
 def show_pages():
     form = PageForm()  # Tạo form mới
 
-    user_id = session.get("user_id")  # Lấy user_id từ session
-    if not user_id:
+    facebook_account_id = session.get("facebook_user_id")  # Lấy user_id từ session
+    if not facebook_account_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
     # Sử dụng SQLAlchemy để lấy tất cả các pages
-    pages = Page.query.filter_by(user_id=user_id).all()  # Lấy tất cả các trang từ bảng 'pages'
+    pages = Page.query.filter_by(
+        facebook_account_id=facebook_account_id
+    ).all()  # Lấy tất cả các trang từ bảng 'pages'
     # Trả về trang HTML với danh sách pages
     return render_template("pages.html", pages=pages, form=form)
 

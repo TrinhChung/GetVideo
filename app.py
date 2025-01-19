@@ -8,7 +8,6 @@ from flask_wtf.csrf import CSRFProtect
 from datetime import timedelta
 from cronjob.init_schedule import scheduler
 from log import setup_logging
-from flask_seeder import FlaskSeeder
 
 from util.until import format_datetime
 
@@ -29,6 +28,7 @@ from models.facebook_ad_account import FacebookAdAccount
 load_dotenv()
 
 migrate = Migrate()
+
 
 def create_app():
     app = Flask(__name__, static_url_path="/static")
@@ -64,10 +64,6 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
 
-    # Cấu hình Flask-Seeder
-    # seeder = FlaskSeeder()
-    # seeder.init_app(app, db)
-
     from routes.home import home_bp
     from routes.playlist import playlist_bp
     from routes.video import video_bp
@@ -94,13 +90,14 @@ def create_app():
     def require_login():
         allowed_routes = [
             "auth.login",
+            "auth.logout",
             "home.polices",
-            "home.terms", "home.home",
-            "auth.register",
+            "home.terms",
+            "home.home",
             "video.serve_video",
             "static",
         ]
-        if "user_id" not in session and request.endpoint not in allowed_routes:
+        if "facebook_user_id" not in session and request.endpoint not in allowed_routes:
             flash("Bạn cần đăng nhập để truy cập trang này.", "danger")
             return redirect(url_for("auth.login"))
 
@@ -116,6 +113,5 @@ if __name__ == "__main__":
     # Flask-Migrate sẽ tự động xử lý migrations
     with app.app_context():
         db.create_all()
-    
 
     app.run(debug=True)
