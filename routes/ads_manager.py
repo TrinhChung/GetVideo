@@ -6,9 +6,9 @@ from models.facebook_ad_account import FacebookAdAccount
 from datetime import datetime
 from database_init import db
 from Form.create_campaign import FacebookCampaignForm, CampaignForm  # Import form
-from util.ads import create_facebook_campaign, fetch_facebook_campaigns
-from util.until import convert_to_mysql_datetime
+from util.ads import create_facebook_campaign
 from flask_paginate import Pagination, get_page_parameter
+from util.post_fb import sync_facebook_campaigns
 
 total_requests = 15000
 requests_per_hour = 170
@@ -149,86 +149,10 @@ def sync_campaigns():
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
-    facebook_accounts = FacebookAccount.query.filter_by(
-        id=facebook_account_id
-    ).all()
-    if not facebook_accounts:
-        flash("No Facebook accounts found", "danger")
-        return redirect(url_for("facebook.add_fb_account"))
+    message, success = sync_facebook_campaigns(facebook_account_id)
 
-    updated_count = 0
-    created_count = 0
+    flash(message, "success" if success else "danger")
 
-    for facebook_account in facebook_accounts:
-        access_token = facebook_account.access_token
-        facebook_ad_accounts = FacebookAdAccount.query.filter_by(
-            facebook_account_id=facebook_account_id,
-        ).all()
-
-        if not facebook_ad_accounts:
-            flash(f"No Facebook Ad Accounts found for account {facebook_account.id}", "danger")
-            continue
-
-        for ad_account in facebook_ad_accounts:
-            try:
-                campaigns = fetch_facebook_campaigns(ad_account.facebook_ad_account_id, access_token)
-            except Exception as e:
-                flash(f"Error fetching campaigns from Facebook for account {ad_account.name}: {e}", "danger")
-                continue
-
-            for campaign in campaigns:
-                existing_campaign = FacebookCampaign.query.filter_by(facebook_campaign_id=campaign["id"]).first()
-
-                created_time = campaign.get("created_time")
-                start_time = campaign.get("start_time")
-                end_time = campaign.get("end_time")
-
-                if created_time:
-                    created_time = datetime.strptime(created_time, "%Y-%m-%dT%H:%M:%S%z")
-                    created_time = convert_to_mysql_datetime(created_time)
-                if start_time and start_time != "1970-01-01T00:00:00+0000":
-                    start_time = datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%S%z")
-                    start_time = convert_to_mysql_datetime(start_time)
-                else:
-                    start_time = None
-                if end_time and end_time != "1970-01-01T00:00:00+0000":
-                    end_time = datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S%z")
-                    end_time = convert_to_mysql_datetime(end_time)
-                else:
-                    end_time = None
-
-                special_ad_categories = campaign.get("special_ad_categories", "")
-                if isinstance(special_ad_categories, list):
-                    special_ad_categories = ",".join(special_ad_categories)
-
-                if existing_campaign:
-                    existing_campaign.name = campaign.get("name", existing_campaign.name)
-                    existing_campaign.objective = campaign.get("objective", existing_campaign.objective)
-                    existing_campaign.status = campaign.get("status", existing_campaign.status)
-                    existing_campaign.created_time = created_time or existing_campaign.created_time
-                    existing_campaign.start_time = start_time or existing_campaign.start_time
-                    existing_campaign.end_time = end_time or existing_campaign.end_time
-                    existing_campaign.special_ad_categories = special_ad_categories
-                    db.session.commit()
-                    updated_count += 1
-                else:
-                    new_campaign = FacebookCampaign(
-                        facebook_campaign_id=campaign["id"],
-                        name=campaign.get("name"),
-                        objective=campaign.get("objective"),
-                        status=campaign.get("status"),
-                        created_time=created_time,
-                        start_time=start_time,
-                        end_time=end_time,
-                        facebook_account_id=facebook_account.id,
-                        special_ad_categories=special_ad_categories,
-                        facebook_ad_account_id=ad_account.id,
-                    )
-                    db.session.add(new_campaign)
-                    db.session.commit()
-                    created_count += 1
-
-    flash(f"Sync completed: {created_count} new campaigns created, {updated_count} campaigns updated.", "success")
     return redirect(url_for("ads_manager.list_fb_campaigns"))
 
 

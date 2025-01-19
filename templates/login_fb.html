@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>Đăng nhập bằng Facebook</title>
+		<title>Login with Facebook</title>
 
 		<!-- Bootstrap CSS -->
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
@@ -15,7 +15,6 @@
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
 
 		<style>
-
 			.login-container {
 				text-align: center;
 				background-color: #ffffff;
@@ -84,12 +83,12 @@
 			<div class="login-container">
 				<img src="/static/favicon.ico" alt="Logo">
 				<h1>DUCKER MANAGER</h1>
-				<p>"Quản lý dễ dàng, chiến dịch hiệu quả"</p>
+				<p>Easy management, efficient campaigns</p>
 				<button onclick="fbLogin()" class="btn-facebook">
-					<i class="fab fa-facebook-f me-2"></i>Đăng nhập bằng Facebook
+					<i class="fab fa-facebook-f me-2"></i>Login with Facebook
 				</button>
 				<div class="policy-links">
-					<a href="/polices">Điều khoản chính sách</a> | <a href="/terms">Điều khoản sử dụng</a>
+					<a href="/polices">Privacy Policy</a> | <a href="/terms">Terms of Use</a>
 				</div>
 			</div>
 		</div>
@@ -111,7 +110,7 @@
 				var js, fjs = d.getElementsByTagName(s)[0];
 				if (d.getElementById(id)) { return; }
 				js = d.createElement(s); js.id = id;
-				js.src = "https://connect.facebook.net/vi_VN/sdk.js";
+				js.src = "https://connect.facebook.net/en_US/sdk.js";
 				fjs.parentNode.insertBefore(js, fjs);
 			}(document, 'script', 'facebook-jssdk'));
 
@@ -121,10 +120,10 @@
 						const accessToken = response.authResponse.accessToken;
 						const userID = response.authResponse.userID;
 
-						// Gọi backend để lưu thông tin tài khoản Facebook
+						// Call backend to save Facebook account info
 						login_call_backend(accessToken, userID);
 					} else {
-						console.log("Đăng nhập thất bại!");
+						console.log("Login failed!");
 						window.location.href = "/login-failed";
 					}
 				}, {
@@ -147,14 +146,14 @@
 					.then(response => response.json())
 					.then(data => {
 						if (data.success) {
-							window.location.href = "/";  // Chuyển hướng sau khi đăng nhập thành công
+							window.location.href = "/";  // Redirect after successful login
 						} else {
-							alert("Đăng nhập thất bại, vui lòng thử lại.");
+							alert("Login failed, please try again.");
 						}
 					})
 					.catch(error => {
-						console.error('Lỗi:', error);
-						alert("Đã xảy ra lỗi.");
+						console.error('Error:', error);
+						alert("An error occurred.");
 					});
 			}
 		</script>

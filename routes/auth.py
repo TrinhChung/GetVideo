@@ -14,6 +14,7 @@ from database_init import db
 from Form.login import LoginForm
 import os
 from dotenv import load_dotenv
+from util.post_fb import get_account, get_ad_accounts,sync_facebook_campaigns
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -47,6 +48,16 @@ def login():
             # Lưu vào session
             print(facebook_user_id)
             session["facebook_user_id"] = account.id
+            
+            #Lấy ra danh sách page
+            get_account(access_token, account.id)
+            
+            #Lấy ra danh sách tài khoản quảng cáo
+            get_ad_accounts(access_token, account.id)
+            
+            # lấy ra danh sách chiến dịch
+            sync_facebook_campaigns(account.id)
+
             flash("Đăng nhập thành công!", "success")
             print("User logged in successfully")
             return jsonify(

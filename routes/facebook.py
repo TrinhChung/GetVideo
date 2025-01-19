@@ -30,16 +30,37 @@ def account_fb():
 
     form = AddFacebookAccountForm()
 
-    facebook_user_id = session.get("facebook_user_id")  # Lấy user_id từ session
-    if not facebook_user_id:
+    # Lấy user_id từ session
+    facebook_account_id = session.get("facebook_user_id")
+    if not facebook_account_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
-    accounts = FacebookAccount.query.filter_by(
-        id=facebook_user_id
-    ).all()  # Lấy tất cả các tài khoản từ bảng
+    # Truy vấn tài khoản Facebook dựa trên facebook_account_id
+    account = FacebookAccount.query.filter_by(id=facebook_account_id).first()
+
+    if not account:
+        flash("Facebook account not found.", "danger")
+        return redirect(url_for("auth.login"))
+
+    # Sử dụng Graph API để lấy thêm thông tin
+    graph_url = f"https://graph.facebook.com/v21.0/me?fields=name,picture&access_token={account.access_token}"
+    response = requests.get(graph_url)
+    if response.status_code == 200:
+        graph_data = response.json()
+        account.name = graph_data.get("name")
+        account.avatar_url = graph_data.get("picture", {}).get("data", {}).get("url")
+    else:
+        
+        flash(f"Failed to fetch additional account information.{response}", "warning")
+        account.name = "Unknown"
+        account.avatar_url = None
+
     return render_template(
-        "account_fb.html", accounts=accounts, form=form, facebook_app_id=facebook_app_id
+        "account_fb.html",
+        account=account,  # Chỉ truyền một tài khoản duy nhất
+        form=form,
+        facebook_app_id=facebook_app_id,
     )
 
 
@@ -131,9 +152,6 @@ def delete_fb_account(id):
             for ad_account in account.facebook_ad_accounts:
                 db.session.delete(ad_account)
 
-            # Sau khi đã xóa các Page, xóa tài khoản Facebook
-            db.session.delete(account)  # Xóa tài khoản Facebook
-
             db.session.commit()  # Cam kết thay đổi vào cơ sở dữ liệu
 
             flash(
@@ -180,7 +198,6 @@ def get_pages():
 @facebook_bp.route("/account_fb/get_account_ads", methods=["POST"])
 def get_account_ads():
     access_token = request.form.get("access_token")
-    id = request.form.get("id")
 
     facebook_account_id = session.get("facebook_user_id")  # Lấy user_id từ session
     if not facebook_account_id:
