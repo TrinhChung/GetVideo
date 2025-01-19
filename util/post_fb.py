@@ -424,7 +424,7 @@ def get_ad_accounts(access_token, user_id, facebook_account_id):
         for ad_account in ad_accounts:
             # Kiểm tra tài khoản đã tồn tại chưa
             existing_account = FacebookAdAccount.query.filter_by(
-                facebook_ad_account_id=ad_account.get("account_id")
+                facebook_ad_account_id=ad_account.get("account_id"), user_id=user_id
             ).first()
 
             if existing_account:

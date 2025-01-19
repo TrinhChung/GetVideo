@@ -95,6 +95,7 @@ def create_app():
         allowed_routes = [
             "auth.login",
             "home.polices",
+            "home.terms", "home.home",
             "auth.register",
             "video.serve_video",
             "static",
