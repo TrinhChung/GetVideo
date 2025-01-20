@@ -70,3 +70,12 @@ docker compose up
 ```bash
 docker compose down -v
 ```
+
+# Kill tiến trình
+```
+sudo lsof -i:5000
+```
+
+```
+sudo kill PIP_ID
+```
