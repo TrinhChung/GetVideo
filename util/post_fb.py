@@ -195,11 +195,11 @@ def create_video_post(page_id, access_token, video_path, message=""):
 
         # Lấy ID của phiên tải lên
         video_id = response.json().get("id")
-        
+
         if not video_id:
             raise Exception("Không nhận được session ID cho phiên tải lên video.")
 
-        flash(f"Tải lên video đã được tạo thành công: {video_id}")
+        flash(f"Video upload has been created successfully: {video_id}")
 
         upload_video_to_reel(video_path, access_token, page_id, message)
 
@@ -207,7 +207,7 @@ def create_video_post(page_id, access_token, video_path, message=""):
 
     except RequestException as e:
         print(e)
-        raise Exception(f"Lỗi khi tải video lên: {e}")
+        raise Exception(f"Error when publish video: {e}")
 
 
 def create_post_by_request(access_token):
@@ -608,3 +608,36 @@ def sync_facebook_campaigns(facebook_account_id):
         f"Sync completed: {created_count} new campaigns created, {updated_count} campaigns updated.",
         True,
     )
+
+
+def delete_facebook_account(id):
+    try:
+        account = FacebookAccount.query.get(id)
+
+        if account:
+            # Xóa tất cả các Page liên kết với tài khoản
+            # for page in account.pages:
+            #     for stack_posts in page.stack_posts:
+            #         db.session.delete(stack_posts)
+            #     db.session.delete(page)
+
+            # Xóa tất cả các chiến dịch liên kết với tài khoản
+            for campaign in account.facebook_campaigns:
+                db.session.delete(campaign)
+
+            # Xóa tất cả các tài khoản quảng cáo liên kết với tài khoản
+            for ad_account in account.facebook_ad_accounts:
+                db.session.delete(ad_account)
+
+            # db.session.delete(account)
+            db.session.commit()
+
+            print("Facebook account and related data deleted successfully!", "success")
+            return True
+        else:
+            print("Account not found.", "danger")
+            return False
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error: {str(e)}", "danger")
+        return False

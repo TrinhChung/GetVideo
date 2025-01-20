@@ -10,7 +10,7 @@ from flask import (
 )
 from database_init import db
 from models.facebook_account import FacebookAccount
-from util.post_fb import get_account, get_ad_accounts
+from util.post_fb import get_account, get_ad_accounts,delete_facebook_account
 from Form.account_fb import AddFacebookAccountForm
 import os
 from dotenv import load_dotenv
@@ -135,34 +135,11 @@ def add_fb_account():
 # Xóa tài khoản Facebook
 @facebook_bp.route("/account_fb/delete_account/<int:id>", methods=["GET", "POST"])
 def delete_fb_account(id):
-    try:
-        account = FacebookAccount.query.get(id)  # Tìm tài khoản theo ID
-
-        if account:
-            # Xóa tất cả các Page liên kết với tài khoản
-            for page in account.pages:
-                for stack_posts in page.stack_posts:
-                    db.session.delete(stack_posts)
-                db.session.delete(page)
-
-            for campaign in account.facebook_campaigns:
-                db.session.delete(campaign)
-
-            # Xóa tất cả các Facebook Ad Account liên kết với tài khoản
-            for ad_account in account.facebook_ad_accounts:
-                db.session.delete(ad_account)
-
-            db.session.commit()  # Cam kết thay đổi vào cơ sở dữ liệu
-
-            flash(
-                "Facebook account and related pages and ad accounts deleted successfully!",
-                "success",
-            )
-        else:
-            flash("Account not found.", "danger")
-    except Exception as e:
-        db.session.rollback()  # Nếu có lỗi, rollback để đảm bảo tính toàn vẹn dữ liệu
-        flash(f"Error: {str(e)}", "danger")
+    success = delete_facebook_account(id)
+    if success:
+        flash("Account deleted successfully!", "success")
+    else:
+        flash("Failed to delete the account.", "danger")
 
     return redirect(url_for("facebook.account_fb"))
 

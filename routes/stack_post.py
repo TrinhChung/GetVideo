@@ -60,7 +60,7 @@ def post_video(post_id):
         try:
             # Lấy thông tin stack post
             post = StackPost.query.get_or_404(post_id)
-            
+
             # Lấy thông tin page
             page = Page.query.get(post.page_id)
             if not page or not page.access_token:
@@ -89,7 +89,7 @@ def post_video(post_id):
                 post.status = "posted"
                 post.video_id = posted_video_id  # Cập nhật ID video
                 db.session.commit()
-                flash("Đăng video thành công", "success")
+                flash("Posted video successfully", "success")
 
             except Exception as e:
                 # Cập nhật trạng thái lỗi

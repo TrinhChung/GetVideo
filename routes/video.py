@@ -24,12 +24,12 @@ VIDEO_FOLDER = './'
 def index():
     form = VideoDownloadForm()
 
-    facebook_user_id = session.get("facebook_user_id")  # Lấy user_id từ session
-    if not user_id:
+    facebook_account_id = session.get("facebook_user_id")  # Lấy user_id từ session
+    if not facebook_account_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
-    
-    videos = Video.query.filter_by(user_id=user_id).all()
+
+    videos = Video.query.filter_by(facebook_account_id=facebook_account_id).all()
     form = VideoDownloadForm()
     return render_template("videos.html", videos=videos, form=form)
 
@@ -61,12 +61,14 @@ def download_video_route(video_id):
 @video_bp.route("/video/download_all", methods=["POST"])
 def download_all_videos():
 
-    facebook_user_id = session.get("facebook_user_id")  # Lấy user_id từ session
-    if not user_id:
+    facebook_account_id = session.get("facebook_user_id")  # Lấy user_id từ session
+    if not facebook_account_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
-    
-    videos_to_download = Video.query.filter_by(crawled=False, user_id=user_id).all()
+
+    videos_to_download = Video.query.filter_by(
+        crawled=False, facebook_account_id=facebook_account_id
+    ).all()
 
     for video in videos_to_download:
         try:
@@ -87,8 +89,8 @@ def download_all_videos():
 # Route để chia video
 @video_bp.route("/split_video/<video_id>", methods=["POST"])
 def split_video_route(video_id):
-    facebook_user_id = session.get("facebook_user_id")  # Lấy user_id từ session
-    if not user_id:
+    facebook_account_id = session.get("facebook_user_id")  # Lấy user_id từ session
+    if not facebook_account_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
@@ -97,7 +99,7 @@ def split_video_route(video_id):
     if video and video.path:
         try:
             segment_duration_sec = 60  # Chỉnh sửa thời gian chia đoạn theo nhu cầu
-            split_video(video.path, segment_duration_sec, user_id)
+            split_video(video.path, segment_duration_sec, facebook_account_id)
 
             flash("Video đã được chia thành các phần", "success")
         except Exception as e:
@@ -110,11 +112,12 @@ def split_video_route(video_id):
 # Route để chia các video đã chọn
 @video_bp.route("/split_selected_videos", methods=["POST"])
 def split_selected_videos():
-    facebook_user_id = session.get("facebook_user_id")  # Lấy user_id từ session
-    if not user_id:
+
+    facebook_account_id = session.get("facebook_user_id")  # Lấy user_id từ session
+    if not facebook_account_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
-    
+
     ids = request.form.getlist(
         "selected_videos"
     )  # Lấy danh sách video_id đã chọn
@@ -127,7 +130,7 @@ def split_selected_videos():
 
         if video and video.path:
             try:
-                split_video(video.path, split_duration, user_id)
+                split_video(video.path, split_duration, facebook_account_id)
                 flash(f"Video {video.title} đã được chia thành các phần", "success")
             except Exception as e:
                 flash(f"Đã xảy ra lỗi khi chia video {video.title}: {e}", "danger")

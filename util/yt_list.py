@@ -91,6 +91,9 @@ def save_playlist_and_videos_to_mysql(
             facebook_account_id=facebook_account_id,
         )
         db.session.add(playlist)
+    else:
+        playlist.title = playlist_title
+        playlist.facebook_account_id = facebook_account_id
 
     # Lưu thông tin video vào bảng videos
     for video in video_data:

@@ -59,7 +59,7 @@ def create_app():
 
     app.jinja_env.filters["datetimeformat"] = format_datetime
 
-    app.config["SEND_FILE_MAX_AGE_DEFAULT"] = timedelta(minutes=1200)
+    app.config["SEND_FILE_MAX_AGE_DEFAULT"] = timedelta(minutes=60)
 
     db.init_app(app)
     migrate.init_app(app, db)
@@ -98,8 +98,14 @@ def create_app():
             "static",
         ]
         if "facebook_user_id" not in session and request.endpoint not in allowed_routes:
-            flash("Bạn cần đăng nhập để truy cập trang này.", "danger")
+            flash("You need to log in to access this page.", "danger")
             return redirect(url_for("auth.login"))
+
+    @app.template_filter('format_currency')
+    def format_currency(value, currency="USD"):
+        if isinstance(value, (int, float)):
+            return f"{value:,.2f} {currency}"
+        return value
 
     # Bắt đầu scheduler
     if not scheduler.running:

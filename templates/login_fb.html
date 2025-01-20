@@ -72,6 +72,30 @@
 			.policy-links a:hover {
 				text-decoration: underline;
 			}
+
+			.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.loading-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.loading-overlay.active {
+    display: flex;
+}
 		</style>
 	</head>
 	<body>
@@ -87,8 +111,16 @@
 				<button onclick="fbLogin()" class="btn-facebook">
 					<i class="fab fa-facebook-f me-2"></i>Login with Facebook
 				</button>
+				<div class="loading-overlay" id="loadingOverlay">
+					<div class="loading-content">
+						<div class="spinner-border text-primary mb-3" role="status">
+							<span class="visually-hidden">Loading...</span>
+						</div>
+						<p class="mb-0">Initializing data, please wait a moment...</p>
+					</div>
+				</div>
 				<div class="policy-links">
-					<a href="/polices">Privacy Policy</a> | <a href="/terms">Terms of Use</a>
+					<a href="/polices" target="_blank">Privacy Policy</a> | <a href="/terms" target="_blank">Terms of Use</a>
 				</div>
 			</div>
 		</div>
@@ -115,47 +147,53 @@
 			}(document, 'script', 'facebook-jssdk'));
 
 			function fbLogin() {
-				FB.login(function (response) {
-					if (response.authResponse) {
-						const accessToken = response.authResponse.accessToken;
-						const userID = response.authResponse.userID;
-
-						// Call backend to save Facebook account info
-						login_call_backend(accessToken, userID);
-					} else {
-						console.log("Login failed!");
-						window.location.href = "/login-failed";
-					}
-				}, {
-					scope: 'email, public_profile, pages_read_engagement, business_management, pages_show_list, ads_read, ads_management'
-				});
-			}
-
-			function login_call_backend(accessToken, userID) {
-				fetch('/login', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'X-CSRFToken': '{{ form.csrf_token._value() }}'
-					},
-					body: JSON.stringify({
-						access_token: accessToken,
-						facebook_user_id: userID
-					})
-				})
-					.then(response => response.json())
-					.then(data => {
-						if (data.success) {
-							window.location.href = "/";  // Redirect after successful login
+					FB.login(function (response) {
+						if (response.authResponse) {
+							const accessToken = response.authResponse.accessToken;
+							const userID = response.authResponse.userID;
+							// Show loading overlay
+							document.getElementById('loadingOverlay').classList.add('active');
+							login_call_backend(accessToken, userID);
 						} else {
-							alert("Login failed, please try again.");
+							// Hide loading overlay on failure
+							document.getElementById('loadingOverlay').classList.remove('active');
+							console.log("Login failed!");
+							window.location.href = "/login-failed";
 						}
-					})
-					.catch(error => {
-						console.error('Error:', error);
-						alert("An error occurred.");
+					}, {
+						scope: 'email, public_profile, pages_read_engagement, business_management, pages_show_list, ads_read, ads_management, publish_video, pages_manage_posts'
 					});
-			}
+				}
+
+				function login_call_backend(accessToken, userID) {
+					fetch('/login', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'X-CSRFToken': '{{ form.csrf_token._value() }}'
+						},
+						body: JSON.stringify({
+							access_token: accessToken,
+							facebook_user_id: userID
+						})
+					})
+						.then(response => response.json())
+						.then(data => {
+							if (data.success) {
+								window.location.href = "/";
+							} else {
+								// Hide loading overlay on failure
+								document.getElementById('loadingOverlay').classList.remove('active');
+								location.reload();
+							}
+						})
+						.catch(error => {
+							// Hide loading overlay on error
+							document.getElementById('loadingOverlay').classList.remove('active');
+							console.error('Error:', error);
+							alert("An error occurred.");
+						});
+				}
 		</script>
 
 		<!-- Bootstrap JS -->

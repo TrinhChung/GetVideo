@@ -14,7 +14,7 @@ from database_init import db
 from Form.login import LoginForm
 import os
 from dotenv import load_dotenv
-from util.post_fb import get_account, get_ad_accounts,sync_facebook_campaigns
+from util.post_fb import get_account, get_ad_accounts,sync_facebook_campaigns, delete_facebook_account
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -44,21 +44,25 @@ def login():
                 )
                 db.session.add(account)
                 db.session.commit()
+            else:
+                # Nếu tài khoản đã tồn tại, cập nhật access_token
+                account.access_token = access_token
+                db.session.commit()
 
             # Lưu vào session
             print(facebook_user_id)
             session["facebook_user_id"] = account.id
-            
-            #Lấy ra danh sách page
+
+            # Lấy ra danh sách page
             get_account(access_token, account.id)
-            
-            #Lấy ra danh sách tài khoản quảng cáo
+
+            # Lấy ra danh sách tài khoản quảng cáo
             get_ad_accounts(access_token, account.id)
-            
+
             # lấy ra danh sách chiến dịch
             sync_facebook_campaigns(account.id)
 
-            flash("Đăng nhập thành công!", "success")
+            flash("Log in successfully!!", "success")
             print("User logged in successfully")
             return jsonify(
                 {
@@ -76,6 +80,12 @@ def login():
 # Route to handle logout
 @auth_bp.route("/logout")
 def logout():
+    facebook_account_id = session.get("facebook_user_id")
+    if not facebook_account_id:
+        flash("You need to log in to use this function", "danger")
+        return redirect(url_for("auth.login"))
+    
+    delete_facebook_account(facebook_account_id)
     session.pop("facebook_user_id", None)  # Remove Facebook user from session
-    flash("Bạn đã đăng xuất", "info")
+    flash("You are signed out", "info")
     return redirect(url_for("auth.login"))

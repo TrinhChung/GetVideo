@@ -16,16 +16,18 @@ def video_splits():
     # Tạo form mới
     form = VideoSplitScheduleForm()
 
-    facebook_user_id = session.get("facebook_user_id")  # Lấy user_id từ session
-    if not user_id:
+    facebook_account_id = session.get("facebook_user_id")  # Lấy user_id từ session
+    if not facebook_account_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
     # Lấy tất cả video splits từ cơ sở dữ liệu
-    video_splits = VideoSplit.query.filter_by(user_id=user_id).all()
+    video_splits = VideoSplit.query.filter_by(
+        facebook_account_id=facebook_account_id
+    ).all()
 
     # Lấy tất cả các trang (Page)
-    pages = Page.query.filter_by(user_id=user_id).all()
+    pages = Page.query.filter_by(facebook_account_id=facebook_account_id).all()
 
     # Cập nhật choices cho form
     form.page_id.choices = [(page.page_id, page.name) for page in pages]
@@ -42,14 +44,16 @@ def video_splits():
 def add_to_schedule():
     form = VideoSplitScheduleForm()
 
-    facebook_user_id = session.get("facebook_user_id")  # Lấy user_id từ session
-    if not user_id:
+    facebook_account_id = session.get("facebook_user_id")  # Lấy user_id từ session
+    if not facebook_account_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
     # Lấy tất cả pages và video splits để cập nhật choices
-    pages = Page.query.filter_by(user_id=user_id).all()
-    video_splits = VideoSplit.query.filter_by(user_id=user_id).all()
+    pages = Page.query.filter_by(facebook_account_id=facebook_account_id).all()
+    video_splits = VideoSplit.query.filter_by(
+        facebook_account_id=facebook_account_id
+    ).all()
     form.page_id.choices = [(page.page_id, page.name) for page in pages]
     form.selected_splits.choices = [(split.id, split.title) for split in video_splits]
 
@@ -76,7 +80,9 @@ def add_to_schedule():
             for index, split_id in enumerate(form.selected_splits.data):
                 # Kiểm tra xem bản ghi đã tồn tại chưa
                 existing_post = StackPost.query.filter_by(
-                    page_id=form.page_id.data, video_split_id=split_id, user_id=user_id
+                    page_id=form.page_id.data,
+                    video_split_id=split_id,
+                    facebook_account_id=facebook_account_id,
                 ).first()
 
                 if existing_post:
@@ -101,7 +107,7 @@ def add_to_schedule():
                     video_split_id=split_id,
                     title=title,
                     status="waiting",
-                    user_id=user_id
+                    facebook_account_id=facebook_account_id,
                 )
 
                 db.session.add(new_stack_post)

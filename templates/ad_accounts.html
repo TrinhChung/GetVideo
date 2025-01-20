@@ -25,7 +25,6 @@
 						<th>Account Name</th>
 						<th>Account ID</th>
 						<th>Status</th>
-						<th>Currency</th>
 						<th>Balance</th>
 						<th>Amount Spent</th>
 						<th>Spend Limit</th>
@@ -49,10 +48,9 @@
 							<span class="badge bg-danger">Locked</span>
 							{% endif %}
 						</td>
-						<td>{{ account.currency }}</td>
-						<td>{{ account.balance or 0 }}</td>
-						<td>{{ account.amount_spent or 0 }}</td>
-						<td>{{ account.spend_cap or "Unlimited" }}</td>
+						<td>{{ "{:,.0f}".format(account.balance or 0) }} {{ account.currency }}</td>
+						<td>{{ "{:,.0f}".format(account.amount_spent or 0) }} {{ account.currency }}</td>
+						<td>{{ "{:,.0f}".format(account.spend_cap) if account.spend_cap else "Unlimited" }}</td>
 						<td>{{ account.timezone_name }} (UTC{{ account.timezone_offset_hours_utc }})</td>
 						<td>{{ account.business_name or "N/A" }}</td>
 						<td>{{ account.created_time.strftime('%d-%m-%Y') if account.created_time else "N/A" }}</td>

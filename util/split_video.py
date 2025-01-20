@@ -39,7 +39,8 @@ def clean_title(title):
 def split_video(
     video_path,
     segment_duration_sec,
-    user_id, output_prefix="output_part",
+    facebook_account_id,
+    output_prefix="output_part",
     codec="libx264",
 ):
     """
@@ -52,6 +53,8 @@ def split_video(
         codec (str): Bộ mã hóa video để sử dụng khi xuất file (mặc định là "libx264").
     """
     output_dir = r"./Videos/Splited"  # Đường dẫn thư mục cố định
+    
+    print(facebook_account_id)
 
     # Kiểm tra và tạo thư mục nếu chưa tồn tại
     if not os.path.exists(output_dir):
@@ -102,7 +105,7 @@ def split_video(
             type_duration=segment_duration_sec,
             video_id=video_id,
             type=video_type,
-            user_id=user_id,
+            facebook_account_id=facebook_account_id,
         )
         db.session.add(video_split)
 
@@ -125,7 +128,7 @@ def split_video(
             type_duration=segment_duration_sec,
             video_id=video_id,
             type=video_type,
-            user_id=user_id,
+            facebook_account_id=facebook_account_id,
         )
         db.session.add(video_split)
 
