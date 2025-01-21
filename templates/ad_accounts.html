@@ -38,7 +38,6 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
     <h1 class="text-dark mb-4 text-center text-md-start">Ad Account List</h1>
 
     {% if ad_accounts %}
@@ -48,7 +47,6 @@
                 <tr>
                     <th>#</th>
                     <th>Account Name</th>
-                    <th>Account ID</th>
                     <th>Status</th>
                     <th>Balance</th>
                     <th>Amount Spent</th>
@@ -63,7 +61,6 @@
                 <tr>
                     <td>{{ loop.index }}</td>
                     <td>{{ account.name }}</td>
-                    <td>{{ account.facebook_ad_account_id }}</td>
                     <td>
                         {% if account.account_status == 1 %}
                         <span class="badge bg-success">Active</span>
@@ -89,7 +86,6 @@
     {% else %}
     <div class="alert alert-info text-center">No ad accounts found</div>
     {% endif %}
-</div>
 {% endblock %}
 
 {% block extra_js %}
