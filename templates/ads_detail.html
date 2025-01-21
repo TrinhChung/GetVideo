@@ -35,6 +35,8 @@
           <th>Spend</th>
           <th>CPC</th>
           <th>CPM</th>
+          <th>CTR</th>
+          <th>Frequency</th>
         </tr>
       </thead>
       <tbody>
@@ -50,8 +52,10 @@
             <td>{{ insight.spend|format_currency }}</td>
             <td class="highlight">{{ insight.cpc|format_currency if insight.cpc else 'N/A' }}</td>
             <td class="highlight">{{ insight.cpm|format_currency if insight.cpm else 'N/A' }}</td>
+            <td>{{ insight.ctr ~ '%' if insight.ctr is not none else 'N/A' }}</td>
+            <td>{{ insight.frequency if insight.frequency is not none else 'N/A' }}</td>
           {% else %}
-            <td colspan="5">No insights available</td>
+            <td colspan="8">No insights available</td>
           {% endif %}
         </tr>
         {% endfor %}
@@ -98,12 +102,8 @@
       },
       options: {
         scales: {
-          x: {
-            title: { display: true, text: 'Impressions' }
-          },
-          y: {
-            title: { display: true, text: 'Clicks' }
-          }
+          x: { title: { display: true, text: 'Impressions' } },
+          y: { title: { display: true, text: 'Clicks' } }
         },
         plugins: {
           tooltip: {
