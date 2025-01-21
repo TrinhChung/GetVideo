@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Ads for Account {{ account_id }}{% endblock %}
+
+{% block extra_css %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .highlight {
+      font-weight: bold;
+      color: #d9534f;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <!-- Breadcrumb Navigation -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('facebook.list_ad_accounts') }}">Account List</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Ads for Account {{ account_id }}</li>
+    </ol>
+  </nav>
+
+  <h1>Ads for Account {{ account_id }}</h1>
+    
+  {% if ads %}
+    <table class="table table-hover table-bordered">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Status</th>
+          <th>Impressions</th>
+          <th>Clicks</th>
+          <th>Spend</th>
+          <th>CPC</th>
+          <th>CPM</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ad in ads %}
+        <tr>
+          <td>{{ ad.id }}</td>
+          <td>{{ ad.name }}</td>
+          <td>{{ ad.status }}</td>
+          {% if ad.insights and ad.insights.data and ad.insights.data|length > 0 %}
+            {% set insight = ad.insights.data[0] %}
+            <td>{{ insight.impressions }}</td>
+            <td>{{ insight.clicks }}</td>
+            <td>{{ insight.spend|format_currency }}</td>
+            <td class="highlight">{{ insight.cpc|format_currency if insight.cpc else 'N/A' }}</td>
+            <td class="highlight">{{ insight.cpm|format_currency if insight.cpm else 'N/A' }}</td>
+          {% else %}
+            <td colspan="5">No insights available</td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="alert alert-info">No ads found for this account.</div>
+  {% endif %}
+
+  <h2 class="mt-5">Comparison of Impressions and Clicks</h2>
+  <canvas id="scatterChart" width="400" height="200"></canvas>
+
+  <h2 class="mt-5">Comparison of CPC and CPM by Ad</h2>
+  <canvas id="mixChart" width="400" height="200"></canvas>
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+    const adsData = {{ ads | tojson }};
+
+    // Prepare data for scatter chart
+    let scatterData = [];
+    adsData.forEach(ad => {
+      if(ad.insights && ad.insights.data && ad.insights.data.length > 0) {
+        const insight = ad.insights.data[0];
+        scatterData.push({
+          x: parseInt(insight.impressions || 0),
+          y: parseInt(insight.clicks || 0),
+          label: ad.name
+        });
+      }
+    });
+
+    // Create scatter chart (Impressions vs Clicks)
+    const scatterCtx = document.getElementById('scatterChart').getContext('2d');
+    const scatterChart = new Chart(scatterCtx, {
+      type: 'scatter',
+      data: {
+        datasets: [{
+          label: 'Impressions - Clicks Correlation',
+          data: scatterData,
+          backgroundColor: 'rgba(75, 192, 192, 0.6)'
+        }]
+      },
+      options: {
+        scales: {
+          x: {
+            title: { display: true, text: 'Impressions' }
+          },
+          y: {
+            title: { display: true, text: 'Clicks' }
+          }
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                let label = context.raw.label || '';
+                return label + ': (' + context.raw.x + ', ' + context.raw.y + ')';
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Prepare data for mixed chart (CPC and CPM)
+    let labels = [];
+    let cpcData = [];
+    let cpmData = [];
+
+    adsData.forEach(ad => {
+      if(ad.insights && ad.insights.data && ad.insights.data.length > 0) {
+        const insight = ad.insights.data[0];
+        labels.push(ad.name);
+        cpcData.push(insight.cpc ? parseFloat(insight.cpc) : 0);
+        cpmData.push(insight.cpm ? parseFloat(insight.cpm) : 0);
+      }
+    });
+
+    // Create mixed chart for CPC and CPM
+    const mixCtx = document.getElementById('mixChart').getContext('2d');
+    const mixChart = new Chart(mixCtx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'CPC',
+          data: cpcData,
+          backgroundColor: 'rgba(220, 53, 69, 0.6)', 
+          borderColor: 'rgba(220, 53, 69, 1)',
+          type: 'line',
+          yAxisID: 'y1'
+        }, {
+          label: 'CPM',
+          data: cpmData,
+          backgroundColor: 'rgba(255, 193, 7, 0.6)',
+          borderColor: 'rgba(255, 193, 7, 1)',
+          type: 'bar',
+          yAxisID: 'y2'
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y1: {
+            beginAtZero: true,
+            position: 'left',
+            title: { display: true, text: 'CPC' }
+          },
+          y2: {
+            beginAtZero: true,
+            position: 'right',
+            grid: { drawOnChartArea: false },
+            title: { display: true, text: 'CPM' }
+          }
+        }
+      }
+    });
+  </script>
+{% endblock %}

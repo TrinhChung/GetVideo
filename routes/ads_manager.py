@@ -9,6 +9,7 @@ from Form.create_campaign import FacebookCampaignForm, CampaignForm  # Import fo
 from util.ads import create_facebook_campaign
 from flask_paginate import Pagination, get_page_parameter
 from util.post_fb import sync_facebook_campaigns
+import requests
 
 total_requests = 15000
 requests_per_hour = 170
@@ -213,3 +214,45 @@ def modify_campaign(campaign_id):
         return redirect(url_for("ads_manager.list_fb_campaigns"))
 
     return render_template("modify_campaign.html", form=form, campaign=campaign)
+
+@ads_manager_bp.route('/ads/<account_id>')
+def view_ads(account_id):
+    # Kiểm tra người dùng đăng nhập
+    facebook_account_id = session.get("facebook_user_id")
+    if not facebook_account_id:
+        flash("You need to log in to use this function", "danger")
+        return redirect(url_for("auth.login"))
+
+    # Lấy access_token từ cơ sở dữ liệu dựa trên facebook_user_id
+    facebook_account = FacebookAccount.query.filter_by(id=facebook_account_id).first()
+    if not facebook_account:
+        flash("Facebook account not found", "danger")
+        return redirect(url_for("auth.login"))
+
+    access_token = facebook_account.access_token
+
+    # Xây dựng URL API để lấy danh sách ads cho tài khoản quảng cáo được chọn
+    url = f"https://graph.facebook.com/v21.0/act_{account_id}/ads"
+    params = {
+        'fields': 'id,name,status,campaign_id,adset_id,creative,insights{impressions,clicks,spend,cpm,cpc,cpp,date_start,date_stop}',
+        'access_token': access_token
+    }
+
+    # Gọi API và xử lý phản hồi
+    response = requests.get(url, params=params)
+    ads_data = response.json()
+
+    if response.status_code != 200:
+        try:
+            error_data = response.json()
+            error_message = error_data.get('error', {}).get('message', 'Unknown error occurred')
+        except Exception:
+            error_message = 'Unknown error occurred'
+        flash(f"Error fetching ads: {error_message}", "danger")
+        return redirect(url_for("facebook.list_ad_accounts"))  # Chuyển hướng về trang danh sách chiến dịch hoặc trang phù hợp
+
+    # Lấy danh sách ads từ phản hồi
+    ads = ads_data.get('data', [])
+
+    # Render template hiển thị thông tin chi tiết
+    return render_template('ads_detail.html', account_id=account_id, ads=ads)
