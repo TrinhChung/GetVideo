@@ -243,6 +243,7 @@ def view_ads(account_id):
 
     # Make API call and handle response
     response = requests.get(url, params=params)
+
     if response.status_code != 200:
         try:
             error_data = response.json()
