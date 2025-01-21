@@ -38,7 +38,7 @@ def create_app():
 
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
     # Cấu hình thời gian sống của session
-    app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
+    app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=60)
 
     # Thiết lập cookie bảo mật
     app.config["SESSION_COOKIE_HTTPONLY"] = (
@@ -59,7 +59,7 @@ def create_app():
 
     app.jinja_env.filters["datetimeformat"] = format_datetime
 
-    app.config["SEND_FILE_MAX_AGE_DEFAULT"] = timedelta(minutes=60)
+    app.config["SEND_FILE_MAX_AGE_DEFAULT"] = timedelta(minutes=30)
 
     db.init_app(app)
     migrate.init_app(app, db)

@@ -250,8 +250,9 @@ def view_ads(account_id):
             error_message = error_data.get('error', {}).get('message', 'Unknown error occurred')
         except Exception:
             error_message = 'Unknown error occurred'
-        flash(f"Error fetching ads: {error_message}", "danger")
-        return redirect(url_for("facebook.list_ad_accounts"))
+        print(error_message)
+        flash(f"Login session expired, please log in again", "danger")
+        return redirect(url_for("auth.login"))
         
     ads_data = response.json()
     ads = ads_data.get('data', [])

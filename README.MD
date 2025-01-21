@@ -72,10 +72,20 @@ docker compose down -v
 ```
 
 # Kill tiến trình
-```
+```bash
 sudo lsof -i:5000
 ```
 
-```
+```bash
 sudo kill PIP_ID
+```
+
+# Create screen
+```bash
+screen -S myflask
+```
+
+# Back to screen
+```bash
+screen -r myflask
 ```

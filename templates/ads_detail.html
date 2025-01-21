@@ -3,28 +3,81 @@
 {% block title %}Ads for Account {{ account_id }}{% endblock %}
 
 {% block extra_css %}
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    .highlight {
-      font-weight: bold;
-      color: #d9534f;
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  .highlight {
+    font-weight: bold;
+    color: #d9534f;
+  }
+
+  /* Breadcrumb responsive */
+  .breadcrumb {
+    font-size: 16px;
+  }
+
+  /* Responsive table */
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  /* Điều chỉnh bảng trên màn hình nhỏ */
+  @media (max-width: 992px) {
+    .table th, .table td {
+      font-size: 14px;
+      padding: 10px 8px;
+      white-space: nowrap; /* Giữ nội dung trên một dòng */
     }
-    /* Bạn có thể thêm CSS bổ sung tại đây nếu cần */
-  </style>
+
+    .btn-sm {
+      font-size: 12px;
+      padding: 6px 10px;
+    }
+
+    h2 {
+      font-size: 22px;
+      text-align: center;
+    }
+
+    .breadcrumb {
+      font-size: 14px;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .table th, .table td {
+      font-size: 12px;
+      padding: 8px;
+    }
+
+    .btn-sm {
+      font-size: 10px;
+      padding: 5px 8px;
+    }
+
+    h2 {
+      font-size: 20px;
+      text-align: center;
+    }
+
+    .breadcrumb {
+      font-size: 13px;
+    }
+  }
+</style>
 {% endblock %}
 
 {% block content %}
-  <!-- Breadcrumb Navigation -->
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="{{ url_for('facebook.list_ad_accounts') }}">Account List</a></li>
-      <li class="breadcrumb-item active" aria-current="page">Ads for Account {{ account_id }}</li>
-    </ol>
-  </nav>
+<!-- Breadcrumb Navigation -->
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('facebook.list_ad_accounts') }}">Account List</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Ads for Account {{ account_id }}</li>
+  </ol>
+</nav>
 
-  <h1>Ads for Account {{ account_id }}</h1>
-    
+<div class="container">
   {% if ads %}
+  <div class="table-responsive">
     <table class="table table-hover table-bordered">
       <thead class="table-dark">
         <tr>
@@ -45,33 +98,35 @@
           <td>{{ ad.name }}</td>
           <td>{{ ad.status }}</td>
           {% if ad.insights and ad.insights.data and ad.insights.data|length > 0 %}
-            {% set insight = ad.insights.data[0] %}
-            <td>{{ insight.impressions }}</td>
-            <td>{{ insight.clicks }}</td>
-            <td>{{ insight.spend|format_currency }}</td>
-            <td class="highlight">{{ insight.cpc|format_currency if insight.cpc else 'N/A' }}</td>
-            <td class="highlight">{{ insight.cpm|format_currency if insight.cpm else 'N/A' }}</td>
-            <td>{{ insight.ctr ~ '%' if insight.ctr is not none else 'N/A' }}</td>
-            <td>{{ insight.frequency if insight.frequency is not none else 'N/A' }}</td>
+          {% set insight = ad.insights.data[0] %}
+          <td>{{ insight.impressions }}</td>
+          <td>{{ insight.clicks }}</td>
+          <td>{{ insight.spend|format_currency }}</td>
+          <td class="highlight">{{ insight.cpc|format_currency if insight.cpc else 'N/A' }}</td>
+          <td class="highlight">{{ insight.cpm|format_currency if insight.cpm else 'N/A' }}</td>
+          <td>{{ insight.ctr ~ '%' if insight.ctr is not none else 'N/A' }}</td>
+          <td>{{ insight.frequency if insight.frequency is not none else 'N/A' }}</td>
           {% else %}
-            <td colspan="8">No insights available</td>
+          <td colspan="8">No insights available</td>
           {% endif %}
         </tr>
         {% endfor %}
       </tbody>
     </table>
+  </div>
   {% else %}
-    <div class="alert alert-info">No ads found for this account.</div>
+  <div class="alert alert-info text-center">No ads found for this account.</div>
   {% endif %}
 
   <h2 class="mt-5">Comparison of CPC and CPM by Ad</h2>
-  <canvas id="mixChart" width="400" height="200"></canvas>
+  <canvas id="mixChart" class="w-100" height="300"></canvas>
 
   <h2 class="mt-5">Comparison of Impressions and Clicks</h2>
-  <canvas id="scatterChart" width="400" height="200"></canvas>
+  <canvas id="scatterChart" class="w-100" height="300"></canvas>
 
   <h2 class="mt-5">Overall Evaluation</h2>
   <div id="evaluation" class="alert alert-info"></div>
+</div>
 {% endblock %}
 
 {% block extra_js %}

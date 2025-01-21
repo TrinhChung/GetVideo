@@ -97,32 +97,30 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-	<div class="card">
-		<div class="card-header facebook-header">
-			<i class="fab fa-facebook-square me-2 facebook-icon"></i>Your Facebook Account
-		</div>
-		<div class="card-body">
-			{% if account %}
-			<div class="profile-wrapper">
-				<img src="{{ account.avatar_url }}" alt="Avatar" class="avatar">
-				<div class="profile-details">
-					<p><strong>Name:</strong> <span>{{ account.name }}</span></p>
-					<p><strong>Facebook User ID:</strong> <span>{{ account.facebook_user_id }}</span></p>
-					{% if account.email %}
-					<p><strong>Email:</strong> <span>{{ account.email }}</span></p>
-					{% endif %}
-					<p><strong>Number of Pages:</strong> <span>{{ account.pages|length }}</span></p>
-					<p><strong>Number of Ad Accounts:</strong> <span>{{ account.facebook_ad_accounts|length }}</span>
-					</p>
-					<p><strong>Number of Campaigns:</strong> <span>{{ account.facebook_campaigns|length }}</span></p>
-				</div>
+<div class="card">
+	<div class="card-header facebook-header">
+		<i class="fab fa-facebook-square me-2 facebook-icon"></i>Your Facebook Account
+	</div>
+	<div class="card-body">
+		{% if account %}
+		<div class="profile-wrapper">
+			<img src="{{ account.avatar_url }}" alt="Avatar" class="avatar">
+			<div class="profile-details">
+				<p><strong>Name:</strong> <span>{{ account.name }}</span></p>
+				<p><strong>Facebook User ID:</strong> <span>{{ account.facebook_user_id }}</span></p>
+				{% if account.email %}
+				<p><strong>Email:</strong> <span>{{ account.email }}</span></p>
+				{% endif %}
+				<p><strong>Number of Pages:</strong> <span>{{ account.pages|length }}</span></p>
+				<p><strong>Number of Ad Accounts:</strong> <span>{{ account.facebook_ad_accounts|length }}</span>
+				</p>
+				<p><strong>Number of Campaigns:</strong> <span>{{ account.facebook_campaigns|length }}</span></p>
 			</div>
-			{% else %}
-			<p class="text-left">No account found. Please log in using Facebook.</p>
-			<button class="btn btn-primary btn-lg" onclick="fbLogin()">Login with Facebook</button>
-			{% endif %}
 		</div>
+		{% else %}
+		<p class="text-left">No account found. Please log in using Facebook.</p>
+		<button class="btn btn-primary btn-lg" onclick="fbLogin()">Login with Facebook</button>
+		{% endif %}
 	</div>
 </div>
 {% endblock %}
