@@ -266,7 +266,7 @@ def get_account(access_token, facebook_account_id):
                 expires_at = None  # Nếu không có expires_at, gán là None
 
             # Kiểm tra xem page_id có tồn tại trong cơ sở dữ liệu chưa
-            existing_page = Page.query.filter_by(page_id=page_id).first()
+            existing_page = Page.query.filter_by(page_id=page_id, facebook_account_id=facebook_account_id).first()
 
             if existing_page:
                 # Nếu đã tồn tại, cập nhật thông tin của trang
@@ -274,7 +274,6 @@ def get_account(access_token, facebook_account_id):
                 existing_page.category = category
                 existing_page.access_token = page_access_token
                 existing_page.expires_at = expires_at
-                existing_page.facebook_account_id = facebook_account_id
             else:
                 # Nếu chưa có, tạo mới một bản ghi
                 new_page = Page(
@@ -426,7 +425,8 @@ def get_ad_accounts(access_token, facebook_account_id):
         for ad_account in ad_accounts:
             # Kiểm tra tài khoản đã tồn tại chưa
             existing_account = FacebookAdAccount.query.filter_by(
-                facebook_ad_account_id=ad_account.get("account_id")
+                facebook_ad_account_id=ad_account.get("account_id"),
+                facebook_account_id=facebook_account_id
             ).first()
 
             if existing_account:

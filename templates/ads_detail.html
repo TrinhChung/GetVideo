@@ -9,6 +9,7 @@
       font-weight: bold;
       color: #d9534f;
     }
+    /* Bạn có thể thêm CSS bổ sung tại đây nếu cần */
   </style>
 {% endblock %}
 
@@ -68,6 +69,9 @@
 
   <h2 class="mt-5">Comparison of Impressions and Clicks</h2>
   <canvas id="scatterChart" width="400" height="200"></canvas>
+
+  <h2 class="mt-5">Overall Evaluation</h2>
+  <div id="evaluation" class="alert alert-info"></div>
 {% endblock %}
 
 {% block extra_js %}
@@ -99,6 +103,7 @@
         }]
       },
       options: {
+        responsive: true,
         scales: {
           x: { title: { display: true, text: 'Impressions' } },
           y: { title: { display: true, text: 'Clicks' } }
@@ -169,5 +174,49 @@
         }
       }
     });
+
+    // Overall Evaluation Logic
+    let totalImpressions = 0;
+    let totalClicks = 0;
+    let totalSpend = 0;
+    let totalCTR = 0;
+    let ctrCount = 0;
+
+    adsData.forEach(ad => {
+      if(ad.insights && ad.insights.data && ad.insights.data.length > 0) {
+        const insight = ad.insights.data[0];
+        totalImpressions += parseInt(insight.impressions || 0);
+        totalClicks += parseInt(insight.clicks || 0);
+        totalSpend += parseFloat(insight.spend || 0);
+        if(insight.impressions > 0 && insight.clicks > 0) {
+          const ctr = (parseInt(insight.clicks) / parseInt(insight.impressions)) * 100;
+          totalCTR += ctr;
+          ctrCount++;
+        }
+      }
+    });
+
+    const avgCTR = ctrCount > 0 ? (totalCTR / ctrCount) : 0;
+    let evaluationText = "<strong>Overall Evaluation:</strong><br>";
+
+    // Evaluate based on average CTR
+    if(avgCTR < 0.5) {
+      evaluationText += "Average CTR is low. Consider improving ad content or targeting.<br>";
+    } else if(avgCTR < 2) {
+      evaluationText += "Average CTR is moderate. There is room for improvement.<br>";
+    } else {
+      evaluationText += "High CTR indicates engaging ads.<br>";
+    }
+
+    // Evaluate based on cost
+    const avgCPC = totalClicks > 0 ? (totalSpend / totalClicks) : 0;
+    if(avgCPC > 5) {  // Giả định CPC > 5 là cao
+      evaluationText += `Average CPC is high: ${avgCPC.toFixed(2)}. Consider optimizing costs.<br>`;
+    } else {
+      evaluationText += `Average CPC is reasonable: ${avgCPC.toFixed(2)}.<br>`;
+    }
+
+    // Display evaluation summary
+    document.getElementById('evaluation').innerHTML = evaluationText;
   </script>
 {% endblock %}
