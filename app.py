@@ -6,7 +6,7 @@ import os
 import secrets
 from flask_wtf.csrf import CSRFProtect
 from datetime import timedelta
-from cronjob.init_schedule import scheduler
+# from cronjob.init_schedule import scheduler
 from log import setup_logging
 
 from util.until import format_datetime
@@ -108,8 +108,8 @@ def create_app():
         return value
 
     # Bắt đầu scheduler
-    if not scheduler.running:
-        scheduler.start()
+    # if not scheduler.running:
+    #     scheduler.start()
 
     return app
 
