@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from util.yt_list import get_playlist_info_and_video_details
 from database_init import db
 from models.playlist import Playlist
-from util.until import extract_playlist_id
 from Form.playlist import PlaylistForm, GetVideoFromPlaylistForm, GetAllVideosForm
 
 playlist_bp = Blueprint("playlist", __name__)
@@ -21,14 +20,9 @@ def batch_youtube_playlist():
 
     if form.validate_on_submit():
         playlist_url = form.playlist_url.data
-        playlist_id = extract_playlist_id(playlist_url)
-
-        if not playlist_id:
-            flash("Không thể trích xuất playlist ID từ URL", "danger")
-            return redirect(url_for("playlist.batch_youtube_playlist"))
 
         try:
-            get_playlist_info_and_video_details(playlist_id, facebook_account_id)
+            get_playlist_info_and_video_details(playlist_url, facebook_account_id)
             flash("Playlist đã được thêm thành công", "success")
         except Exception as e:
             flash(f"Đã xảy ra lỗi khi thêm playlist: {e}", "danger")
@@ -57,12 +51,8 @@ def get_video_from_playlist():
             flash("Video đã được thêm từ playlist", "success")
         except Exception as e:
             flash(f"Đã xảy ra lỗi khi lấy video từ playlist: {e}", "danger")
-            return render_template(
-                "error.html",
-                error_message=f"Đã xảy ra lỗi khi lấy video từ playlist: {e}",
-            )
-
-        return redirect(url_for("playlist.batch_youtube_playlist"))
+    else:
+        flash("Tham số truyền vào không hợp lệ", "danger")
 
     return redirect(url_for("playlist.batch_youtube_playlist"))
 
@@ -84,13 +74,14 @@ def get_all_videos():
 
         for playlist in playlists:
             try:
-                get_playlist_info_and_video_details(playlist.id, facebook_account_id)
+                get_playlist_info_and_video_details(
+                    playlist.playlist_id, facebook_account_id
+                )
                 flash(f"Video đã được thêm từ playlist {playlist.title}", "success")
             except Exception as e:
                 flash(
                     f"Đã xảy ra lỗi khi lấy video từ playlist {playlist.title}: {e}",
                     "danger",
                 )
-                print(f"Đã xảy ra lỗi khi lấy video từ playlist {playlist.title}: {e}")
 
     return redirect(url_for("playlist.batch_youtube_playlist"))

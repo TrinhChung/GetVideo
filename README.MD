@@ -89,3 +89,7 @@ screen -S myflask
 ```bash
 screen -r myflask
 ```
+# Kill to screen
+```bash
+screen -X -S myflask quit
+```

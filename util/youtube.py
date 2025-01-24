@@ -1,20 +1,26 @@
 import os
 import yt_dlp
 from util.until import extract_facebook_video_id
+import random
+import string
+
 
 def download_video_from_url(video_url, download_path):
     """
     Tải video từ một URL bất kỳ được hỗ trợ bởi yt_dlp.
     :param video_url: URL của video
     :param download_path: Thư mục lưu video (mặc định là DOWNLOAD_PATH)
-    :return: Đường dẫn file video đã tải
+    :return: Đường dẫn file video đã tải và độ dài video
     """
+    # Tạo một chuỗi số ngẫu nhiên dài 12 chữ số
+    random_digits = "".join(random.choices(string.digits, k=12))
+
     # Cài đặt các tùy chọn cho việc tải video
     ydl_opts = {
         "format": "best",  # Tải video có chất lượng tốt nhất
         "outtmpl": os.path.join(
-            download_path, "%(title)s.%(ext)s"
-        ),  # Lưu video vào thư mục chỉ định
+            download_path, f"{random_digits}.%(ext)s"
+        ),  # Lưu video vào thư mục chỉ định với tên là chuỗi số
         "noplaylist": True,  # Tải 1 video duy nhất, không tải playlist
         "quiet": False,  # Hiển thị thông tin tải về trong terminal
     }
@@ -25,10 +31,8 @@ def download_video_from_url(video_url, download_path):
             info = ydl.extract_info(
                 video_url, download=True
             )  # Tải video và lấy thông tin
-            video_path = os.path.join(download_path, f"{info['title']}.{info['ext']}")
-            video_duration = info.get(
-                "duration", 0
-            ) 
+            video_path = os.path.join(download_path, f"{random_digits}.{info['ext']}")
+            video_duration = info.get("duration", 0)
             print(f"Video đã được tải về: {video_path}")
             return video_path, video_duration
     except Exception as e:

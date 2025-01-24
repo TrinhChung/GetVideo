@@ -641,3 +641,85 @@ def delete_facebook_account(id):
         db.session.rollback()
         print(f"Error: {str(e)}", "danger")
         return False
+
+
+def fetch_facebook_ad_details(ad_id_list, adset_id_list, access_token):
+    base_url = "https://graph.facebook.com/v21.0"
+
+    # Gọi API cho từng adset_id
+    print("\nFetching Ad Set Details:")
+    for adset_id in adset_id_list:
+        adset_url = f"{base_url}/{adset_id}"
+        params = {"fields": "id,name,status,daily_budget", "access_token": access_token}
+
+        response = requests.get(adset_url, params=params)
+        if response.status_code == 200:
+            adset_data = response.json()
+            print(f"Ad Set {adset_id}: {adset_data}")
+        else:
+            flash("Đã gọi quá nhiều chuyển sang tài khoản ads khác hoặc đợi 1 tiếng")
+            print(
+                f"Failed to fetch Ad Set {adset_id}: {response.json().get('error', {}).get('message', 'Unknown error')}"
+            )
+            return False;
+
+    # Gọi API cho từng ad_id
+    print("\nFetching Ad Details:")
+    for ad_id in ad_id_list:
+        ad_url = f"{base_url}/{ad_id}"
+        params = {
+            "fields": "id,name,status,creative{object_type,object_story_spec,title,body}",
+            "access_token": access_token,
+        }
+
+        response = requests.get(ad_url, params=params)
+        if response.status_code == 200:
+            ad_data = response.json()
+            print(f"Ad {ad_id}: {ad_data}")
+        else:
+            flash("Đã gọi quá nhiều chuyển sang tài khoản ads khác hoặc đợi 1 tiếng")
+            print(
+                f"Failed to fetch Ad {ad_id}: {response.json().get('error', {}).get('message', 'Unknown error')}"
+            )
+            return False;
+    return True;
+
+
+def get_facebook_insights(ad_account_id, access_token):
+    """
+    Lấy dữ liệu báo cáo từ Facebook Ads API.
+
+    Parameters:
+        ad_account_id (str): ID của tài khoản quảng cáo Facebook.
+        access_token (str): Mã token để xác thực API.
+        start_date (str): Ngày bắt đầu (định dạng YYYY-MM-DD).
+        end_date (str): Ngày kết thúc (định dạng YYYY-MM-DD).
+
+    Returns:
+        bool: False nếu có lỗi, in dữ liệu nếu thành công.
+    """
+    url = f"https://graph.facebook.com/v22.0/act_{ad_account_id}/insights"
+
+    params = {
+        "fields": "impressions,clicks,spend",
+        "access_token": access_token,
+    }
+
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()  # Kiểm tra nếu có lỗi HTTP
+
+        data = response.json()
+
+        # Kiểm tra nếu phản hồi có lỗi từ API
+        if "error" in data:
+            print("Lỗi từ Facebook API:", data["error"]["message"])
+            return False
+
+        # In dữ liệu nhận được
+        print("Dữ liệu nhận được:", data)
+        return True
+
+    except requests.exceptions.RequestException as e:
+        print("Lỗi khi gửi yêu cầu:", e)
+        return False

@@ -71,8 +71,8 @@ def login():
                 }
             )
 
-        flash("Đăng nhập thất bại!", "danger")
-        return jsonify({"success": False, "message": f"Đăng nhập thất bại"}), 500
+        flash("Login failed!", "danger")
+        return jsonify({"success": False, "message": f"Login failed"}), 500
 
     return render_template("login_fb.html", form=form, facebook_app_id=facebook_app_id)
 

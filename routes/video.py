@@ -14,24 +14,46 @@ from models.video import Video
 from util.youtube import download_video
 from util.split_video import split_video  # Nhập hàm split_video
 from Form.video import VideoDownloadForm, VideoSplitForm
+from flask_paginate import Pagination, get_page_parameter
 
 video_bp = Blueprint("video", __name__)
 
 VIDEO_FOLDER = './'
 
+
 # Route để hiển thị và quản lý video
 @video_bp.route("/videos", methods=["GET"])
 def index():
-    form = VideoDownloadForm()
-
-    facebook_account_id = session.get("facebook_user_id")  # Lấy user_id từ session
+    facebook_account_id = session.get("facebook_user_id")
     if not facebook_account_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
-    videos = Video.query.filter_by(facebook_account_id=facebook_account_id).all()
+    # Pagination setup
+    page = request.args.get(get_page_parameter(), type=int, default=1)
+    per_page = 10
+
+    # Optional filtering (you can add more filters as needed)
+    playlist_id_filter = request.args.get("playlist_id_filter")
+
+    # Base query
+    query = Video.query.filter_by(facebook_account_id=facebook_account_id)
+
+    # Apply filters if exists
+    if playlist_id_filter:
+        query = query.filter(Video.playlist_id == playlist_id_filter)
+
+    # Pagination
+    total = query.count()
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    videos = pagination.items
+
+    # Prepare form for potential filtering
     form = VideoDownloadForm()
-    return render_template("videos.html", videos=videos, form=form)
+
+    return render_template(
+        "videos.html", videos=videos, pagination=pagination, form=form, total=total
+    )
 
 
 # Route để tải xuống video theo video_id
@@ -99,7 +121,7 @@ def split_video_route(video_id):
     if video and video.path:
         try:
             segment_duration_sec = 60  # Chỉnh sửa thời gian chia đoạn theo nhu cầu
-            split_video(video.path, segment_duration_sec, facebook_account_id)
+            split_video(video.title, video.path, segment_duration_sec, facebook_account_id)
 
             flash("Video đã được chia thành các phần", "success")
         except Exception as e:
@@ -126,11 +148,10 @@ def split_selected_videos():
     # Lặp qua từng video đã chọn và chia video
     for id in ids:
         video = Video.query.filter_by(id=id).first()
-        print(video.path)
 
         if video and video.path:
             try:
-                split_video(video.path, split_duration, facebook_account_id)
+                split_video(video.title, video.path, split_duration, facebook_account_id)
                 flash(f"Video {video.title} đã được chia thành các phần", "success")
             except Exception as e:
                 flash(f"Đã xảy ra lỗi khi chia video {video.title}: {e}", "danger")

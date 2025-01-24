@@ -8,13 +8,14 @@ from database_init import db
 from Form.create_campaign import FacebookCampaignForm, CampaignForm  # Import form
 from util.ads import create_facebook_campaign
 from flask_paginate import Pagination, get_page_parameter
-from util.post_fb import sync_facebook_campaigns
+from util.post_fb import (
+    sync_facebook_campaigns,
+)
 import requests
+import os
+from dotenv import load_dotenv
 
-total_requests = 15000
-requests_per_hour = 170
-batch_count = total_requests // requests_per_hour  # Số batch cần chạy
-remaining_requests = total_requests % requests_per_hour  # Số request còn lại
+load_dotenv()  # Đọc file .env
 
 ads_manager_bp = Blueprint("ads_manager", __name__)
 
@@ -124,13 +125,8 @@ def list_fb_campaigns():
         )
 
     # Lấy danh sách chiến dịch phân trang
-    total_campaigns = query.count()
-    campaigns = query.paginate(page=page, per_page=per_page, error_out=False).items
-
-    # Tạo đối tượng phân trang
-    pagination = Pagination(
-        page=page, total=total_campaigns, per_page=per_page, css_framework="bootstrap5"
-    )
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    campaigns = pagination.items
 
     # Render danh sách chiến dịch
     return render_template(
@@ -231,14 +227,16 @@ def view_ads(account_id):
 
     access_token = facebook_account.access_token
 
+    access_token_marketing = os.getenv("ACCESS_TOKEN_MARKETING")
+
     # Construct API URL to fetch ads for the selected ad account with extended fields
     url = f"https://graph.facebook.com/v21.0/act_{account_id}/ads"
     params = {
-        'fields': (
-            'id,name,status,'
-            'insights{impressions,clicks,spend,cpm,cpc,cpp,ctr,frequency,date_start,date_stop}'
+        "fields": (
+            "id,adset_id,name,status,"
+            "insights{impressions,clicks,spend,cpm,cpc,cpp,ctr,frequency,date_start,date_stop}"
         ),
-        'access_token': access_token
+        "access_token": access_token_marketing,
     }
 
     # Make API call and handle response
@@ -253,9 +251,32 @@ def view_ads(account_id):
         print(error_message)
         flash(f"Login session expired, please log in again", "danger")
         return redirect(url_for("auth.login"))
-        
+
     ads_data = response.json()
     ads = ads_data.get('data', [])
+
+    ad_id_list = []
+    adset_id_list = []
+
+    for ad in ads_data.get("data", []):
+        ad_id_list.append(ad["id"])
+        adset_id_list.append(ad.get("adset_id", "N/A"))
+
+    print(f"Số lượng quảng cáo: {len(ad_id_list)}")
+    print(f"Số lượng nhóm quảng cáo: {len(adset_id_list)}")
+
+    isContinue = True;
+
+    # for i in range(1,400):
+    #     if isContinue == True:
+    #         print(i)
+    #         isContinue = get_facebook_insights(account_id, access_token)
+
+    # for i in range(1, 10):
+    #      if isContinue == True:
+    #         print(i * (len(ad_id_list) + len(adset_id_list)))
+    # isContinue = fetch_facebook_ad_details(ad_id_list, adset_id_list, access_token_marketing)
+    #         #fetch_facebook_ad_details(ad_id_list, adset_id_list, access_token)
 
     # Render template with detailed insights
     return render_template('ads_detail.html', account_id=account_id, ads=ads)

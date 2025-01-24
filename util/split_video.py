@@ -4,6 +4,9 @@ import re
 from models.video_split import VideoSplit
 from database_init import db
 from models.video import Video
+import random
+import string
+
 
 def get_video_type(path):
     """
@@ -23,8 +26,6 @@ def clean_title(title):
     """
     Làm sạch tiêu đề video: loại bỏ các từ hoặc cụm từ không cần thiết và định dạng video ở cuối.
     """
-    # Loại bỏ định dạng video ở cuối (vd: .mp4, .avi, .mkv, ...), case-insensitive
-    title = re.sub(r"\.(mp4|avi|mkv|mov|flv|wmv|webm)$", "", title, flags=re.IGNORECASE)
 
     # Loại bỏ các đoạn chứa '[Review Phim]' hoặc những gì nằm sau dấu '|'
     title = re.sub(r"\[.*?\]", "", title)  # Xóa phần trong dấu []
@@ -37,6 +38,7 @@ def clean_title(title):
 
 
 def split_video(
+    video_title,
     video_path,
     segment_duration_sec,
     facebook_account_id,
@@ -53,8 +55,8 @@ def split_video(
         codec (str): Bộ mã hóa video để sử dụng khi xuất file (mặc định là "libx264").
     """
     output_dir = r"./Videos/Splited"  # Đường dẫn thư mục cố định
-    
-    print(facebook_account_id)
+
+    random_digits = "".join(random.choices(string.digits, k=12))
 
     # Kiểm tra và tạo thư mục nếu chưa tồn tại
     if not os.path.exists(output_dir):
@@ -62,9 +64,6 @@ def split_video(
 
     # Đọc video
     video = VideoFileClip(video_path)
-
-    # Lấy tên file từ đường dẫn video
-    video_title = os.path.basename(video_path)
 
     # Làm sạch tên video
     clean_video_title = clean_title(video_title)
@@ -94,7 +93,7 @@ def split_video(
     # Lặp qua video và cắt thành các phần nhỏ
     while end_time <= video.duration:
         subclip = video.subclip(start_time, end_time)  # Cắt đoạn video
-        output_path = os.path.join(output_dir, f"{clean_video_title}_Phần_{i}.mp4")
+        output_path = os.path.join(output_dir, f"{random_digits}.mp4")
         subclip.write_videofile(output_path, codec=codec)  # Lưu phần nhỏ vào thư mục
 
         # Lưu vào database
@@ -118,7 +117,7 @@ def split_video(
     if remaining_duration > 30:
         end_time = video.duration - 30  # Lấy đoạn cuối không chứa 30 giây cuối
         subclip = video.subclip(start_time, end_time)
-        output_path = os.path.join(output_dir, f"{clean_video_title}_Phần_{i}.mp4")
+        output_path = os.path.join(output_dir, f"{random_digits}.mp4")
         subclip.write_videofile(output_path, codec=codec)
 
         video_split = VideoSplit(

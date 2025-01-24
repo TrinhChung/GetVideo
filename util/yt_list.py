@@ -3,7 +3,8 @@ from util.until import generate_playlist_url
 from models.video import Video
 from models.playlist import Playlist
 from database_init import db
-
+from util.until import extract_playlist_id
+from flask import redirect, url_for, flash
 
 def get_existing_playlist(playlist_id, facebook_account_id):
     """
@@ -14,7 +15,7 @@ def get_existing_playlist(playlist_id, facebook_account_id):
         Tuple chứa (playlist_title, danh sách video_ids) hoặc None nếu không tồn tại
     """
     playlist = Playlist.query.filter_by(
-        id=playlist_id, facebook_account_id=facebook_account_id
+        playlist_id=playlist_id, facebook_account_id=facebook_account_id
     ).first()
 
     if not playlist:
@@ -30,20 +31,13 @@ def get_playlist_info_and_video_details(playlist_id, facebook_account_id):
     Hàm chính để xử lý playlist và cập nhật database.
     """
     try:
-        # Bước 1: Lấy URL playlist từ ID
-        playlist_url = generate_playlist_url(playlist_id)
-
         # Bước 2: Kiểm tra playlist trong database
         existing_data = get_existing_playlist(playlist_id, facebook_account_id)
 
         # Bước 3: Lấy thông tin mới từ YouTube
-        yt_playlist_id, yt_playlist_title, yt_videos = get_playlist_from_youtube(
-            playlist_url
+        yt_playlist_title, yt_videos = get_playlist_or_channel_videos(
+            playlist_id
         )
-
-        # Bước 4: Xác thực ID playlist
-        if playlist_id != yt_playlist_id:
-            raise ValueError("ID playlist từ URL không khớp với dữ liệu từ YouTube")
 
         # Bước 5: Xử lý dữ liệu
         if existing_data:
@@ -59,18 +53,18 @@ def get_playlist_info_and_video_details(playlist_id, facebook_account_id):
                 save_playlist_and_videos_to_mysql(
                     playlist_id, yt_playlist_title, new_videos, facebook_account_id
                 )
-                print(f"Đã thêm {len(new_videos)} video mới vào playlist")
+                flash(f"Đã thêm {len(new_videos)} video mới vào playlist")
             else:
-                print("Không có video mới để thêm")
+                flash("Không có video mới để thêm")
         else:
             print("Thêm playlist mới...")
             save_playlist_and_videos_to_mysql(
                 playlist_id, yt_playlist_title, yt_videos, facebook_account_id
             )
-            print(f"Đã thêm playlist mới với {len(yt_videos)} video")
+            flash(f"Đã thêm playlist mới với {len(yt_videos)} video")
 
     except Exception as e:
-        print(f"Đã xảy ra lỗi: {e}")
+        raise Exception(f"Đã xảy ra lỗi: {e}")
 
 
 # Lưu thông tin vào bảng playlist và videos
@@ -78,15 +72,14 @@ def save_playlist_and_videos_to_mysql(
     playlist_id, playlist_title, video_data, facebook_account_id
 ):
     print("Đang lưu thông tin playlist và video...")
-    print(facebook_account_id)
 
     # Lưu thông tin playlist vào bảng playlist
     playlist = Playlist.query.filter_by(
-        id=playlist_id, facebook_account_id=facebook_account_id
+        playlist_id=playlist_id, facebook_account_id=facebook_account_id
     ).first()
     if not playlist:
         playlist = Playlist(
-            id=playlist_id,
+            playlist_id=playlist_id,
             title=playlist_title,
             facebook_account_id=facebook_account_id,
         )
@@ -100,13 +93,13 @@ def save_playlist_and_videos_to_mysql(
         # Kiểm tra nếu video đã tồn tại
         if not Video.query.filter_by(
             video_id=video["id"],
-            playlist_id=playlist_id,
+            playlist_id=playlist.id,
             facebook_account_id=facebook_account_id,
         ).first():
             video_entry = Video(
                 video_id=video["id"],
                 title=video["title"],
-                playlist_id=playlist_id,
+                playlist_id=playlist.id,
                 crawled=False,  # False: video chưa được crawl
                 facebook_account_id=facebook_account_id,
             )
@@ -138,7 +131,6 @@ def get_playlist_from_youtube(playlist_url):
             if not info_dict.get("entries"):
                 raise ValueError("Không tìm thấy video trong playlist")
 
-            playlist_id = info_dict.get("id", "Unknown ID")
             playlist_title = info_dict.get("title", "Unknown Title")
 
             video_data = [
@@ -146,6 +138,39 @@ def get_playlist_from_youtube(playlist_url):
                 for video in info_dict["entries"]
             ]
 
-            return playlist_id, playlist_title, video_data
+            return playlist_title, video_data
     except Exception as e:
         raise Exception(f"Lỗi khi lấy thông tin playlist: {e}")
+
+
+def get_playlist_or_channel_videos(url):
+    """
+    Lấy thông tin playlist hoặc kênh từ YouTube sử dụng yt-dlp.
+    Args:
+        url: URL của playlist hoặc kênh YouTube
+    Returns:
+        Tuple chứa (playlist_id, playlist_title, danh sách video)
+    """
+    ydl_opts = {
+        "extract_flat": True,
+        "quiet": False,
+    }
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info_dict = ydl.extract_info(url, download=False)
+
+            if not info_dict.get("entries"):
+                raise ValueError("Không tìm thấy video trong playlist hoặc kênh")
+
+            playlist_title = info_dict.get("title", "Unknown Title")
+
+            video_data = []
+            for video in info_dict["entries"]:
+                # Kiểm tra xem video có thông tin đầy đủ không
+                if video and "id" in video and "title" in video:
+                    video_data.append({"id": video["id"], "title": video["title"]})
+
+            return playlist_title, video_data
+    except Exception as e:
+        raise Exception(f"Lỗi khi lấy thông tin: {e}")

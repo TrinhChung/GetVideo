@@ -65,7 +65,7 @@
 								<td>
 									<form method="POST" action="{{ url_for('playlist.get_video_from_playlist') }}" class="d-inline">
 										{{ form.csrf_token }} <!-- CSRF token --> <!-- CSRF security token -->
-										<input type="hidden" name="playlist_id" value="{{ playlist.id }}">
+										<input type="hidden" name="playlist_id" value="{{ playlist.playlist_id }}">
 										<button type="submit" class="btn btn-primary btn-sm">
 											<i class="fa fa-download"></i> Get Video
 										</button>

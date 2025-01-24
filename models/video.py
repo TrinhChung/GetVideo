@@ -9,7 +9,7 @@ class Video(db.Model):
     video_id = db.Column(db.String(255), nullable=False)
     title = db.Column(db.String(255))
     crawled = db.Column(db.Boolean, default=False)
-    playlist_id = db.Column(db.String(255), db.ForeignKey("playlist.id"))
+    playlist_id = db.Column(db.Integer, db.ForeignKey("playlist.id"))
     path = db.Column(db.String(255))
     duration = db.Column(db.Integer)
     splited = db.Column(
