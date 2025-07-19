@@ -2,6 +2,7 @@ from flask import Flask, session, redirect, url_for, flash, request
 from flask_migrate import Migrate
 from database_init import db
 from dotenv import load_dotenv
+from sqlalchemy import inspect
 import os
 import secrets
 from flask_wtf.csrf import CSRFProtect
@@ -131,6 +132,13 @@ if __name__ == "__main__":
     app = create_app()
     # Flask-Migrate sẽ tự động xử lý migrations
     with app.app_context():
-        db.create_all()
-
+        inspector = inspect(db.engine)
+        existing_tables = inspector.get_table_names()
+        required_tables = ['user', 'product']  # hoặc tự lấy từ db.Model.__tablename__
+        missing_tables = [t for t in required_tables if t not in existing_tables]
+        if missing_tables:
+            print(f"Creating missing tables: {missing_tables}")
+            db.create_all()
+        else:
+            print("All required tables already exist. Skipping db.create_all().")
     app.run(debug=True)
