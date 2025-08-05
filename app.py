@@ -7,7 +7,6 @@ import os
 import secrets
 from flask_wtf.csrf import CSRFProtect
 from datetime import timedelta
-from cronjob.init_schedule import scheduler
 from log import setup_logging
 
 from util.until import format_datetime
@@ -79,21 +78,13 @@ def create_app():
     migrate.init_app(app, db)
 
     from routes.home import home_bp
-    from routes.playlist import playlist_bp
-    from routes.video import video_bp
-    from routes.download import download_bp
     from routes.facebook import facebook_bp
     from routes.pages import pages_bp
     from routes.auth import auth_bp
-    from routes.video_split import video_split_bp
     from routes.stack_post import stack_post_bp
     from routes.ads_manager import ads_manager_bp
 
     app.register_blueprint(home_bp)
-    app.register_blueprint(playlist_bp)
-    app.register_blueprint(video_bp)
-    app.register_blueprint(video_split_bp)
-    app.register_blueprint(download_bp)
     app.register_blueprint(facebook_bp)
     app.register_blueprint(pages_bp)
     app.register_blueprint(auth_bp)
@@ -108,7 +99,6 @@ def create_app():
             "home.polices",
             "home.terms",
             "home.home",
-            "video.serve_video",
             "static",
         ]
         if "facebook_user_id" not in session and request.endpoint not in allowed_routes:
@@ -120,10 +110,6 @@ def create_app():
         if isinstance(value, (int, float)):
             return f"{value:,.2f} {currency}"
         return value
-
-    # Bắt đầu scheduler
-    if not scheduler.running:
-        scheduler.start()
 
     return app
 

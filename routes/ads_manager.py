@@ -225,8 +225,6 @@ def view_ads(account_id):
         flash("Facebook account not found", "danger")
         return redirect(url_for("auth.login"))
 
-    access_token = facebook_account.access_token
-
     access_token_marketing = os.getenv("ACCESS_TOKEN_MARKETING")
 
     # Construct API URL to fetch ads for the selected ad account with extended fields
@@ -265,18 +263,4 @@ def view_ads(account_id):
     print(f"Số lượng quảng cáo: {len(ad_id_list)}")
     print(f"Số lượng nhóm quảng cáo: {len(adset_id_list)}")
 
-    isContinue = True;
-
-    # for i in range(1,400):
-    #     if isContinue == True:
-    #         print(i)
-    #         isContinue = get_facebook_insights(account_id, access_token)
-
-    # for i in range(1, 10):
-    #      if isContinue == True:
-    #         print(i * (len(ad_id_list) + len(adset_id_list)))
-    # isContinue = fetch_facebook_ad_details(ad_id_list, adset_id_list, access_token_marketing)
-    #         #fetch_facebook_ad_details(ad_id_list, adset_id_list, access_token)
-
-    # Render template with detailed insights
     return render_template('ads_detail.html', account_id=account_id, ads=ads)
