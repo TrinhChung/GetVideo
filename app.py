@@ -2,28 +2,12 @@ from flask import Flask, session, redirect, url_for, flash, request
 from flask_migrate import Migrate
 from database_init import db
 from dotenv import load_dotenv
-from sqlalchemy import inspect
 import os
-import secrets
 from flask_wtf.csrf import CSRFProtect
 from datetime import timedelta
 from log import setup_logging
 
 from util.until import format_datetime
-
-# Import tất cả các mô hình
-from models.category_playlist import CategoryPlaylist
-from models.category import Category
-from models.facebook_account import FacebookAccount
-from models.history import History
-from models.page import Page
-from models.playlist import Playlist
-from models.stack_post import StackPost
-from models.video_category import VideoCategory
-from models.video_split_category import VideoSplitCategory
-from models.video_split import VideoSplit
-from models.video import Video
-from models.facebook_ad_account import FacebookAdAccount
 
 load_dotenv()
 
@@ -118,6 +102,20 @@ if __name__ == "__main__":
     app = create_app()
     # Flask-Migrate sẽ tự động xử lý migrations
     with app.app_context():
+        from sqlalchemy import inspect
+        from models.category_playlist import CategoryPlaylist
+        from models.category import Category
+        from models.facebook_account import FacebookAccount
+        from models.history import History
+        from models.page import Page
+        from models.playlist import Playlist
+        from models.stack_post import StackPost
+        from models.video_category import VideoCategory
+        from models.video_split_category import VideoSplitCategory
+        from models.video_split import VideoSplit
+        from models.video import Video
+        from models.facebook_ad_account import FacebookAdAccount
+
         inspector = inspect(db.engine)
         existing_tables = inspector.get_table_names()
         required_tables = ['user', 'product']  # hoặc tự lấy từ db.Model.__tablename__
