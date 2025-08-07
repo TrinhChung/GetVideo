@@ -17,11 +17,6 @@ from util.until import convert_to_mysql_datetime
 # Tải các biến môi trường từ file .env
 load_dotenv()
 
-# Lấy ACCESS_TOKEN và PAGE_ID từ .env
-ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")  # Token truy cập của bạn
-PAGE_ID = os.getenv("PAGE_ID")  # ID của Trang
-APP_ID = os.getenv("APP_ID")
-
 # Nội dung bài viết
 post_message = "Đây là bài đăng thử nghiệm từ Python. 🚀"
 
