@@ -211,56 +211,73 @@ def modify_campaign(campaign_id):
 
     return render_template("modify_campaign.html", form=form, campaign=campaign)
 
-@ads_manager_bp.route('/ads/<account_id>')
+
+@ads_manager_bp.route("/ads/<account_id>")
 def view_ads(account_id):
-    # Check if user is logged in
+    # Check login
     facebook_account_id = session.get("facebook_user_id")
     if not facebook_account_id:
         flash("You need to log in to use this function", "danger")
         return redirect(url_for("auth.login"))
 
-    # Retrieve access token from database based on facebook_user_id
+    # Lấy access token đúng từ DB (KHÔNG dùng app token)
     facebook_account = FacebookAccount.query.filter_by(id=facebook_account_id).first()
-    if not facebook_account:
-        flash("Facebook account not found", "danger")
+    if not facebook_account or not facebook_account.access_token:
+        flash("Facebook account or access token not found", "danger")
         return redirect(url_for("auth.login"))
 
-    access_token_marketing = os.getenv("ACCESS_TOKEN_MARKETING")
+    access_token = facebook_account.access_token  # << dùng token của user/system user
 
-    # Construct API URL to fetch ads for the selected ad account with extended fields
     url = f"https://graph.facebook.com/v21.0/act_{account_id}/ads"
     params = {
         "fields": (
             "id,adset_id,name,status,"
             "insights{impressions,clicks,spend,cpm,cpc,cpp,ctr,frequency,date_start,date_stop}"
         ),
-        "access_token": access_token_marketing,
+        "access_token": access_token,
+        # "limit": 50,  # tuỳ chọn
     }
 
-    # Make API call and handle response
-    response = requests.get(url, params=params)
-
-    if response.status_code != 200:
-        try:
-            error_data = response.json()
-            error_message = error_data.get('error', {}).get('message', 'Unknown error occurred')
-        except Exception:
-            error_message = 'Unknown error occurred'
-        print(error_message)
-        flash(f"Login session expired, please log in again", "danger")
+    try:
+        resp = requests.get(url, params=params, timeout=15)
+    except requests.RequestException as e:
+        flash(f"Lỗi mạng khi gọi Facebook API: {e}", "danger")
         return redirect(url_for("auth.login"))
 
-    ads_data = response.json()
-    ads = ads_data.get('data', [])
+    # Xử lý lỗi rõ ràng hơn
+    if not resp.ok:
+        try:
+            err = resp.json().get("error", {})
+        except Exception:
+            err = {}
+        code = err.get("code")
+        subcode = err.get("error_subcode")
+        msg = err.get("message", "Unknown error")
 
-    ad_id_list = []
-    adset_id_list = []
+        # Một số gợi ý fix theo lỗi
+        if code == 200 and "Provide valid app ID" in msg:
+            flash(
+                "Token không hợp lệ cho Marketing API (đừng dùng app token). Hãy dùng user/system-user token có quyền ads_read/ads_management.",
+                "danger",
+            )
+        elif code == 190:
+            flash(
+                "Access token hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại.",
+                "danger",
+            )
+            return redirect(url_for("auth.login"))
+        else:
+            flash(f"Facebook API lỗi (code={code}, subcode={subcode}): {msg}", "danger")
 
-    for ad in ads_data.get("data", []):
-        ad_id_list.append(ad["id"])
-        adset_id_list.append(ad.get("adset_id", "N/A"))
+        return redirect(url_for("auth.login"))
 
-    print(f"Số lượng quảng cáo: {len(ad_id_list)}")
-    print(f"Số lượng nhóm quảng cáo: {len(adset_id_list)}")
+    data = resp.json()
+    ads = data.get("data", [])
 
-    return render_template('ads_detail.html', account_id=account_id, ads=ads)
+    # (tuỳ chọn) log nhanh số lượng
+    ad_ids = [ad.get("id") for ad in ads]
+    adset_ids = [ad.get("adset_id") for ad in ads if ad.get("adset_id")]
+    print(f"Số lượng quảng cáo: {len(ad_ids)}")
+    print(f"Số lượng nhóm quảng cáo: {len(adset_ids)}")
+
+    return render_template("ads_detail.html", account_id=account_id, ads=ads)

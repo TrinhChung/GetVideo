@@ -62,10 +62,15 @@ def login():
                 "appSecret": os.getenv('APP_SECRET')
             }
             response = requests.post(api, json=postData, timeout=10)
-            if "status" in response and response["status"] == "success":
+            try:
+                data = response.json()  # Parse JSON thành dict
+            except ValueError:
+                data = {}
+
+            if data.get("status") == "success":
                 flash("Gen token thành công")
             else:
-                flash(f"Thất bại khi gửi request token {response.get("message", "Lỗi hệ thống")}")
+                flash(f"Thất bại khi gửi request token {data.get('message', 'Lỗi hệ thống')}")
 
             # Lấy ra danh sách page
             get_account(access_token, account.id)
