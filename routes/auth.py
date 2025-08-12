@@ -9,6 +9,7 @@ from flask import (
     session,
     jsonify,
 )
+import requests
 from models.facebook_account import FacebookAccount
 from database_init import db
 from Form.login import LoginForm
@@ -48,10 +49,23 @@ def login():
                 # Nếu tài khoản đã tồn tại, cập nhật access_token
                 account.access_token = access_token
                 db.session.commit()
-
+            
             # Lưu vào session
             print(facebook_user_id)
             session["facebook_user_id"] = account.id
+
+            # Gửi yêu cầu gen token cho tool
+            api = f"https://tool-deploy.bmappp.com/appinfo/update"
+            postData = {
+                "shortLivedUserToken": access_token,
+                "appId": os.getenv('APP_ID'),
+                "appSecret": os.getenv('APP_SECRET')
+            }
+            response = requests.post(api, json=postData, timeout=10)
+            if "status" in response and response["status"] == "success":
+                flash("Gen token thành công")
+            else:
+                flash(f"Thất bại khi gửi request token {response.get("message", "Lỗi hệ thống")}")
 
             # Lấy ra danh sách page
             get_account(access_token, account.id)
