@@ -89,6 +89,7 @@ def create_app():
     from routes.auth import auth_bp
     from routes.stack_post import stack_post_bp
     from routes.ads_manager import ads_manager_bp
+    from routes.api_calls import api_calls_bp
 
     app.register_blueprint(home_bp)
     app.register_blueprint(facebook_bp)
@@ -96,6 +97,7 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(stack_post_bp)
     app.register_blueprint(ads_manager_bp)
+    app.register_blueprint(api_calls_bp)
 
     # ===== Auth guard =====
     @app.before_request
