@@ -23,12 +23,5 @@ class VideoSplit(db.Model):
         "FacebookAccount", backref=db.backref("video_splits", lazy=True)
     )
 
-    # Mối quan hệ với Category thông qua bảng phụ 'video_split_category'
-    categories = db.relationship(
-        "Category",
-        secondary="video_split_category",  # Cập nhật tên bảng phụ
-        back_populates="videos_split",  # Liên kết với back_populates trong Category
-    )
-
     def __repr__(self):
         return f"<VideoSplit {self.title} (ID: {self.id})>"

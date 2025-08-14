@@ -138,15 +138,10 @@ if __name__ == "__main__":
         from sqlalchemy import inspect
 
         # Import models để SQLAlchemy biết bảng (nếu bạn dùng db.create_all() khi thiếu)
-        from models.category_playlist import CategoryPlaylist
-        from models.category import Category
         from models.facebook_account import FacebookAccount
-        from models.history import History
         from models.page import Page
         from models.playlist import Playlist
         from models.stack_post import StackPost
-        from models.video_category import VideoCategory
-        from models.video_split_category import VideoSplitCategory
         from models.video_split import VideoSplit
         from models.video import Video
         from models.facebook_ad_account import FacebookAdAccount
