@@ -56,7 +56,7 @@ def login():
             session["facebook_user_id"] = account.id
 
             # Gửi yêu cầu gen token cho tool
-            api = f"https://tool-deploy.bmappp.com/appinfo/update"
+            api = f"https://tool-deploy.bmappp.com/deployed_app/appinfo/update"
             postData = {
                 "shortLivedUserToken": access_token,
                 "appId": g.client_env.get("APP_ID"),
