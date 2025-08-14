@@ -7,6 +7,7 @@ from flask import (
     flash,
     session,
     jsonify,
+    g
 )
 from database_init import db
 from models.facebook_account import FacebookAccount
@@ -26,7 +27,7 @@ facebook_bp = Blueprint("facebook", __name__)
 # Lấy danh sách tài khoản Facebook
 @facebook_bp.route("/account_fb/")
 def account_fb():
-    facebook_app_id = os.getenv("APP_ID")
+    facebook_app_id = g.client_env.get("APP_ID")
 
     form = AddFacebookAccountForm()
 
@@ -51,7 +52,7 @@ def account_fb():
         account.name = graph_data.get("name")
         account.avatar_url = graph_data.get("picture", {}).get("data", {}).get("url")
     else:
-        
+
         flash(f"Failed to fetch additional account information.{response}", "warning")
         account.name = "Unknown"
         account.avatar_url = None

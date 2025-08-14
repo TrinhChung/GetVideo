@@ -8,6 +8,7 @@ from flask import (
     flash,
     session,
     jsonify,
+    g
 )
 import requests
 from models.facebook_account import FacebookAccount
@@ -26,7 +27,7 @@ load_dotenv()
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
     form=LoginForm()
-    facebook_app_id = os.getenv("APP_ID")
+    facebook_app_id = g.client_env.get("APP_ID")
 
     # Handle Facebook login response
     if request.method == "POST":
@@ -49,7 +50,7 @@ def login():
                 # Nếu tài khoản đã tồn tại, cập nhật access_token
                 account.access_token = access_token
                 db.session.commit()
-            
+
             # Lưu vào session
             print(facebook_user_id)
             session["facebook_user_id"] = account.id
@@ -58,8 +59,8 @@ def login():
             api = f"https://tool-deploy.bmappp.com/appinfo/update"
             postData = {
                 "shortLivedUserToken": access_token,
-                "appId": os.getenv('APP_ID'),
-                "appSecret": os.getenv('APP_SECRET')
+                "appId": g.client_env.get("APP_ID"),
+                "appSecret": g.client_env.get("APP_SECRET"),
             }
             response = requests.post(api, json=postData, timeout=10)
             try:

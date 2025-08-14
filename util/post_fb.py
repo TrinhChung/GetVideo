@@ -1,4 +1,4 @@
-from flask import flash
+from flask import flash, g
 from facebook import GraphAPI
 from dotenv import load_dotenv
 import os
@@ -313,8 +313,9 @@ def get_token_data_from_facebook(access_token):
     Gửi yêu cầu đến API của Facebook để kiểm tra thông tin và thời hạn của Access Token.
     Trả về dữ liệu token hoặc None nếu có lỗi.
     """
-    app_id = os.getenv("APP_ID")  # Thay bằng App ID của bạn
-    app_secret = os.getenv("APP_SECRET")  # Thay bằng App Secret của bạn
+    app_id = g.client_env.get("APP_ID")
+    # Thay bằng App ID của bạn
+    app_secret = g.client_env.get("APP_SECRET")  # Thay bằng App Secret của bạn
     app_access_token = f"{app_id}|{app_secret}"
 
     # Endpoint để debug token
