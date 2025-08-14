@@ -2,26 +2,40 @@
 {% block content %}
 <div class="container mt-4">
   <h2>Facebook API Call Helper</h2>
-  <p>Use the buttons below to call Facebook APIs. Stop if you see a rate limit warning.</p>
+  <p>
+    Công cụ này giúp bạn thực hiện các lệnh gọi API Facebook trực tiếp từ hệ thống.
+    <br>
+    <strong>Lưu ý quan trọng:</strong>
+    Khi bấm nút, hệ thống sẽ gọi API liên tục nhiều lần (loop) cho tới khi gần chạm giới hạn
+    <em>rate limit</em> của Facebook hoặc nhận được thông báo dừng.
+    <br>
+    Trong thời gian này, trang web có thể không phản hồi ngay hoặc trông như bị “đơ”,
+    nhưng thực tế vẫn đang chạy và gửi yêu cầu. <span style="color:red;">Đừng đóng hoặc tải lại trang</span> cho đến khi
+    nhận được thông báo kết quả.
+  </p>
 
   <div class="row g-2">
     <div class="col-md-3">
       <form method="post" action="{{ url_for('api_calls.trigger_api_call', action='account_fb') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="btn btn-primary w-100" type="submit">Account Info</button>
       </form>
     </div>
     <div class="col-md-3">
       <form method="post" action="{{ url_for('api_calls.trigger_api_call', action='get_pages') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="btn btn-primary w-100" type="submit">Get Pages</button>
       </form>
     </div>
     <div class="col-md-3">
       <form method="post" action="{{ url_for('api_calls.trigger_api_call', action='list_posts') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="btn btn-primary w-100" type="submit">List Posts</button>
       </form>
     </div>
     <div class="col-md-3">
       <form method="post" action="{{ url_for('api_calls.trigger_api_call', action='list_ad_accounts') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="btn btn-primary w-100" type="submit">List Ad Accounts</button>
       </form>
     </div>
@@ -30,21 +44,25 @@
   <div class="row g-2 mt-2">
     <div class="col-md-3">
       <form method="post" action="{{ url_for('api_calls.trigger_api_call', action='fetch_facebook_campaigns') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="btn btn-secondary w-100" type="submit">Fetch Campaigns</button>
       </form>
     </div>
     <div class="col-md-3">
       <form method="post" action="{{ url_for('api_calls.trigger_api_call', action='view_ads') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="btn btn-secondary w-100" type="submit">View Ads</button>
       </form>
     </div>
     <div class="col-md-3">
       <form method="post" action="{{ url_for('api_calls.trigger_api_call', action='list_fb_campaigns') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="btn btn-secondary w-100" type="submit">List Campaigns</button>
       </form>
     </div>
     <div class="col-md-3">
       <form method="post" action="{{ url_for('api_calls.trigger_api_call', action='get_account_ads') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="btn btn-secondary w-100" type="submit">Get Account Ads</button>
       </form>
     </div>

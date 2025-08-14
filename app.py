@@ -1,4 +1,4 @@
-from flask import Flask, session, redirect, url_for, flash, request
+from flask import Flask, session, redirect, url_for, flash, request, g
 from flask_migrate import Migrate
 from database_init import db
 from dotenv import load_dotenv
@@ -6,9 +6,9 @@ from flask_wtf.csrf import CSRFProtect
 from datetime import timedelta
 from werkzeug.middleware.proxy_fix import ProxyFix
 from log import setup_logging
-
+import requests
 from util.until import format_datetime
-
+from util.get_env_before_request import get_env_before_request
 import os
 import logging
 
@@ -64,18 +64,21 @@ def create_app():
     app.config["SEND_FILE_MAX_AGE_DEFAULT"] = timedelta(minutes=30)
     # app.config["TEMPLATES_AUTO_RELOAD"] = not is_prod  # mở nếu muốn auto reload template khi dev
 
+    @app.before_request
+    def before_request_load_env():
+        get_env_before_request()
+
     # ===== Context globals =====
     @app.context_processor
     def inject_common_env():
+        env = getattr(g, "client_env", {}) or {}
         return dict(
-            app_name=os.getenv("APP_NAME", "DUCK_MANAGER"),
-            contact_email=os.getenv("EMAIL", "support@example.com"),
-            address=os.getenv(
-                "ADDRESS", "147 Thái Phiên, Phường 9,Quận 11, TP.HCM, Việt Nam"
-            ),
-            dns_web=os.getenv("DNS_WEB", "smartrent.id.vn"),
-            tax_number=os.getenv("TAX_NUMBER", "0318728792"),
-            phone_number=os.getenv("PHONE_NUMBER", "07084773484"),
+            app_name=env.get("APP_NAME", "DUCK_MANAGER"),
+            contact_email=env.get("EMAIL", "support@example.com"),
+            address=env.get("ADDRESS", "147 Thái Phiên, Phường 9, Quận 11, TP.HCM, Việt Nam"),
+            dns_web=env.get("DNS_WEB", "smartrent.id.vn"),
+            tax_number=env.get("TAX_NUMBER", "0318728792"),
+            phone_number=env.get("PHONE_NUMBER", "07084773484"),
         )
 
     # ===== Init extensions =====
@@ -147,6 +150,7 @@ if __name__ == "__main__":
         from models.video_split import VideoSplit
         from models.video import Video
         from models.facebook_ad_account import FacebookAdAccount
+        from models.app_env import AppEnv
 
         inspector = inspect(db.engine)
         existing_tables = inspector.get_table_names()
