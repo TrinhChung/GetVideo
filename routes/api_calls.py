@@ -64,7 +64,7 @@ def _get_access_token():
 
 @api_calls_bp.route("/api_calls/trigger/<string:action>", methods=["POST"])
 def trigger_api_call(action: str):
-    """Trigger specific Facebook API call repeatedly until near rate limit."""
+    """Trigger 2 loại API call: get_posts_of_pages, get_ads_detail (tổng 600 calls)."""
     if "facebook_user_id" not in session:
         flash("You need to log in to access this page.", "danger")
         return redirect(url_for("auth.login"))
@@ -74,101 +74,108 @@ def trigger_api_call(action: str):
         return redirect(url_for("api_calls.api_calls_home"))
 
     fb_api = "https://graph.facebook.com/v21.0"
-    max_calls = 400
-    delay_sec = 0.02
+    total_calls = 600  # tổng số call
+    delay_sec = 0.05  # tránh bị chặn rate limit
 
     try:
-        for i in range(max_calls):
-            try:
-                response = None
+        # --- NÚT LẤY POST CỦA PAGE ---
+        if action == "get_posts_of_pages":
+            # Lấy danh sách page
+            response = requests.get(
+                f"{fb_api}/me/accounts", params={"access_token": token}
+            )
+            if not response.ok:
+                flash(f"Lỗi lấy danh sách page: {response.text}", "danger")
+                return redirect(url_for("api_calls.api_calls_home"))
 
-                if action == "account_fb":
-                    response = requests.get(
-                        f"{fb_api}/me", params={"access_token": token}
-                    )
+            pages = response.json().get("data", [])
+            if not pages:
+                flash("Không có trang nào được liên kết với tài khoản này.", "danger")
+                return redirect(url_for("api_calls.api_calls_home"))
 
-                elif action == "get_pages":
-                    response = requests.get(
-                        f"{fb_api}/me/accounts", params={"access_token": token}
-                    )
+            flash(
+                f"Đã tìm thấy {len(pages)} trang. Đang gọi {total_calls} API...", "info"
+            )
 
-                elif action == "list_posts":
-                    pages = Page.query.filter_by(
-                        facebook_account_id=session["facebook_user_id"]
-                    ).all()
-                    for page in pages:
-                        response = requests.get(
-                            f"{fb_api}/{page.page_id}/posts",
-                            params={"access_token": page.access_token},
+            calls_per_page = max(1, total_calls // len(pages))
+            call_count = 0
+
+            for page in pages:
+                for _ in range(calls_per_page):
+                    page_id = page["id"]
+                    page_access_token = page["access_token"]
+                    posts_url = f"{fb_api}/{page_id}/posts"
+                    posts_params = {
+                        "fields": "id,message,created_time,reactions.summary(true),comments.summary(true)",
+                        "access_token": page_access_token,
+                    }
+                    post_res = requests.get(posts_url, params=posts_params)
+                    call_count += 1
+
+                    if not post_res.ok:
+                        flash(
+                            f"Lỗi lấy post cho page {page_id}: {post_res.text}",
+                            "danger",
                         )
-                        if _check_rate_limit(response):
-                            flash(
-                                f"Stopped after {i+1} calls due to rate limit.",
-                                "warning",
-                            )
-                            return redirect(url_for("api_calls.api_calls_home"))
+                        break
 
-                elif action == "list_ad_accounts":
-                    response = requests.get(
-                        f"{fb_api}/me/adaccounts", params={"access_token": token}
-                    )
+                    # Xử lý dữ liệu ở đây nếu muốn
+                    time.sleep(delay_sec)
 
-                elif action in {"fetch_facebook_campaigns", "list_fb_campaigns"}:
-                    ads = FacebookAdAccount.query.filter_by(
-                        facebook_account_id=session["facebook_user_id"]
-                    ).all()
-                    for ad in ads:
-                        response = requests.get(
-                            f"{fb_api}/{ad.facebook_ad_account_id}/campaigns",
-                            params={"access_token": token},
+            flash(f"Hoàn tất {call_count} calls lấy bài viết của page.", "success")
+
+        # --- NÚT LẤY ADS DETAIL ---
+        elif action == "get_ads_detail":
+            acc_res = requests.get(
+                f"{fb_api}/me/adaccounts", params={"access_token": token}
+            )
+            if not acc_res.ok:
+                flash(f"Lỗi lấy danh sách ad account: {acc_res.text}", "danger")
+                return redirect(url_for("api_calls.api_calls_home"))
+
+            accounts = acc_res.json().get("data", [])
+            if not accounts:
+                flash("Không tìm thấy tài khoản quảng cáo nào.", "danger")
+                return redirect(url_for("api_calls.api_calls_home"))
+
+            flash(
+                f"Đã tìm thấy {len(accounts)} ad account. Đang gọi {total_calls} API...",
+                "info",
+            )
+
+            calls_per_acc = max(1, total_calls // len(accounts))
+            call_count = 0
+
+            for acc in accounts:
+                account_id = acc["id"].replace("act_", "")
+                for _ in range(calls_per_acc):
+                    ads_url = f"{fb_api}/act_{account_id}/ads"
+                    ads_params = {
+                        "fields": (
+                            "id,adset_id,name,status,"
+                            "insights{impressions,clicks,spend,cpm,cpc,cpp,ctr,frequency,date_start,date_stop}"
+                        ),
+                        "access_token": token,
+                    }
+                    ads_res = requests.get(ads_url, params=ads_params)
+                    call_count += 1
+
+                    if not ads_res.ok:
+                        flash(
+                            f"Lỗi lấy ads của account {account_id}: {ads_res.text}",
+                            "danger",
                         )
-                        if _check_rate_limit(response):
-                            flash(
-                                f"Stopped after {i+1} calls due to rate limit.",
-                                "warning",
-                            )
-                            return redirect(url_for("api_calls.api_calls_home"))
+                        break
 
-                elif action in {"view_ads", "get_account_ads"}:
-                    ads = FacebookAdAccount.query.filter_by(
-                        facebook_account_id=session["facebook_user_id"]
-                    ).all()
-                    for ad in ads:
-                        response = requests.get(
-                            f"{fb_api}/{ad.facebook_ad_account_id}/ads",
-                            params={"access_token": token},
-                        )
-                        if _check_rate_limit(response):
-                            flash(
-                                f"Stopped after {i+1} calls due to rate limit.",
-                                "warning",
-                            )
-                            return redirect(url_for("api_calls.api_calls_home"))
+                    time.sleep(delay_sec)
 
-                else:
-                    flash("Unknown action.", "danger")
-                    return redirect(url_for("api_calls.api_calls_home"))
-
-                if response and _check_rate_limit(response):
-                    flash(f"Stopped after {i+1} calls due to rate limit.", "warning")
-                    break
-
-                if response and not response.ok:
-                    flash(f"API call failed at loop {i+1}: {response.text}", "danger")
-                    break
-
-                time.sleep(delay_sec)
-
-            except requests.RequestException as req_err:
-                logging.exception("Request error")
-                flash(f"Request error at loop {i+1}: {req_err}", "danger")
-                break
+            flash(f"Hoàn tất {call_count} calls lấy chi tiết ads.", "success")
 
         else:
-            flash(f"Finished {max_calls} calls without hitting rate limit.", "success")
+            flash("Unknown action.", "danger")
 
     except Exception as exc:
-        logging.exception("Unexpected error in API loop")
-        flash(f"Unexpected error: {exc}", "danger")
+        logging.exception("Unexpected error in API trigger")
+        flash(f"Lỗi: {exc}", "danger")
 
     return redirect(url_for("api_calls.api_calls_home"))
