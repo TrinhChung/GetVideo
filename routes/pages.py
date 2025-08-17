@@ -24,20 +24,3 @@ def show_pages():
     # Trả về trang HTML với danh sách pages
     return render_template("pages.html", pages=pages, form=form)
 
-# Route để debug token và lưu expires_at
-@pages_bp.route("/pages/debug-token", methods=["POST"])
-def debug_token():
-    token = request.form.get("token")  # Lấy token từ biểu mẫu
-    page_id = request.form.get("page_id")  # Lấy page_id từ biểu mẫu
-
-    if not token or not page_id:
-        flash("Token and Page ID are required.", "error")
-        return redirect(url_for("pages.show_pages"))
-
-    try:
-        # Gọi hàm check_token_expiry từ post_fb.py
-        check_token_expiry(token, page_id)
-    except Exception as e:
-        flash(f"Error: {str(e)}", "error")
-
-    return redirect(url_for("pages.show_pages"))
