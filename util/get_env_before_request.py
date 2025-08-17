@@ -31,7 +31,6 @@ def get_env_before_request(api_base_url="http://127.0.0.1:4000"):
         domain = host_header.split(":")[0] if host_header else "localhost"
 
     env_dict = None
-    print(domain)
 
     # 2. Kiểm tra DB trước
     record = AppEnv.query.filter_by(domain=domain).first()
@@ -60,6 +59,7 @@ def get_env_before_request(api_base_url="http://127.0.0.1:4000"):
     # 3. Nếu chưa có, gọi API backend
     url = f"{api_base_url}/api/deployed_app"
     headers_with_forwarded = {"X-Client-Domain": domain}
+    print(url)
 
     try:
         resp = requests.get(url, headers=headers_with_forwarded, timeout=5)

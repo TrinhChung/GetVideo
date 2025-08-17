@@ -5,7 +5,8 @@ from database_init import db
 class Page(db.Model):
     __tablename__ = "page"
 
-    page_id = db.Column(db.String(255), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    page_id = db.Column(db.String(255))
     name = db.Column(db.String(255))
     category = db.Column(db.String(255))
     access_token = db.Column(db.Text, nullable=False)

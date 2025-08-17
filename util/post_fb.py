@@ -611,6 +611,7 @@ def delete_facebook_account(id):
         account = FacebookAccount.query.get(id)
 
         if account:
+            print(account.pages)
             # Xóa tất cả các Page liên kết với tài khoản
             for page in account.pages:
                 for stack_posts in page.stack_posts:

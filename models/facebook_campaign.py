@@ -4,7 +4,7 @@ class FacebookCampaign(db.Model):
     __tablename__ = "facebook_campaign"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    facebook_campaign_id = db.Column(db.String(255), unique=True, nullable=False)
+    facebook_campaign_id = db.Column(db.String(255), nullable=False)
     name = db.Column(db.String(255), nullable=False)
     objective = db.Column(db.String(255), nullable=False)
     status = db.Column(db.String(50), nullable=False)

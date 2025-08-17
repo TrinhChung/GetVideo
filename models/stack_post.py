@@ -7,7 +7,7 @@ class StackPost(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     page_id = db.Column(
-        db.String(255), db.ForeignKey("page.page_id"), nullable=False
+        db.Integer, db.ForeignKey("page.id"), nullable=False
     )  # Liên kết với Page qua page_id
     time = db.Column(db.DateTime, default=datetime.utcnow)  # Thời gian đăng bài
     video_split_id = db.Column(
@@ -25,7 +25,7 @@ class StackPost(db.Model):
     )
 
     facebook_account_id = db.Column(db.Integer, db.ForeignKey("facebook_account.id"))
-    
+
     facebook_account = db.relationship(
         "FacebookAccount", backref=db.backref("stack_posts", lazy=True)
     )
