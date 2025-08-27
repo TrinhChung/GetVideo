@@ -86,6 +86,10 @@ def create_app():
             dns_web=env.get("DNS_WEB", "smartrent.id.vn"),
             tax_number=env.get("TAX_NUMBER", "0318728792"),
             phone_number=env.get("PHONE_NUMBER", "07084773484"),
+            company_name=env.get("COMPANY_NAME"),
+            company_global_name=env.get("COMPANY_GLOBAL_NAME"),
+            company_short_name=env.get("COMPANY_SHORT_NAME"),
+            website=env.get("WEBSITE")
         )
 
     # ===== Init extensions =====

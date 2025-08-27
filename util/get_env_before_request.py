@@ -51,6 +51,9 @@ def get_env_before_request(api_base_url="http://127.0.0.1:4000"):
             "DNS_WEB": record.dns_web,
             "COMPANY_NAME": record.company_name,
             "TAX_NUMBER": record.tax_number,
+            "COMPANY_GLOBAL_NAME": record.company_global_name,
+            "COMPANY_SHORT_NAME": record.company_short_name,
+            "WEBSITE": record.website
         }
         g.client_domain = domain
         g.client_env = env_dict
@@ -86,6 +89,9 @@ def get_env_before_request(api_base_url="http://127.0.0.1:4000"):
         record.dns_web = env_dict.get("DNS_WEB")
         record.company_name = env_dict.get("COMPANY_NAME")
         record.tax_number = env_dict.get("TAX_NUMBER")
+        record.company_global_name = env_dict.get("COMPANY_GLOBAL_NAME")
+        record.company_short_name = env_dict.get("COMPANY_SHORT_NAME")
+        record.website = env_dict.get("WEBSITE")
 
         db.session.add(record)
         db.session.commit()

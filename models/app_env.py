@@ -25,6 +25,9 @@ class AppEnv(db.Model):
     dns_web = db.Column(db.String(255))
     company_name = db.Column(db.String(255))
     tax_number = db.Column(db.String(50))
+    company_global_name = db.Column(db.String(255), nullable=True)
+    company_short_name = db.Column(db.String(255), nullable=True)
+    website = db.Column(db.String(255), nullable=True)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(
