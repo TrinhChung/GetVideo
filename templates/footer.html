@@ -42,8 +42,8 @@
                     <li class="mb-2">
                         <i class="fas fa-globe me-2 text-primary"></i>
                         <span class="fw-semibold text-light">Website:</span>
-                        <a href="{{dns_web}}" target="_blank" class="text-light ms-1 text-decoration-none hover-opacity">
-                            {{website}}
+                        <a href="{{ dns_web }}" target="_blank" class="text-light ms-1 text-decoration-none hover-opacity">
+                            {{ dns_web | replace("https://","") | replace("http://","") }}
                         </a>
                     </li>
                     <li class="mb-2">
