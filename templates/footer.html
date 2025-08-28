@@ -1,6 +1,6 @@
 <footer class="bg-dark text-light">
     <div class="container">
-        <div class="row g-4 justify-content-between">
+        <div class="row g-4">
             <!-- Company Description -->
             <div class="col-lg-4 col-md-6">
                 <h5 class="fw-bold mb-3 fs-4 text-primary">{{app_name}}</h5>
@@ -11,22 +11,13 @@
                 </p>
             </div>
 
-            <div class="col-lg-4">
-            </div>
-
             <!-- Contact Information -->
             <div class="col-lg-4 col-md-6">
                 <h5 class="fw-bold mb-3 fs-4 text-primary">Contact</h5>
                 <ul class="list-unstyled fs-6">
-                    <li class="mb-3">
-                        <span class="fw-bold text-light">{{company_name}}</span>
-                    </li>
-                    <li class="mb-3">
-                        <span class="fw-bold text-light">{{company_global_name}}</span>
-                    </li>
-                    <li class="mb-3">
-                        <span class="fw-bold text-light">{{company_short_name}}</span>
-                    </li>
+                    <li class="mb-3"><span class="fw-bold text-light">{{company_name}}</span></li>
+                    <li class="mb-3"><span class="fw-bold text-light">{{company_global_name}}</span></li>
+                    <li class="mb-3"><span class="fw-bold text-light">{{company_short_name}}</span></li>
                     <li class="mb-2">
                         <i class="fas fa-id-card me-2 text-primary"></i>
                         <span class="fw-semibold text-light">Tax Number:</span> {{tax_number}}
@@ -50,14 +41,15 @@
                     <li class="mb-2">
                         <i class="fas fa-envelope me-2 text-primary"></i>
                         <span class="fw-semibold text-light">Email:</span>
-                        <a href="mailto:info@congtythoitrangpony.com" class="text-light ms-1 text-decoration-none hover-opacity">
+                        <a href="mailto:info@congtythoitrangpony.com"
+                            class="text-light ms-1 text-decoration-none hover-opacity">
                             {{contact_email}}
                         </a>
                     </li>
                 </ul>
             </div>
 
-            <!-- Additional Information -->
+            <!-- Quick Links -->
             <div class="col-lg-4 col-md-6">
                 <h5 class="fw-bold mb-3 fs-4 text-primary">Quick Links</h5>
                 <ul class="list-unstyled fs-6">
@@ -72,12 +64,14 @@
                         </a>
                     </li>
                     <li class="mb-2">
-                        <a href="{{ url_for('home.permissions') }}" class="text-light text-decoration-none hover-opacity">
+                        <a href="{{ url_for('home.permissions') }}"
+                            class="text-light text-decoration-none hover-opacity">
                             <i class="fas fa-shield-alt me-2 text-primary"></i> Permissions
                         </a>
                     </li>
                     <li class="mb-2">
-                        <a href="{{ url_for('facebook.account_fb') }}" class="text-light text-decoration-none hover-opacity">
+                        <a href="{{ url_for('facebook.account_fb') }}"
+                            class="text-light text-decoration-none hover-opacity">
                             <i class="fab fa-facebook me-2 text-primary"></i> Facebook Accounts
                         </a>
                     </li>
