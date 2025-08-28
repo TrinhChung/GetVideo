@@ -58,18 +58,37 @@
             </div>
 
             <!-- Additional Information -->
-            <!-- <div class="col-lg-4 col-md-6">
-                <h5 class="fw-bold mb-3 fs-4 text-primary">Additional Information</h5>
-                <div class="text-light fs-6">
-                    <p class="mb-3 lh-base">
-                        This website is developed based on NoirSteed’s framework to optimize the Facebook advertising workflow.
-                    </p>
-                    <p class="lh-base">
-                        Providing automation tools to save time and improve
-                        the effectiveness of advertising campaigns.
-                    </p>
-                </div>
-            </div> -->
+            <div class="col-lg-4 col-md-6">
+                <h5 class="fw-bold mb-3 fs-4 text-primary">Quick Links</h5>
+                <ul class="list-unstyled fs-6">
+                    <li class="mb-2">
+                        <a href="{{ url_for('home.polices') }}" class="text-light text-decoration-none hover-opacity">
+                            <i class="fas fa-file-contract me-2 text-primary"></i> Privacy Policy
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="{{ url_for('home.terms') }}" class="text-light text-decoration-none hover-opacity">
+                            <i class="fas fa-scroll me-2 text-primary"></i> Terms of Service
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="{{ url_for('home.permissions') }}" class="text-light text-decoration-none hover-opacity">
+                            <i class="fas fa-shield-alt me-2 text-primary"></i> Permissions
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="{{ url_for('facebook.account_fb') }}" class="text-light text-decoration-none hover-opacity">
+                            <i class="fab fa-facebook me-2 text-primary"></i> Facebook Accounts
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="{{ url_for('ads_manager.list_fb_campaigns') }}"
+                            class="text-light text-decoration-none hover-opacity">
+                            <i class="fas fa-bullhorn me-2 text-primary"></i> Campaigns
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
 
         <!-- Copyright -->
